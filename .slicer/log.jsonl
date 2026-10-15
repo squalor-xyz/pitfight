@@ -223,3 +223,7 @@
 {"when": "2026-10-15T12:55:38Z", "item": "S14", "action": "note", "from": "", "to": "", "note": "Owner 2026-10-15 (C28): Node (installed) with node:test is a", "by": "Jon R"}
 {"when": "2026-10-15T12:55:38Z", "item": "S15", "action": "note", "from": "", "to": "", "note": "Owner 2026-10-15 (C28): Node (installed) with node:test is a", "by": "Jon R"}
 {"when": "2026-10-15T12:55:38Z", "item": "S17", "action": "note", "from": "", "to": "", "note": "Owner 2026-10-15 (C28): Node (installed) with node:test is a", "by": "Jon R"}
+{"when": "2026-10-15T13:27:58Z", "item": "relay-roles", "action": "relay-roles", "from": "", "to": "", "note": "init"}
+{"when": "2026-10-15T13:27:58Z", "item": "relay-roles.r1", "action": "relay-roles", "from": "", "to": "model,reasoning,note", "note": "set"}
+{"when": "2026-10-15T13:27:58Z", "item": "relay-roles.r2", "action": "relay-roles", "from": "", "to": "model,reasoning,note", "note": "set"}
+{"when": "2026-10-15T13:27:58Z", "item": "relay-roles.r4", "action": "relay-roles", "from": "", "to": "model,reasoning,note", "note": "set"}
