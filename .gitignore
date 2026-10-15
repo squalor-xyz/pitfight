@@ -1,0 +1,17 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# Build / cache output
+build/
+dist/
+target/
+out/
+node_modules/
+__pycache__/
+.cache/
+*.log
