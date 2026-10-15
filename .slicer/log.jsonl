@@ -228,3 +228,8 @@
 {"when": "2026-10-15T13:27:58Z", "item": "relay-roles.r2", "action": "relay-roles", "from": "", "to": "model,reasoning,note", "note": "set"}
 {"when": "2026-10-15T13:27:58Z", "item": "relay-roles.r4", "action": "relay-roles", "from": "", "to": "model,reasoning,note", "note": "set"}
 {"when": "2026-10-15T13:34:16Z", "item": "C38", "action": "catalog", "from": "", "to": "Game rules are the implementer's call", "note": "add"}
+{"when": "2026-10-15T13:37:18Z", "item": "C39", "action": "catalog", "from": "", "to": "No database in v1; SQLite proposed for the hill", "note": "add"}
+{"when": "2026-10-15T13:37:18Z", "item": "S19", "action": "note", "from": "", "to": "", "note": "Owner 2026-10-15 (C39): propose SQLite via a cgo-free driver", "by": "Jon R"}
+{"when": "2026-10-15T13:37:19Z", "item": "S13", "action": "note", "from": "", "to": "", "note": "Owner 2026-10-15 (C39): tournament results stay as files (JS", "by": "Jon R"}
+{"when": "2026-10-15T13:37:19Z", "item": "S19", "action": "cite", "from": "", "to": "C39", "note": ""}
+{"when": "2026-10-15T13:37:19Z", "item": "S13", "action": "cite", "from": "", "to": "C39", "note": ""}

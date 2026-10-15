@@ -146,6 +146,10 @@ Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run loca
 
 Owner decision 2026-10-15: the tie rule, minimum starting separation and tournament scoring rule are decided by the implementing slice under C35 (record each with a one-line reason; reviewer checks). The ISA spec (S03) still needs owner sign-off.
 
+### C39 No database in v1; SQLite proposed for the hill
+
+Owner decision 2026-10-15: v1 keeps match state in memory (pure VM, C36) and replays and tournament results as JSON-lines files (C29). No database dependency in v1. The hill slice (S19) proposes SQLite through a cgo-free driver (ncruces/go-sqlite3 or modernc.org/sqlite; confirm license) as the first non-stdlib dependency, for owner approval then. DuckDB or the sqlite3 CLI may analyse the JSONL files externally, with no code dependency.
+
 ## Assumptions
 
 ### C20 Name: keep placeholder bot-arena
