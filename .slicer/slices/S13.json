@@ -1,0 +1,41 @@
+{
+  "id": "S13",
+  "title": "Run tournaments with a scoreboard",
+  "lead": [
+    "`arena tourney bots/ --rounds R`: round-robin over many seeds, run in parallel, with a reproducible scoreboard."
+  ],
+  "depends_note": null,
+  "findings_note": "PROJECT.md Milestone 6, Goals 5",
+  "size": "M",
+  "flags": [],
+  "trees_note": "tourney",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** a persistent hill (later tier).",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "Goal 5 and acceptance criterion C18. Tournament stats across seeds are the named mitigation for ISA balance."
+    },
+    {
+      "heading": "Files",
+      "body": "- Tournament module and tests.\n- The `arena tourney` subcommand."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "- The pairing list for N bots is complete with no duplicates.\n- Seeds derive deterministically from the round number.\n- The scoreboard is identical regardless of thread count and match completion order."
+    },
+    {
+      "heading": "Implement",
+      "body": "- Parallel matches with standard-library threads; results gathered and ordered deterministically.\n- Per-bot stats across seeds for the balance check.\n- Gap: PROJECT.md does not define the scoring rule (points for win, tie, loss). Propose one to the owner."
+    },
+    {
+      "heading": "Check",
+      "body": "- The project test command passes.\n- `arena tourney bots/ --rounds 100` finishes, and two runs give identical output (`diff` is empty)."
+    },
+    {
+      "heading": "Git",
+      "body": "Branch `slice/<id>-tourney` in `.worktrees/<id>`. One commit when the owner asks."
+    }
+  ],
+  "notes": []
+}

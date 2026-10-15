@@ -1,0 +1,41 @@
+{
+  "id": "S08",
+  "title": "Add the disassembler and round-trip tests",
+  "lead": [
+    "Disassemble a cell list back to source for debugging, and prove asm -> disasm -> asm round-trips."
+  ],
+  "depends_note": null,
+  "findings_note": "PROJECT.md Milestone 3",
+  "size": "S",
+  "flags": [],
+  "trees_note": "asm",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** source formatting beyond what the round trip needs.",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "Acceptance criterion C17 requires the round trip. Disassembly is the v1 debugging aid."
+    },
+    {
+      "heading": "Files",
+      "body": "- Assembler package: disassembler and round-trip tests.\n- CLI package: the disassembly entry point."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "- For every opcode, modifier and addressing mode: `assemble(disassemble(cells)) == cells`.\n- Round trip over every worked example program in the spec docs."
+    },
+    {
+      "heading": "Implement",
+      "body": "- Gap: PROJECT.md does not say how disassembly is invoked from the CLI. Propose a subcommand or flag to the owner."
+    },
+    {
+      "heading": "Check",
+      "body": "- The project test command passes.\n- Disassembling and reassembling each spec example gives identical cells."
+    },
+    {
+      "heading": "Git",
+      "body": "Branch `slice/<id>-disassembler` in `.worktrees/<id>`. One commit when the owner asks."
+    }
+  ],
+  "notes": []
+}

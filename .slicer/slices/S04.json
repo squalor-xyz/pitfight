@@ -1,0 +1,41 @@
+{
+  "id": "S04",
+  "title": "Specify match rules and verify default parameters",
+  "lead": [
+    "Specify the match: config fields, seeded placement, turn order, cycle limit, tie rule and result. Verify the recommended default parameters against a cited source."
+  ],
+  "depends_note": null,
+  "findings_note": "PROJECT.md Goals 3-4, Open decisions 5",
+  "size": "S",
+  "flags": [],
+  "trees_note": "docs",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** tournament scoring, replay format, implementation.",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "Goals 3 and 4 need a deterministic match with a defined tie rule. The recommended defaults (core 8000, cycles 80000, max processes 8000) are from general knowledge and must be checked against a source (C24)."
+    },
+    {
+      "heading": "Files",
+      "body": "- `docs/spec/match.md` (new; final path per the scaffolding layout)."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "None (document). The spec includes worked placement examples for fixed seeds that the arena slice turns into tests."
+    },
+    {
+      "heading": "Implement",
+      "body": "- Config fields from the data model: core size, cycle limit, max processes, min separation, seed.\n- Placement: random non-overlapping start positions from the seed, honoring min separation. Specify the RNG algorithm exactly and implement it in-repo later, so native and WASM builds agree; define the error when placement is impossible.\n- Turn: each live bot executes one instruction from the front of its queue, then requeues it; a bot with no processes is dead. Define bot order within a cycle and what one cycle counts.\n- Result: winner, survivors at the cycle limit, cycles run.\n- Gap: PROJECT.md requires \"a defined tie rule\" but gives none. Propose options to the owner.\n- Gap: PROJECT.md gives no default min separation. Propose one to the owner.\n- Verify the three defaults against a public source (ICWS'94 text or hill documentation); cite it in the spec; record the confirmed defaults as a catalog decision."
+    },
+    {
+      "heading": "Check",
+      "body": "- Every config field has a default and, where it comes from Redcode norms, a cited source.\n- The tie rule and min separation are owner-confirmed.\n- `slicer catalog list --kind decision --json --lean` includes the confirmed defaults."
+    },
+    {
+      "heading": "Git",
+      "body": "Branch `slice/<id>-match-spec` in `.worktrees/<id>`. Document only. One commit when the owner asks."
+    }
+  ],
+  "notes": []
+}

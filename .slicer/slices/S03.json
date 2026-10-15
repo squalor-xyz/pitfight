@@ -1,0 +1,41 @@
+{
+  "id": "S03",
+  "title": "Write the ISA spec",
+  "lead": [
+    "Write the instruction set spec: the cell format, every opcode, modifier and addressing mode, and their exact semantics, following the ISA decision (C21)."
+  ],
+  "depends_note": null,
+  "findings_note": "PROJECT.md Milestone 1, Goals 1",
+  "size": "M",
+  "flags": [],
+  "trees_note": "docs",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** match configuration, placement, scheduling and tie rule (next slice); assembly syntax (assembler slice); the replay format.",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "v1 acceptance requires the spec to document every opcode, modifier and addressing mode, each with tests (C15). The VM and assembler are built and tested against it. ISA balance is a named risk: some designs make one strategy dominant."
+    },
+    {
+      "heading": "Files",
+      "body": "- `docs/spec/isa.md` (new; final path per the scaffolding layout)."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "None (document). The spec carries, for each opcode and addressing mode, at least one worked case (core state before, instruction, core state and process effect after) that the VM slices turn into unit tests."
+    },
+    {
+      "heading": "Implement",
+      "body": "- Cell: opcode, modifier, operands A and B with addressing modes, plus the last-writer bot id (metadata for the visualizer, not part of the instruction).\n- All addresses modulo CORESIZE; define the integer range and how negative values wrap.\n- Enumerate opcodes, modifiers and addressing modes with semantics, including process effects (spawn, death) and what makes a process die.\n- Define the contents of an empty core cell.\n- If C21 confirms the Redcode-inspired option, state which Redcode semantics are kept and which differ.\n- Keep it to a few pages (PROJECT.md).\n- Confirm the ISA can express the four starter strategies (imp, bomber, replicator, scanner); they are the balance test."
+    },
+    {
+      "heading": "Check",
+      "body": "- Every opcode, modifier and addressing mode has a semantics entry and at least one worked case.\n- `rg -n 'TODO|TBD' docs/spec/isa.md` prints nothing.\n- Owner has reviewed and approved the spec."
+    },
+    {
+      "heading": "Git",
+      "body": "Branch `slice/<id>-isa-spec` in `.worktrees/<id>`. Document only. One commit when the owner asks."
+    }
+  ],
+  "notes": []
+}

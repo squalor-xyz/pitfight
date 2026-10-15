@@ -1,0 +1,41 @@
+{
+  "id": "S16",
+  "title": "Check licensing of Redcode standards and warriors",
+  "lead": [
+    "Find and record the licensing of the ICWS standard texts and published warriors before any of them is bundled or adapted."
+  ],
+  "depends_note": null,
+  "findings_note": "PROJECT.md Dependency / licensing notes",
+  "size": "S",
+  "flags": [],
+  "trees_note": "docs",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** bundling any warrior; choosing the project's own license.",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "PROJECT.md says their licensing has to be checked before bundling any existing warriors and is not verified (C14). The starter bots are original, so v1 does not wait on this."
+    },
+    {
+      "heading": "Files",
+      "body": "- `docs/licensing.md` (new; final path per the scaffolding layout)."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "None (research)."
+    },
+    {
+      "heading": "Implement",
+      "body": "- Read public sources (read-only) for the ICWS'94 text and commonly published warriors; record the license or terms for each with a citation.\n- Give the owner a bundle or do-not-bundle recommendation per item."
+    },
+    {
+      "heading": "Check",
+      "body": "- Every claim in the doc cites a source.\n- Owner has reviewed it."
+    },
+    {
+      "heading": "Git",
+      "body": "Branch `slice/<id>-licensing` in `.worktrees/<id>`. Document only. One commit when the owner asks."
+    }
+  ],
+  "notes": []
+}

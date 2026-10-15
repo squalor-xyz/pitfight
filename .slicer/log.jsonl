@@ -1,0 +1,71 @@
+{"when": "2026-10-15T03:57:44Z", "item": "C01", "action": "catalog", "from": "", "to": "Small, well-specified instruction set with a written spec", "note": "add"}
+{"when": "2026-10-15T03:57:44Z", "item": "C02", "action": "catalog", "from": "", "to": "Assembler with labels, expressions and line-numbered errors", "note": "add"}
+{"when": "2026-10-15T03:57:45Z", "item": "C03", "action": "catalog", "from": "", "to": "Deterministic VM", "note": "add"}
+{"when": "2026-10-15T03:57:45Z", "item": "C04", "action": "catalog", "from": "", "to": "Arena with seeded placement, round-robin scheduling, cycle limit and tie rule", "note": "add"}
+{"when": "2026-10-15T03:57:45Z", "item": "C05", "action": "catalog", "from": "", "to": "Reproducible tournament runner with scoreboard", "note": "add"}
+{"when": "2026-10-15T03:57:45Z", "item": "C06", "action": "catalog", "from": "", "to": "Terminal and web visualizer of recorded replays", "note": "add"}
+{"when": "2026-10-15T03:57:45Z", "item": "C07", "action": "catalog", "from": "", "to": "Compact versioned replay format", "note": "add"}
+{"when": "2026-10-15T03:57:45Z", "item": "C08", "action": "catalog", "from": "", "to": "Online multiplayer, accounts or a hosted ladder", "note": "add"}
+{"when": "2026-10-15T03:57:46Z", "item": "C09", "action": "catalog", "from": "", "to": "LLM agent competitors in v1", "note": "add"}
+{"when": "2026-10-15T03:57:46Z", "item": "C10", "action": "catalog", "from": "", "to": "Full compatibility with every historic Core War standard", "note": "add"}
+{"when": "2026-10-15T03:57:46Z", "item": "C11", "action": "catalog", "from": "", "to": "Graphical bot editor or IDE", "note": "add"}
+{"when": "2026-10-15T03:57:46Z", "item": "C12", "action": "catalog", "from": "", "to": "VM core is pure", "note": "add"}
+{"when": "2026-10-15T03:57:46Z", "item": "C13", "action": "catalog", "from": "", "to": "Every dependency needs owner approval", "note": "add"}
+{"when": "2026-10-15T03:57:47Z", "item": "C14", "action": "catalog", "from": "", "to": "Do not bundle existing warriors until licensing is checked", "note": "add"}
+{"when": "2026-10-15T03:57:47Z", "item": "C15", "action": "catalog", "from": "", "to": "Spec covers and tests every opcode, modifier and addressing mode", "note": "add"}
+{"when": "2026-10-15T03:57:47Z", "item": "C16", "action": "catalog", "from": "", "to": "Same result and replay hash for arena run imp.s dwarf.s --seed 1", "note": "add"}
+{"when": "2026-10-15T03:57:47Z", "item": "C17", "action": "catalog", "from": "", "to": "Assembler errors with line and column; asm-disasm-asm round-trips", "note": "add"}
+{"when": "2026-10-15T03:57:47Z", "item": "C18", "action": "catalog", "from": "", "to": "Starter-bot tournament over 100 seeds prints a stable scoreboard", "note": "add"}
+{"when": "2026-10-15T03:57:47Z", "item": "C19", "action": "catalog", "from": "", "to": "Terminal and web viewers play the same replay file correctly", "note": "add"}
+{"when": "2026-10-15T03:57:57Z", "item": "C20", "action": "catalog", "from": "", "to": "Name: keep placeholder bot-arena", "note": "add"}
+{"when": "2026-10-15T03:57:58Z", "item": "C21", "action": "catalog", "from": "", "to": "ISA: original ISA strongly inspired by Redcode semantics", "note": "add"}
+{"when": "2026-10-15T03:57:58Z", "item": "C22", "action": "catalog", "from": "", "to": "Core language: Rust core + WASM, TypeScript viewer", "note": "add"}
+{"when": "2026-10-15T03:57:58Z", "item": "C23", "action": "catalog", "from": "", "to": "Replay format: versioned JSON lines for v1", "note": "add"}
+{"when": "2026-10-15T03:57:58Z", "item": "C24", "action": "catalog", "from": "", "to": "Default match parameters: Redcode '94 hill norms", "note": "add"}
+{"when": "2026-10-15T03:57:58Z", "item": "C25", "action": "catalog", "from": "", "to": "Visualizer priority: terminal viewer first, web viewer second", "note": "add"}
+{"when": "2026-10-15T03:58:03Z", "item": "C25", "action": "catalog", "from": "", "to": "body", "note": "edit"}
+{"when": "2026-10-15T04:01:21Z", "item": "S01", "action": "add", "from": "", "to": "open", "note": "Confirm open decisions"}
+{"when": "2026-10-15T04:01:21Z", "item": "S02", "action": "add", "from": "", "to": "open", "note": "Set up project scaffolding"}
+{"when": "2026-10-15T04:01:21Z", "item": "S03", "action": "add", "from": "", "to": "open", "note": "Write the ISA spec"}
+{"when": "2026-10-15T04:01:21Z", "item": "S04", "action": "add", "from": "", "to": "open", "note": "Specify match rules and verify default parameters"}
+{"when": "2026-10-15T04:01:21Z", "item": "S05", "action": "add", "from": "", "to": "open", "note": "Build VM core memory and addressing modes"}
+{"when": "2026-10-15T04:01:21Z", "item": "S06", "action": "add", "from": "", "to": "open", "note": "Execute opcodes and process queues in the VM"}
+{"when": "2026-10-15T04:01:21Z", "item": "S07", "action": "add", "from": "", "to": "open", "note": "Build the assembler"}
+{"when": "2026-10-15T04:01:21Z", "item": "S08", "action": "add", "from": "", "to": "open", "note": "Add the disassembler and round-trip tests"}
+{"when": "2026-10-15T04:01:21Z", "item": "S09", "action": "add", "from": "", "to": "open", "note": "Run matches in the arena"}
+{"when": "2026-10-15T04:01:21Z", "item": "S10", "action": "add", "from": "", "to": "open", "note": "Write the starter bots and golden-result tests"}
+{"when": "2026-10-15T04:01:21Z", "item": "S11", "action": "add", "from": "", "to": "open", "note": "Define and write the replay format"}
+{"when": "2026-10-15T04:01:21Z", "item": "S12", "action": "add", "from": "", "to": "open", "note": "Build the terminal viewer"}
+{"when": "2026-10-15T04:01:21Z", "item": "S13", "action": "add", "from": "", "to": "open", "note": "Run tournaments with a scoreboard"}
+{"when": "2026-10-15T04:01:21Z", "item": "S14", "action": "add", "from": "", "to": "open", "note": "Build the VM core for WASM"}
+{"when": "2026-10-15T04:01:21Z", "item": "S15", "action": "add", "from": "", "to": "open", "note": "Build the web viewer"}
+{"when": "2026-10-15T04:01:21Z", "item": "S16", "action": "add", "from": "", "to": "open", "note": "Check licensing of Redcode standards and warriors"}
+{"when": "2026-10-15T04:01:21Z", "item": "S17", "action": "add", "from": "", "to": "open", "note": "Verify v1 acceptance criteria"}
+{"when": "2026-10-15T04:01:21Z", "item": "S18", "action": "add", "from": "", "to": "later", "note": "LLM agent harness"}
+{"when": "2026-10-15T04:01:21Z", "item": "S19", "action": "add", "from": "", "to": "later", "note": "Persistent hill of ranked bots"}
+{"when": "2026-10-15T04:01:21Z", "item": "S20", "action": "add", "from": "", "to": "later", "note": "Host the web visualizer on squalor.xyz"}
+{"when": "2026-10-15T04:01:21Z", "item": "S21", "action": "add", "from": "", "to": "later", "note": "ISA variants and new game modes"}
+{"when": "2026-10-15T04:01:32Z", "item": "S01", "action": "cite", "from": "", "to": "C20,C21,C22,C23,C24,C25", "note": ""}
+{"when": "2026-10-15T04:01:32Z", "item": "S02", "action": "cite", "from": "", "to": "C20,C22,C12,C13,C14", "note": ""}
+{"when": "2026-10-15T04:01:32Z", "item": "S03", "action": "cite", "from": "", "to": "C21,C01,C15", "note": ""}
+{"when": "2026-10-15T04:01:32Z", "item": "S04", "action": "cite", "from": "", "to": "C24,C03,C04", "note": ""}
+{"when": "2026-10-15T04:01:32Z", "item": "S05", "action": "cite", "from": "", "to": "C12,C15", "note": ""}
+{"when": "2026-10-15T04:01:32Z", "item": "S06", "action": "cite", "from": "", "to": "C12,C15", "note": ""}
+{"when": "2026-10-15T04:01:33Z", "item": "S07", "action": "cite", "from": "", "to": "C02,C17,C13", "note": ""}
+{"when": "2026-10-15T04:01:33Z", "item": "S08", "action": "cite", "from": "", "to": "C17", "note": ""}
+{"when": "2026-10-15T04:01:33Z", "item": "S09", "action": "cite", "from": "", "to": "C03,C04,C09,C16", "note": ""}
+{"when": "2026-10-15T04:01:33Z", "item": "S10", "action": "cite", "from": "", "to": "C14,C16,C18", "note": ""}
+{"when": "2026-10-15T04:01:33Z", "item": "S11", "action": "cite", "from": "", "to": "C23,C07,C16,C19,C13", "note": ""}
+{"when": "2026-10-15T04:01:33Z", "item": "S12", "action": "cite", "from": "", "to": "C25,C06,C19,C13", "note": ""}
+{"when": "2026-10-15T04:01:33Z", "item": "S13", "action": "cite", "from": "", "to": "C05,C18", "note": ""}
+{"when": "2026-10-15T04:01:33Z", "item": "S14", "action": "cite", "from": "", "to": "C22,C13", "note": ""}
+{"when": "2026-10-15T04:01:34Z", "item": "S15", "action": "cite", "from": "", "to": "C22,C25,C06,C19,C13", "note": ""}
+{"when": "2026-10-15T04:01:34Z", "item": "S16", "action": "cite", "from": "", "to": "C14,C21", "note": ""}
+{"when": "2026-10-15T04:01:34Z", "item": "S17", "action": "cite", "from": "", "to": "C15,C16,C17,C18,C19", "note": ""}
+{"when": "2026-10-15T04:01:34Z", "item": "S18", "action": "cite", "from": "", "to": "C09", "note": ""}
+{"when": "2026-10-15T04:01:34Z", "item": "S19", "action": "cite", "from": "", "to": "C08", "note": ""}
+{"when": "2026-10-15T04:01:34Z", "item": "S20", "action": "cite", "from": "", "to": "C08", "note": ""}
+{"when": "2026-10-15T04:01:34Z", "item": "S21", "action": "cite", "from": "", "to": "C21", "note": ""}
+{"when": "2026-10-15T04:01:34Z", "item": "preamble", "action": "prose", "from": "", "to": "", "note": "edit"}
+{"when": "2026-10-15T04:01:35Z", "item": "goals", "action": "prose", "from": "", "to": "", "note": "edit"}
+{"when": "2026-10-15T04:01:35Z", "item": "non_goals", "action": "prose", "from": "", "to": "", "note": "edit"}

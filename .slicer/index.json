@@ -1,0 +1,993 @@
+{
+  "version": 8,
+  "id_prefix": "S",
+  "id_width": 2,
+  "next_id": 22,
+  "preamble": "bot-arena (working name): a Core War-style programming game. Players write small bots for a tiny virtual machine; the bots share a circular memory arena and try to make each other crash. v1 is the ISA spec, assembler, deterministic VM and arena, tournament runner, replay format, and terminal and web viewers. Source: PROJECT.md.",
+  "passes": [],
+  "items": [
+    {
+      "id": "S01",
+      "title": "Confirm open decisions",
+      "short_title": "Confirm open decisions",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "S",
+        "flags": [],
+        "trees": [
+          "docs"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Open decisions",
+        "discovered_from": "",
+        "cites": [
+          "C20",
+          "C21",
+          "C22",
+          "C23",
+          "C24",
+          "C25"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "Decisions",
+        "reason": "",
+        "importance": 3,
+        "urgency": 3,
+        "effort": 1,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S02",
+      "title": "Set up project scaffolding",
+      "short_title": "Set up project scaffolding",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [
+        "S01"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "S",
+        "flags": [],
+        "trees": [
+          "repo"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Stack recommendation, Risks",
+        "discovered_from": "",
+        "cites": [
+          "C20",
+          "C22",
+          "C12",
+          "C13",
+          "C14"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "v1 foundation",
+        "reason": "",
+        "importance": 3,
+        "urgency": 3,
+        "effort": 1,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S03",
+      "title": "Write the ISA spec",
+      "short_title": "Write the ISA spec",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [
+        "S01",
+        "S02"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "M",
+        "flags": [],
+        "trees": [
+          "docs"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Milestone 1, Goals 1",
+        "discovered_from": "",
+        "cites": [
+          "C21",
+          "C01",
+          "C15"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "",
+        "reason": "",
+        "importance": 3,
+        "urgency": 3,
+        "effort": 2,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S04",
+      "title": "Specify match rules and verify default parameters",
+      "short_title": "Specify match rules and verify default parameters",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [
+        "S01",
+        "S03"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "S",
+        "flags": [],
+        "trees": [
+          "docs"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Goals 3-4, Open decisions 5",
+        "discovered_from": "",
+        "cites": [
+          "C24",
+          "C03",
+          "C04"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "",
+        "reason": "",
+        "importance": 3,
+        "urgency": 2,
+        "effort": 1,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S05",
+      "title": "Build VM core memory and addressing modes",
+      "short_title": "Build VM core memory and addressing modes",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [
+        "S02",
+        "S03"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "M",
+        "flags": [],
+        "trees": [
+          "vm"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Milestone 2",
+        "discovered_from": "",
+        "cites": [
+          "C12",
+          "C15"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "v1 core",
+        "reason": "",
+        "importance": 3,
+        "urgency": 2,
+        "effort": 2,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S06",
+      "title": "Execute opcodes and process queues in the VM",
+      "short_title": "Execute opcodes and process queues in the VM",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [
+        "S05"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "L",
+        "flags": [],
+        "trees": [
+          "vm"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Milestone 2, Core concepts",
+        "discovered_from": "",
+        "cites": [
+          "C12",
+          "C15"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "",
+        "reason": "",
+        "importance": 3,
+        "urgency": 2,
+        "effort": 3,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S07",
+      "title": "Build the assembler",
+      "short_title": "Build the assembler",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [
+        "S03",
+        "S05"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "M",
+        "flags": [],
+        "trees": [
+          "asm"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Milestone 3, Goals 2",
+        "discovered_from": "",
+        "cites": [
+          "C02",
+          "C17",
+          "C13"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "",
+        "reason": "",
+        "importance": 3,
+        "urgency": 2,
+        "effort": 2,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S08",
+      "title": "Add the disassembler and round-trip tests",
+      "short_title": "Add the disassembler and round-trip tests",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [
+        "S07"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "S",
+        "flags": [],
+        "trees": [
+          "asm"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Milestone 3",
+        "discovered_from": "",
+        "cites": [
+          "C17"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "",
+        "reason": "",
+        "importance": 2,
+        "urgency": 2,
+        "effort": 1,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S09",
+      "title": "Run matches in the arena",
+      "short_title": "Run matches in the arena",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [
+        "S06",
+        "S04",
+        "S07"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "M",
+        "flags": [],
+        "trees": [
+          "arena"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Milestone 4, Goals 3-4",
+        "discovered_from": "",
+        "cites": [
+          "C03",
+          "C04",
+          "C09",
+          "C16"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "",
+        "reason": "",
+        "importance": 3,
+        "urgency": 2,
+        "effort": 2,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S10",
+      "title": "Write the starter bots and golden-result tests",
+      "short_title": "Write the starter bots and golden-result tests",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [
+        "S09",
+        "S08"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "M",
+        "flags": [],
+        "trees": [
+          "bots"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md v1 features, Risks",
+        "discovered_from": "",
+        "cites": [
+          "C14",
+          "C16",
+          "C18"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "",
+        "reason": "",
+        "importance": 3,
+        "urgency": 2,
+        "effort": 2,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S11",
+      "title": "Define and write the replay format",
+      "short_title": "Define and write the replay format",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [
+        "S09",
+        "S01"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "M",
+        "flags": [],
+        "trees": [
+          "replay"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Milestone 5, Goals 7, Risks",
+        "discovered_from": "",
+        "cites": [
+          "C23",
+          "C07",
+          "C16",
+          "C19",
+          "C13"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "",
+        "reason": "",
+        "importance": 3,
+        "urgency": 2,
+        "effort": 2,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S12",
+      "title": "Build the terminal viewer",
+      "short_title": "Build the terminal viewer",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [
+        "S11",
+        "S01"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "M",
+        "flags": [],
+        "trees": [
+          "tui"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Milestone 5, Goals 6",
+        "discovered_from": "",
+        "cites": [
+          "C25",
+          "C06",
+          "C19",
+          "C13"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "v1 tools",
+        "reason": "",
+        "importance": 2,
+        "urgency": 2,
+        "effort": 2,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S13",
+      "title": "Run tournaments with a scoreboard",
+      "short_title": "Run tournaments with a scoreboard",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [
+        "S09",
+        "S10"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "M",
+        "flags": [],
+        "trees": [
+          "tourney"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Milestone 6, Goals 5",
+        "discovered_from": "",
+        "cites": [
+          "C05",
+          "C18"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "",
+        "reason": "",
+        "importance": 2,
+        "urgency": 2,
+        "effort": 2,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S14",
+      "title": "Build the VM core for WASM",
+      "short_title": "Build the VM core for WASM",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [
+        "S09",
+        "S01"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "M",
+        "flags": [],
+        "trees": [
+          "vm",
+          "web"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Milestone 7, Stack recommendation",
+        "discovered_from": "",
+        "cites": [
+          "C22",
+          "C13"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "",
+        "reason": "",
+        "importance": 2,
+        "urgency": 1,
+        "effort": 2,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S15",
+      "title": "Build the web viewer",
+      "short_title": "Build the web viewer",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [
+        "S11",
+        "S01"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "L",
+        "flags": [],
+        "trees": [
+          "web"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Milestone 7, Goals 6",
+        "discovered_from": "",
+        "cites": [
+          "C22",
+          "C25",
+          "C06",
+          "C19",
+          "C13"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "",
+        "reason": "",
+        "importance": 2,
+        "urgency": 1,
+        "effort": 3,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S16",
+      "title": "Check licensing of Redcode standards and warriors",
+      "short_title": "Check licensing of Redcode standards and warriors",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [
+        "S01"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "S",
+        "flags": [],
+        "trees": [
+          "docs"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Dependency / licensing notes",
+        "discovered_from": "",
+        "cites": [
+          "C14",
+          "C21"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "",
+        "reason": "",
+        "importance": 1,
+        "urgency": 1,
+        "effort": 1,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S17",
+      "title": "Verify v1 acceptance criteria",
+      "short_title": "Verify v1 acceptance criteria",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [
+        "S08",
+        "S10",
+        "S12",
+        "S13",
+        "S15"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "S",
+        "flags": [],
+        "trees": [
+          "repo"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md v1 acceptance criteria",
+        "discovered_from": "",
+        "cites": [
+          "C15",
+          "C16",
+          "C17",
+          "C18",
+          "C19"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "",
+        "reason": "",
+        "importance": 3,
+        "urgency": 1,
+        "effort": 1,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S18",
+      "title": "LLM agent harness",
+      "short_title": "LLM agent harness",
+      "status": "later",
+      "has_slice": true,
+      "depends_on": [
+        "S17"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "L",
+        "flags": [],
+        "trees": [
+          "harness"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Feature tiers: Later",
+        "discovered_from": "",
+        "cites": [
+          "C09"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "Later tier",
+        "reason": "",
+        "importance": 2,
+        "urgency": 1,
+        "effort": 3,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S19",
+      "title": "Persistent hill of ranked bots",
+      "short_title": "Persistent hill of ranked bots",
+      "status": "later",
+      "has_slice": true,
+      "depends_on": [
+        "S13"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "M",
+        "flags": [],
+        "trees": [
+          "tourney"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Feature tiers: Later",
+        "discovered_from": "",
+        "cites": [
+          "C08"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "",
+        "reason": "",
+        "importance": 1,
+        "urgency": 1,
+        "effort": 2,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S20",
+      "title": "Host the web visualizer on squalor.xyz",
+      "short_title": "Host the web visualizer on squalor.xyz",
+      "status": "later",
+      "has_slice": true,
+      "depends_on": [
+        "S15"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "S",
+        "flags": [],
+        "trees": [
+          "web"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Feature tiers: Later",
+        "discovered_from": "",
+        "cites": [
+          "C08"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "",
+        "reason": "",
+        "importance": 1,
+        "urgency": 1,
+        "effort": 2,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S21",
+      "title": "ISA variants and new game modes",
+      "short_title": "ISA variants and new game modes",
+      "status": "later",
+      "has_slice": true,
+      "depends_on": [
+        "S17"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "L",
+        "flags": [],
+        "trees": [
+          "vm"
+        ],
+        "trees_literal": false,
+        "findings": "PROJECT.md Feature tiers: Later",
+        "discovered_from": "",
+        "cites": [
+          "C21"
+        ],
+        "key": "",
+        "pass": "",
+        "group": "",
+        "reason": "",
+        "importance": 1,
+        "urgency": 1,
+        "effort": 3,
+        "attempts": 0
+      }
+    }
+  ],
+  "epilogue": "",
+  "goals": "Goal records C01-C07 come from PROJECT.md Goals. Open decisions C20-C25 are assumptions pending owner confirmation in S01; nothing that depends on them starts before S01 lands.",
+  "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
+  "catalog": {
+    "next_id": 26,
+    "id_prefix": "C",
+    "id_width": 2,
+    "records": [
+      {
+        "id": "C01",
+        "kind": "goal",
+        "title": "Small, well-specified instruction set with a written spec",
+        "body": "A small, well-specified instruction set with a written spec. Compatibility with the Redcode standard vs a new ISA is an open decision. (PROJECT.md Goals 1)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C02",
+        "kind": "goal",
+        "title": "Assembler with labels, expressions and line-numbered errors",
+        "body": "An assembler with labels, expressions, and clear error messages with line numbers. (PROJECT.md Goals 2)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C03",
+        "kind": "goal",
+        "title": "Deterministic VM",
+        "body": "The same bots, seed and config always give the same result, which makes replays and tests possible. (PROJECT.md Goals 3)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C04",
+        "kind": "goal",
+        "title": "Arena with seeded placement, round-robin scheduling, cycle limit and tie rule",
+        "body": "An arena with N bots, random non-overlapping start positions from a seed, round-robin process scheduling, a cycle limit and a defined tie rule. (PROJECT.md Goals 4)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C05",
+        "kind": "goal",
+        "title": "Reproducible tournament runner with scoreboard",
+        "body": "Round-robin over many seeds, a scoreboard, reproducible results. (PROJECT.md Goals 5)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C06",
+        "kind": "goal",
+        "title": "Terminal and web visualizer of recorded replays",
+        "body": "A terminal view and a web view of memory ownership and execution pointers, with step, play, pause and seek on recorded replays. (PROJECT.md Goals 6)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C07",
+        "kind": "goal",
+        "title": "Compact versioned replay format",
+        "body": "Compact, versioned, and able to drive the visualizer without re-simulating. (PROJECT.md Goals 7)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C08",
+        "kind": "non_goal",
+        "title": "Online multiplayer, accounts or a hosted ladder",
+        "body": "Out of scope for v1. (PROJECT.md Non-goals)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C09",
+        "kind": "non_goal",
+        "title": "LLM agent competitors in v1",
+        "body": "A later tier; v1 designs the CLI so they can plug in. (PROJECT.md Non-goals)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C10",
+        "kind": "non_goal",
+        "title": "Full compatibility with every historic Core War standard",
+        "body": "Out of scope for v1. (PROJECT.md Non-goals)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C11",
+        "kind": "non_goal",
+        "title": "Graphical bot editor or IDE",
+        "body": "Out of scope for v1. (PROJECT.md Non-goals)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C12",
+        "kind": "constraint",
+        "title": "VM core is pure",
+        "body": "The VM core has no I/O, no clocks, and uses seeded RNG only for placement. Everything else wraps it. (PROJECT.md Architecture sketch)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C13",
+        "kind": "constraint",
+        "title": "Every dependency needs owner approval",
+        "body": "Standard library first. Every crate, wasm toolchain or JS package needs owner approval with a stated reason and a FLOSS license. (PROJECT.md Dependency / licensing notes, Risks: Toolchain)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C14",
+        "kind": "constraint",
+        "title": "Do not bundle existing warriors until licensing is checked",
+        "body": "ICWS standards and existing warriors are public material, but their licensing has to be checked before bundling any existing warriors. Not verified yet. (PROJECT.md Dependency / licensing notes)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C15",
+        "kind": "requirement",
+        "title": "Spec covers and tests every opcode, modifier and addressing mode",
+        "body": "The spec documents every opcode, modifier and addressing mode, and each one has tests. (PROJECT.md v1 acceptance criteria)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C16",
+        "kind": "requirement",
+        "title": "Same result and replay hash for arena run imp.s dwarf.s --seed 1",
+        "body": "arena run imp.s dwarf.s --seed 1 gives the same result and replay hash on every run and machine. (PROJECT.md v1 acceptance criteria)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C17",
+        "kind": "requirement",
+        "title": "Assembler errors with line and column; asm-disasm-asm round-trips",
+        "body": "The assembler rejects malformed input with line and column errors; asm -> disasm -> asm round-trips. (PROJECT.md v1 acceptance criteria)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C18",
+        "kind": "requirement",
+        "title": "Starter-bot tournament over 100 seeds prints a stable scoreboard",
+        "body": "A tournament of the starter bots over 100 seeds finishes and prints a stable scoreboard. (PROJECT.md v1 acceptance criteria)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C19",
+        "kind": "requirement",
+        "title": "Terminal and web viewers play the same replay file correctly",
+        "body": "The terminal and web viewers both play the same replay file correctly. (PROJECT.md v1 acceptance criteria)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C20",
+        "kind": "assumption",
+        "title": "Name: keep placeholder bot-arena",
+        "body": "PENDING OWNER CONFIRMATION - not decided. Placeholder name is \"bot-arena\" (CLI examples use \"arena\"). PROJECT.md gives no recommendation and no alternatives. (PROJECT.md Open decisions 1)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C21",
+        "kind": "assumption",
+        "title": "ISA: original ISA strongly inspired by Redcode semantics",
+        "body": "PENDING OWNER CONFIRMATION - not decided. Recommendation: an original ISA strongly inspired by Redcode semantics, small enough to specify in a few pages; Redcode compatibility can come later as a mode. Alternatives: (a) implement a subset of the Redcode ICWS'94 standard (body of existing warriors and literature); (b) design a new small ISA (freedom, distinct identity). (PROJECT.md Open decisions 2)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C22",
+        "kind": "assumption",
+        "title": "Core language: Rust core + WASM, TypeScript viewer",
+        "body": "PENDING OWNER CONFIRMATION - not decided. Recommendation: Rust for assembler, VM and tournament runner, compiled to WASM so the web viewer can run live matches with the identical core; web viewer in plain TypeScript + canvas, no framework. Alternatives: (A) all TypeScript (Node CLI, browser viewer; one language, simpler toolchain, slower tournaments); (B) Python stdlib core plus a JS viewer (fastest to prototype; too slow for large tournaments without optimization). Rust + wasm-pack (or equivalent) needs owner approval per dependency rules. (PROJECT.md Stack recommendation, Open decisions 3)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C23",
+        "kind": "assumption",
+        "title": "Replay format: versioned JSON lines for v1",
+        "body": "PENDING OWNER CONFIRMATION - not decided. Recommendation: versioned JSON lines for v1 (simple, debuggable), binary format later if size matters. Alternative named in the data model: a periodic snapshot plus a delta log. (PROJECT.md Open decisions 4, Core concepts: Replay)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C24",
+        "kind": "assumption",
+        "title": "Default match parameters: Redcode '94 hill norms",
+        "body": "PENDING OWNER CONFIRMATION - not decided. Recommendation: start from Redcode '94 hill norms (core 8000, cycles 80000, max processes 8000) and tune. UNVERIFIED: these numbers are from general knowledge and must be checked against a source during the spec slice. PROJECT.md names no alternative values. (PROJECT.md Open decisions 5)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C25",
+        "kind": "assumption",
+        "title": "Visualizer priority: terminal viewer first, web viewer second",
+        "body": "PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first (needed for debugging), web viewer second. PROJECT.md names no alternative; both viewers are v1. (PROJECT.md Open decisions 6)",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      }
+    ]
+  }
+}

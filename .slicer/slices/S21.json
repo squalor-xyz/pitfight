@@ -1,0 +1,41 @@
+{
+  "id": "S21",
+  "title": "ISA variants and new game modes",
+  "lead": [
+    "Later tier: ISA variants and new game modes such as teams and king-of-the-hill zones. C21's recommendation also leaves Redcode compatibility for later as a mode."
+  ],
+  "depends_note": null,
+  "findings_note": "PROJECT.md Feature tiers: Later",
+  "size": "L",
+  "flags": [],
+  "trees_note": "vm",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** anything in v1.",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "Listed in PROJECT.md's later tier."
+    },
+    {
+      "heading": "Files",
+      "body": "Not designed."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "Gap: to be written when this item is specified."
+    },
+    {
+      "heading": "Implement",
+      "body": "Known: ISA variants; game modes such as teams and king-of-the-hill zones. Gap: rules for each mode are not specified."
+    },
+    {
+      "heading": "Check",
+      "body": "Gap: no acceptance criteria in PROJECT.md for this tier."
+    },
+    {
+      "heading": "Git",
+      "body": "Specify with the owner before starting."
+    }
+  ],
+  "notes": []
+}

@@ -1,0 +1,41 @@
+{
+  "id": "S17",
+  "title": "Verify v1 acceptance criteria",
+  "lead": [
+    "Run each v1 acceptance criterion (C15-C19) end to end and record the result."
+  ],
+  "depends_note": null,
+  "findings_note": "PROJECT.md v1 acceptance criteria",
+  "size": "S",
+  "flags": [],
+  "trees_note": "repo",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** new features; fixes, which become their own slices.",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "PROJECT.md defines v1 by five acceptance criteria. This slice is the gate."
+    },
+    {
+      "heading": "Files",
+      "body": "- An acceptance check script or test target (path per the scaffolding layout).\n- Golden fixtures for the imp vs dwarf seed 1 result and replay hash."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "- One automated check per criterion that fails until the criterion holds."
+    },
+    {
+      "heading": "Implement",
+      "body": "- C15: compare the spec's opcode, modifier and mode list against the test enumeration.\n- C16: run `arena run imp.s dwarf.s --seed 1` and compare result and replay hash to the golden fixture.\n- C17: run the malformed-input and round-trip suites.\n- C18: run the 100-seed starter-bot tournament twice and diff.\n- C19: play the shared replay in both viewers and compare frame models.\n- Gap: \"every run and machine\" in C16 needs runs on more than one machine; with no CI host chosen, record which machines were used."
+    },
+    {
+      "heading": "Check",
+      "body": "- The acceptance script passes.\n- A note on this item lists each criterion with its command and outcome."
+    },
+    {
+      "heading": "Git",
+      "body": "Branch `slice/<id>-acceptance` in `.worktrees/<id>`. One commit when the owner asks."
+    }
+  ],
+  "notes": []
+}

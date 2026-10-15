@@ -1,0 +1,41 @@
+{
+  "id": "S12",
+  "title": "Build the terminal viewer",
+  "lead": [
+    "A terminal view of memory ownership and execution pointers, driven by a replay file, with step, play, pause and seek."
+  ],
+  "depends_note": null,
+  "findings_note": "PROJECT.md Milestone 5, Goals 6",
+  "size": "M",
+  "flags": [],
+  "trees_note": "tui",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** live simulation; the web viewer.",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "Goal 6 and acceptance criterion C19. C25 recommends the terminal viewer first because debugging needs it."
+    },
+    {
+      "heading": "Files",
+      "body": "- Terminal viewer package: a pure frame model plus a thin terminal renderer, and tests."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "- The frame model at cycle N (cell ownership, execution pointers) equals the expected state for a fixture replay.\n- Seeking to cycle N equals stepping N times.\n- The step, play, pause and seek state machine."
+    },
+    {
+      "heading": "Implement",
+      "body": "- Standard library first: ANSI escape sequences for drawing.\n- Raw keyboard input may need platform APIs or a dependency; that needs owner approval (C13).\n- Gap: a default core of 8000 cells does not fit one screen. PROJECT.md does not say how to scale or page it; propose a layout."
+    },
+    {
+      "heading": "Check",
+      "body": "- The project test command passes.\n- Manual: play the imp vs dwarf seed 1 replay; step, pause and seek work."
+    },
+    {
+      "heading": "Git",
+      "body": "Branch `slice/<id>-tui` in `.worktrees/<id>`. One commit when the owner asks."
+    }
+  ],
+  "notes": []
+}

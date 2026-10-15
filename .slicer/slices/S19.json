@@ -1,0 +1,41 @@
+{
+  "id": "S19",
+  "title": "Persistent hill of ranked bots",
+  "lead": [
+    "Later tier: a persistent ranked bot pool where new bots challenge the top N."
+  ],
+  "depends_note": null,
+  "findings_note": "PROJECT.md Feature tiers: Later",
+  "size": "M",
+  "flags": [],
+  "trees_note": "tourney",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** online hosting or accounts (non-goal C08).",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "Listed in PROJECT.md's later tier."
+    },
+    {
+      "heading": "Files",
+      "body": "Not designed."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "Gap: to be written when this item is specified; PROJECT.md gives no acceptance criteria."
+    },
+    {
+      "heading": "Implement",
+      "body": "Known: persistent pool, challenge the top N. Gap: N, ranking rule and storage are not specified."
+    },
+    {
+      "heading": "Check",
+      "body": "Gap: no acceptance criteria in PROJECT.md for this tier."
+    },
+    {
+      "heading": "Git",
+      "body": "Specify with the owner before starting."
+    }
+  ],
+  "notes": []
+}

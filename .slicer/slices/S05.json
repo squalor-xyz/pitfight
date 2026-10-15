@@ -1,0 +1,41 @@
+{
+  "id": "S05",
+  "title": "Build VM core memory and addressing modes",
+  "lead": [
+    "Implement the circular core of CORESIZE cells with modulo addressing, the cell type with its last-writer id, and operand evaluation for every addressing mode, test-first."
+  ],
+  "depends_note": null,
+  "findings_note": "PROJECT.md Milestone 2",
+  "size": "M",
+  "flags": [],
+  "trees_note": "vm",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** opcode execution, process queues, placement, scheduling, any I/O.",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "Milestone 2 (VM core with unit tests per opcode and addressing mode). Every other component reads and writes cells through this layer. The core must be pure (C12)."
+    },
+    {
+      "heading": "Files",
+      "body": "- VM core package source and unit tests (package path per the scaffolding layout)."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "- One test per addressing mode, taken from the ISA spec's worked cases.\n- Wraparound at address 0 and CORESIZE-1, and negative offsets.\n- A write records the writing bot's id as last writer.\n- A fresh core holds the spec's empty-cell value everywhere."
+    },
+    {
+      "heading": "Implement",
+      "body": "- Pure module: no I/O, no clock, no RNG.\n- Choose integer types so modulo arithmetic is exact and cannot overflow for any configured CORESIZE.\n- Public read/write API that later slices use."
+    },
+    {
+      "heading": "Check",
+      "body": "- The project test command passes.\n- Each addressing mode in the spec has a named test.\n- The VM core imports no I/O, time, thread or random APIs (under Rust: `rg -n 'std::(fs|io|net|time|thread|process)' <vm-core-dir>` prints nothing)."
+    },
+    {
+      "heading": "Git",
+      "body": "Branch `slice/<id>-vm-memory` in `.worktrees/<id>`. One commit when the owner asks."
+    }
+  ],
+  "notes": []
+}

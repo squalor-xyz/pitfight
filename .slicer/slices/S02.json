@@ -1,0 +1,41 @@
+{
+  "id": "S02",
+  "title": "Set up project scaffolding",
+  "lead": [
+    "Create the repository layout, one test command, and the project AGENTS.md for the confirmed stack, so every later slice can work test-first."
+  ],
+  "depends_note": null,
+  "findings_note": "PROJECT.md Stack recommendation, Risks",
+  "size": "S",
+  "flags": [],
+  "trees_note": "repo",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** VM, assembler or arena code beyond one smoke test; the WASM toolchain; a LICENSE file unless the owner chose one; CI host configuration.",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "Every later slice is test-first and needs a known layout and a single test command. AGENTS.md carries the project rules that PROJECT.md sets: pure VM core (C12), owner approval for every dependency (C13), no bundled existing warriors (C14), determinism."
+    },
+    {
+      "heading": "Files",
+      "body": "- `AGENTS.md` (new): stack, build and test commands, the rules above, worktree and branch conventions.\n- Build manifest and package directories for the stack confirmed in C22. Under the recommended Rust stack that is a Cargo workspace (`Cargo.toml`) with packages for the VM core and the `arena` CLI. The package split is a structural decision: the implementer proposes it and the owner approves it before files are created.\n- `.gitignore`: extend only if the stack needs more than the existing entries (`target/`, `node_modules/` are already there)."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "One smoke test in the core package, run by the project test command, that fails before the package exists and passes after."
+    },
+    {
+      "heading": "Implement",
+      "body": "1. Propose the package layout (VM core, assembler, arena and tournament CLI, replay, terminal viewer, web viewer directory) to the owner; wait for approval.\n2. Create the manifest and packages with the standard library only; no crates or packages.\n3. Write AGENTS.md: the test command, the build command, C12/C13/C14, the determinism rule (same bots, seed and config give the same result), and the slice workflow.\n4. Confirm the one test command runs every package's tests."
+    },
+    {
+      "heading": "Check",
+      "body": "- The project test command passes (under the recommended Rust stack: `cargo test --workspace`).\n- The manifest declares no third-party dependencies (Rust: `cargo tree` lists only workspace packages).\n- Every command named in AGENTS.md runs as written.\n- `git status --short` lists only the intended files."
+    },
+    {
+      "heading": "Git",
+      "body": "Branch `slice/<id>-scaffolding` in `.worktrees/<id>`. One commit when the owner asks."
+    }
+  ],
+  "notes": []
+}

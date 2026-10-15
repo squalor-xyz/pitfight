@@ -1,0 +1,41 @@
+{
+  "id": "S20",
+  "title": "Host the web visualizer on squalor.xyz",
+  "lead": [
+    "Later tier: host the web visualizer on squalor.xyz."
+  ],
+  "depends_note": null,
+  "findings_note": "PROJECT.md Feature tiers: Later",
+  "size": "S",
+  "flags": [],
+  "trees_note": "web",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** accounts or a hosted ladder (non-goal C08).",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "Listed in PROJECT.md's later tier; lets spectators watch without a local build."
+    },
+    {
+      "heading": "Files",
+      "body": "Not designed."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "Gap: to be written when this item is specified."
+    },
+    {
+      "heading": "Implement",
+      "body": "Gap: hosting provider, deploy method and what content is served are not specified. Deploying is an external action that needs explicit owner approval."
+    },
+    {
+      "heading": "Check",
+      "body": "Gap: no acceptance criteria in PROJECT.md for this tier."
+    },
+    {
+      "heading": "Git",
+      "body": "Specify with the owner before starting; no deploy without the owner."
+    }
+  ],
+  "notes": []
+}

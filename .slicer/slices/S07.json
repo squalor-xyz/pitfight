@@ -1,0 +1,41 @@
+{
+  "id": "S07",
+  "title": "Build the assembler",
+  "lead": [
+    "`arena asm bot.s`: turn assembly source into a cell list, with labels, expressions, and errors that carry line and column."
+  ],
+  "depends_note": null,
+  "findings_note": "PROJECT.md Milestone 3, Goals 2",
+  "size": "M",
+  "flags": [],
+  "trees_note": "asm",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** the disassembler (next slice); running matches.",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "Goal 2 and acceptance criterion C17: the assembler rejects malformed input with line and column errors."
+    },
+    {
+      "heading": "Files",
+      "body": "- Assembler package source and tests.\n- `docs/spec/asm.md` (new): the assembly syntax.\n- The `arena asm` subcommand in the CLI package."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "- Valid programs assemble to the expected cells, covering every opcode, modifier and addressing mode.\n- Forward and backward label references.\n- Expressions evaluate as the syntax doc defines.\n- Each malformed case errors with the exact line and column: unknown opcode, bad addressing mode, undefined label, duplicate label, malformed expression."
+    },
+    {
+      "heading": "Implement",
+      "body": "- Gap: PROJECT.md asks for labels and expressions but does not define the syntax, the expression operators, or the `arena asm` output format. The implementer proposes them in `docs/spec/asm.md` for owner review before coding.\n- Hand-written lexer and parser; no parser dependency (C13).\n- Output cells use the VM core cell type."
+    },
+    {
+      "heading": "Check",
+      "body": "- The project test command passes.\n- `arena asm` on a malformed file exits non-zero and prints `file:line:col: message`."
+    },
+    {
+      "heading": "Git",
+      "body": "Branch `slice/<id>-assembler` in `.worktrees/<id>`. One commit when the owner asks."
+    }
+  ],
+  "notes": []
+}

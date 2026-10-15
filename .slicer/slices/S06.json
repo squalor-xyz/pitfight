@@ -1,0 +1,41 @@
+{
+  "id": "S06",
+  "title": "Execute opcodes and process queues in the VM",
+  "lead": [
+    "Implement every opcode and modifier, per-bot process queues capped at MAXPROCESSES, process death, and in-memory events (cell writes, process spawn and death), with one unit test per opcode and modifier case."
+  ],
+  "depends_note": null,
+  "findings_note": "PROJECT.md Milestone 2, Core concepts",
+  "size": "L",
+  "flags": [],
+  "trees_note": "vm",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** placement, multi-bot cycle scheduling and the cycle limit (arena slice); serializing events to a file (replay slice).",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "Milestone 2 and acceptance criterion C15. The architecture sketch has the VM core emit events that the replay and viewers consume."
+    },
+    {
+      "heading": "Files",
+      "body": "- VM core package source and unit tests."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "- One test per opcode and modifier, from the ISA spec's worked cases.\n- Spawning up to MAXPROCESSES, and the spec's behavior when a spawn would exceed it.\n- A process dies on the spec's death conditions; a bot with no processes reports dead.\n- Executing an instruction emits exactly the expected events.\n- A table-driven test enumerates every opcode, modifier and addressing mode from the spec and fails if any has no case."
+    },
+    {
+      "heading": "Implement",
+      "body": "- Execute one instruction for one process: fetch, evaluate operands, apply, requeue or kill.\n- Process queue per bot, front-execute then requeue, per the data model.\n- Events are plain values returned to the caller; the core does no I/O (C12)."
+    },
+    {
+      "heading": "Check",
+      "body": "- The project test command passes, including the enumeration test.\n- The purity grep from the previous slice still prints nothing."
+    },
+    {
+      "heading": "Git",
+      "body": "Branch `slice/<id>-vm-opcodes` in `.worktrees/<id>`. One commit when the owner asks."
+    }
+  ],
+  "notes": []
+}

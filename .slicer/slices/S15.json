@@ -1,0 +1,41 @@
+{
+  "id": "S15",
+  "title": "Build the web viewer",
+  "lead": [
+    "A plain TypeScript + canvas viewer, without a framework, that plays replay files with step, play, pause and seek."
+  ],
+  "depends_note": null,
+  "findings_note": "PROJECT.md Milestone 7, Goals 6",
+  "size": "L",
+  "flags": [],
+  "trees_note": "web",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** hosting (later tier); live matches through the WASM build, which v1 acceptance does not require (scope with the owner).",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "v1 feature list, goal 6 and acceptance criterion C19: the terminal and web viewers both play the same replay file correctly."
+    },
+    {
+      "heading": "Files",
+      "body": "- Web viewer directory: TypeScript sources, a static HTML page, and tests."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "- Replay parsing and the frame model are tested in TypeScript.\n- For the shared fixture replay, the frame model at sampled cycles equals the terminal viewer's frame model.\n- Seeking to cycle N equals stepping N times."
+    },
+    {
+      "heading": "Implement",
+      "body": "- Gap: the TypeScript compiler and any test runner are dependencies that need owner approval (C13). Propose the minimum.\n- Canvas drawing of cell ownership and execution pointers."
+    },
+    {
+      "heading": "Check",
+      "body": "- The web viewer tests pass.\n- Manual: open the page, load the shared fixture replay, and step, play, pause and seek."
+    },
+    {
+      "heading": "Git",
+      "body": "Branch `slice/<id>-web-viewer` in `.worktrees/<id>`. One commit when the owner asks."
+    }
+  ],
+  "notes": []
+}

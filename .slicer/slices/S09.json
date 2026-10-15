@@ -1,0 +1,41 @@
+{
+  "id": "S09",
+  "title": "Run matches in the arena",
+  "lead": [
+    "`arena run a.s b.s --seed N`: assemble the bots, place them from the seed, schedule round-robin, stop at the cycle limit, and print a text result."
+  ],
+  "depends_note": null,
+  "findings_note": "PROJECT.md Milestone 4, Goals 3-4",
+  "size": "M",
+  "flags": [],
+  "trees_note": "arena",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** writing replay files, tournaments, viewers.",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "Milestone 4 and goals 3-4. Every later feature runs matches through this."
+    },
+    {
+      "heading": "Files",
+      "body": "- Arena module (wraps the pure VM core) and its tests.\n- The `arena run` subcommand."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "- Placement for a fixed seed matches the match spec's worked examples, is non-overlapping and honors min separation.\n- Placement that cannot fit returns the spec's error.\n- Turn order between two hand-built bots matches the spec.\n- The cycle limit stops the match and reports survivors.\n- The tie rule, a single winner, and a dead bot each produce the spec's result.\n- The same bots, seed and config run twice give identical results."
+    },
+    {
+      "heading": "Implement",
+      "body": "- The seeded RNG from the match spec, in-repo (C13).\n- The CLI stays non-interactive and scriptable so the later agent harness can drive it (C09). Gap: PROJECT.md does not define a machine-readable output; raise it with the owner."
+    },
+    {
+      "heading": "Check",
+      "body": "- The project test command passes.\n- `arena run x.s y.s --seed 1` run twice gives byte-identical output (`diff` of the two outputs is empty)."
+    },
+    {
+      "heading": "Git",
+      "body": "Branch `slice/<id>-arena` in `.worktrees/<id>`. One commit when the owner asks."
+    }
+  ],
+  "notes": []
+}

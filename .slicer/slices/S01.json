@@ -1,0 +1,41 @@
+{
+  "id": "S01",
+  "title": "Confirm open decisions",
+  "lead": [
+    "The owner confirms or changes each open decision from PROJECT.md. They are recorded as catalog assumptions C20-C25 and are not decided until this slice lands. Slices that depend on a decision depend on this item."
+  ],
+  "depends_note": null,
+  "findings_note": "PROJECT.md Open decisions",
+  "size": "S",
+  "flags": [],
+  "trees_note": "docs",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** code, spec text, dependency installs, or any choice the owner has not made.",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "PROJECT.md leaves six decisions open (name, ISA, core language, replay format, default match parameters, visualizer priority). They shape the layout, the spec, the replay file and the build order, so later slices cannot be specified for real until they are settled."
+    },
+    {
+      "heading": "Files",
+      "body": "No repository files. Tracking only: catalog records C20-C25, changed through `slicer catalog add/edit/retire`, and the slices whose scope changes, through `slicer edit`."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "None; no code. Before the slice: `slicer catalog list --kind assumption --json --lean` lists C20-C25 as active and pending."
+    },
+    {
+      "heading": "Implement",
+      "body": "Put each assumption to the owner with its recommendation from PROJECT.md:\n\n- C20 Name: placeholder \"bot-arena\" (CLI examples use `arena`). PROJECT.md gives no recommendation; the owner names it or keeps the placeholder.\n- C21 ISA: recommended an original ISA strongly inspired by Redcode semantics, Redcode compatibility later as a mode. Alternatives: a subset of Redcode ICWS'94; a new small ISA.\n- C22 Core language: recommended Rust core + WASM with a plain TypeScript + canvas viewer. Alternatives: all TypeScript; Python stdlib core + JS viewer. Includes approving the Rust toolchain now and noting the WASM toolchain needs separate approval (C13).\n- C23 Replay format: recommended versioned JSON lines for v1, binary later if size matters. The data model also names a periodic snapshot plus delta log.\n- C24 Default match parameters: recommended starting from Redcode '94 hill norms (core 8000, cycles 80000, max processes 8000). These numbers are unverified; the owner confirms \"use these pending verification in the match-rules slice\".\n- C25 Visualizer priority: recommended terminal viewer first, web viewer second.\n\nAlso ask, without a recommendation (PROJECT.md has none):\n\n- Project license: \"not yet chosen\" per PROJECT.md. Scaffolding adds no LICENSE file until this is answered.\n- CI host: PROJECT.md wants golden match hashes \"in CI\" but names no CI system. Until chosen, checks run locally.\n\nFor each answer: add a `decision` record with the owner's choice (`slicer catalog add --kind decision ...`), retire the assumption (`slicer catalog retire Cxx`), and cite the decision from affected items (`slicer catalog cite`). If an answer departs from the recommendation, update the affected slices (for example the scaffolding and WASM slices if C22 changes) with `slicer edit` before they start."
+    },
+    {
+      "heading": "Check",
+      "body": "- `slicer catalog list --kind decision --json --lean` has one decision per item C20-C25, plus license and CI answers or an explicit \"deferred\".\n- `slicer catalog list --kind assumption --json --lean` shows no active C20-C25.\n- `slicer check --json` is clean."
+    },
+    {
+      "heading": "Git",
+      "body": "Tracking-only change on a roadmap branch in `.worktrees/<name>`. Commit only when the owner asks."
+    }
+  ],
+  "notes": []
+}
