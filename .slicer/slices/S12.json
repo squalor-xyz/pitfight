@@ -2,7 +2,7 @@
   "id": "S12",
   "title": "Build the terminal viewer",
   "lead": [
-    "A terminal view of memory ownership and execution pointers, driven by a replay file, with step, play, pause and seek."
+    "`pit view replay.jsonl`: a terminal view in `internal/tui` of memory ownership and execution pointers, driven by a replay file, with step, play, pause and seek, using ANSI escapes and the Go standard library only."
   ],
   "depends_note": null,
   "findings_note": "PROJECT.md Milestone 5, Goals 6",
@@ -14,23 +14,23 @@
   "sections": [
     {
       "heading": "Why",
-      "body": "Goal 6 and acceptance criterion C19. C25 recommends the terminal viewer first because debugging needs it."
+      "body": "Goal 6 and acceptance criterion C19. C31 puts the terminal viewer first because debugging needs it. This slice also creates the shared viewer fixture that the web viewer (S15) must match."
     },
     {
       "heading": "Files",
-      "body": "- Terminal viewer package: a pure frame model plus a thin terminal renderer, and tests."
+      "body": "- `internal/tui/model.go`: pure frame model (cell owner per address, execution pointers per bot, cycle) built from `internal/replay`.\n- `internal/tui/player.go`: the step, play, pause and seek state machine.\n- `internal/tui/render.go`: ANSI renderer writing to an `io.Writer`.\n- `internal/tui/model_test.go`, `player_test.go`, `render_test.go`.\n- `testdata/viewer/fixture.jsonl`: a small replay (small core, few cycles) written by `pit run`, hand-checked.\n- `testdata/viewer/frames.json`: the expected frame model at sampled cycles, hand-checked; S15 reuses both files.\n- `cmd/pit/view.go`: the `view` subcommand; `cmd/pit/view_test.go`."
     },
     {
       "heading": "Failing tests",
-      "body": "- The frame model at cycle N (cell ownership, execution pointers) equals the expected state for a fixture replay.\n- Seeking to cycle N equals stepping N times.\n- The step, play, pause and seek state machine."
+      "body": "- `TestFrames`: the frame model of `testdata/viewer/fixture.jsonl` at each sampled cycle equals `testdata/viewer/frames.json`.\n- `TestSeekEqualsStep`: seeking to cycle N gives the same frame as stepping N times, for every N in the fixture.\n- `TestPlayer`: table-driven transitions of the step, play, pause and seek state machine, including seek past the end and before 0.\n- `TestRender`: rendering a fixed frame to a `bytes.Buffer` equals a golden string in `internal/tui/testdata/`.\n- `TestViewCommand` (`cmd/pit`): input commands from a `strings.Reader` drive the player and the command exits 0 at end of input."
     },
     {
       "heading": "Implement",
-      "body": "- Standard library first: ANSI escape sequences for drawing.\n- Raw keyboard input may need platform APIs or a dependency; that needs owner approval (C13).\n- Gap: a default core of 8000 cells does not fit one screen. PROJECT.md does not say how to scale or page it; propose a layout."
+      "body": "- Standard library only: ANSI escape sequences for drawing.\n- Input: Go's standard library has no portable raw-terminal mode, and golang.org/x/term would be a dependency (C13). v1 reads line-mode commands from stdin (for example `s` step, `p` play/pause, `g N` seek, `q` quit, each followed by Enter); the exact keys are the implementer's call, recorded per C35. Raw single-key input is a later change that needs owner approval of a dependency.\n- Layout: a default core of 8000 cells does not fit one screen. The implementer decides the layout (for example one character per cell in fixed-width rows with paging, or downsampled blocks) and records it per C35.\n- The frame model is the source of truth for C19; keep it independent of the renderer."
     },
     {
       "heading": "Check",
-      "body": "- The project test command passes.\n- Manual: play the imp vs dwarf seed 1 replay; step, pause and seek work."
+      "body": "- `. scripts/env.sh && go test ./... && go vet ./... && test -z \"$(gofmt -l cmd internal)\"` passes.\n- Manual: `. scripts/env.sh && go run ./cmd/pit view internal/replay/testdata/imp_dwarf_seed1.jsonl`; step, play, pause and seek work in a terminal.\n- The reviewer checks each C35 decision recorded by this slice."
     },
     {
       "heading": "Git",

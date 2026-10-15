@@ -25,9 +25,9 @@
 </style>
 </head><body>
 <h1>Roadmap</h1>
-<div class="prose"><p>bot-arena (working name): a Core War-style programming game. Players write small bots for a tiny virtual machine; the bots share a circular memory arena and try to make each other crash. v1 is the ISA spec, assembler, deterministic VM and arena, tournament runner, replay format, and terminal and web viewers. Source: PROJECT.md.</p></div>
+<div class="prose"><p>pitfight (formerly the working name bot-arena; CLI command `pit`): a Core War-style programming game. Players write small bots for a tiny virtual machine; the bots share a circular memory arena and try to make each other crash. v1 is the ISA spec, assembler, deterministic VM and arena, tournament runner, replay format, and terminal and web viewers, in Go (standard library only) with a plain JavaScript + canvas web viewer. Source: PROJECT.md and the owner decisions of 2026-10-15 (C26-C37).</p></div>
 <section><h2>Goals</h2>
-<div class="prose"><p>Goal records C01-C07 come from PROJECT.md Goals. Open decisions C20-C25 are assumptions pending owner confirmation in S01; nothing that depends on them starts before S01 lands.</p></div>
+<div class="prose"><p>Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).</p></div>
 <h3>C01 Small, well-specified instruction set with a written spec</h3>
 <div class="prose"><p>A small, well-specified instruction set with a written spec. Compatibility with the Redcode standard vs a new ISA is an open decision. (PROJECT.md Goals 1)</p></div>
 <h3>C02 Assembler with labels, expressions and line-numbered errors</h3>
@@ -57,8 +57,8 @@
 <section><h2>Requirements</h2>
 <h3>C15 Spec covers and tests every opcode, modifier and addressing mode</h3>
 <div class="prose"><p>The spec documents every opcode, modifier and addressing mode, and each one has tests. (PROJECT.md v1 acceptance criteria)</p></div>
-<h3>C16 Same result and replay hash for arena run imp.s dwarf.s --seed 1</h3>
-<div class="prose"><p>arena run imp.s dwarf.s --seed 1 gives the same result and replay hash on every run and machine. (PROJECT.md v1 acceptance criteria)</p></div>
+<h3>C16 Same result and replay hash for pit run imp.s dwarf.s --seed 1</h3>
+<div class="prose"><p>pit run imp.s dwarf.s --seed 1 gives the same result and replay hash on every run and machine. (PROJECT.md v1 acceptance criteria, which writes the command as arena run; renamed per C26)</p></div>
 <h3>C17 Assembler errors with line and column; asm-disasm-asm round-trips</h3>
 <div class="prose"><p>The assembler rejects malformed input with line and column errors; asm -&gt; disasm -&gt; asm round-trips. (PROJECT.md v1 acceptance criteria)</p></div>
 <h3>C18 Starter-bot tournament over 100 seeds prints a stable scoreboard</h3>
@@ -70,51 +70,85 @@
 <h3>C12 VM core is pure</h3>
 <div class="prose"><p>The VM core has no I/O, no clocks, and uses seeded RNG only for placement. Everything else wraps it. (PROJECT.md Architecture sketch)</p></div>
 <h3>C13 Every dependency needs owner approval</h3>
-<div class="prose"><p>Standard library first. Every crate, wasm toolchain or JS package needs owner approval with a stated reason and a FLOSS license. (PROJECT.md Dependency / licensing notes, Risks: Toolchain)</p></div>
+<div class="prose"><p>Standard library first. Every third-party Go module, toolchain (including tsc for TypeScript), wasm toolchain or JS package needs owner approval with a stated reason and a FLOSS license. The Go toolchain itself (go1.27.2) and its stock GOOS=js GOARCH=wasm target are approved by C28. (PROJECT.md Dependency / licensing notes, Risks: Toolchain; updated for C28)</p></div>
 <h3>C14 Do not bundle existing warriors until licensing is checked</h3>
 <div class="prose"><p>ICWS standards and existing warriors are public material, but their licensing has to be checked before bundling any existing warriors. Not verified yet. (PROJECT.md Dependency / licensing notes)</p></div>
+<h3>C34 Go caches stay in the repo; local checks</h3>
+<div class="prose"><p>Owner decision 2026-10-15 (carried over from the owner&#x27;s sibling project). `scripts/env.sh` exports GOCACHE, GOMODCACHE, GOPATH, GOTMPDIR and TMPDIR under a gitignored `.cache/` in the repo, plus GOTOOLCHAIN=local and GOPROXY=off. Every Go command runs with it sourced (`. scripts/env.sh &amp;&amp; go ...`). The project checks are `go test ./...`, `go vet ./...` and `gofmt -l cmd internal` (must print nothing).</p></div>
+<h3>C35 Implementer decides unfixed interface details and records them</h3>
+<div class="prose"><p>Owner decision 2026-10-15 (standing rule). Interface details not fixed by PROJECT.md or a catalog decision (for example package APIs, CLI flags and output formats, syntax details) are decided by the slice implementer and recorded in the catalog as a decision with a one-line reason. The reviewer checks each one.</p></div>
+<h3>C36 Determinism: no map iteration in core; in-repo seeded PRNG</h3>
+<div class="prose"><p>Owner decision 2026-10-15. No map iteration in the VM or arena core (Go map order is randomized). Randomness comes only from an in-repo seeded PRNG with a fixed, documented algorithm, not math/rand or math/rand/v2, so results and replays survive Go upgrades. Extends C12 and C03.</p></div>
+<h3>C37 Use Go built-in fuzzing where natural</h3>
+<div class="prose"><p>Owner decision 2026-10-15. Go&#x27;s built-in fuzzing (`go test -fuzz`) needs no dependency. Use it for the assembler and VM where a slice benefits. Fuzz targets keep a seed corpus so plain `go test ./...` runs them as regular tests.</p></div>
+</section>
+<section><h2>Decisions</h2>
+<h3>C26 Name: pitfight, CLI command pit</h3>
+<div class="prose"><p>Owner decision 2026-10-15. The project is named pitfight (formerly the placeholder bot-arena). The CLI command is `pit` (PROJECT.md examples that use `arena` become `pit`, e.g. `pit run imp.s dwarf.s --seed 1`). Go module path: github.com/squalor-xyz/pitfight. Replaces assumption C20.</p></div>
+<h3>C27 ISA: original ISA strongly inspired by Redcode semantics</h3>
+<div class="prose"><p>Owner decision 2026-10-15. Accepted: an original ISA strongly inspired by Redcode semantics. Redcode compatibility may come later as a mode. Replaces assumption C21.</p></div>
+<h3>C28 Core language: Go standard library only; plain JS + canvas web viewer</h3>
+<div class="prose"><p>Owner decision 2026-10-15: Go (go1.27.2) standard library only for assembler, VM, arena, tournament runner and terminal viewer; not Rust. Web viewer: plain JavaScript ES modules with JSDoc types and // @ts-check, canvas, no framework, no build step (owner chose plain JS over tsc 2026-10-15; tsc may be added later as a checker only with separate approval). JS tests use node:test from the installed Node (no npm packages). Live in-browser matches, if needed, use Go&#x27;s stock GOOS=js GOARCH=wasm build.</p></div>
+<h3>C29 Replay format: versioned JSON lines for v1</h3>
+<div class="prose"><p>Owner decision 2026-10-15. Accepted: versioned JSON lines for v1. Replaces assumption C23.</p></div>
+<h3>C30 Default match parameters: start from Redcode &#x27;94 hill norms (unverified)</h3>
+<div class="prose"><p>Owner decision 2026-10-15. Accepted: start from Redcode &#x27;94 hill norms (core 8000, cycles 80000, max processes 8000). Still UNVERIFIED: the match-rules slice must verify these against a source. Replaces assumption C24.</p></div>
+<h3>C31 Visualizer priority: terminal viewer first, web viewer second</h3>
+<div class="prose"><p>Owner decision 2026-10-15. Accepted: terminal viewer first, web viewer second. Replaces assumption C25.</p></div>
+<h3>C32 License: AGPL-3.0-or-later, copyright Squalor LLC</h3>
+<div class="prose"><p>Owner decision 2026-10-15. The project license is AGPL-3.0-or-later, copyright Squalor LLC. LICENSE must be the verbatim AGPL-3.0 text, which the owner will supply as a file (no network fetch); the license text must not be modified. The copyright line and the or-later notice go in a NOTICE file. Until the owner supplies the text, the scaffolding slice writes NOTICE and flags LICENSE as pending owner input.</p></div>
+<h3>C33 CI deferred</h3>
+<div class="prose"><p>Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run locally (see the in-repo Go cache and checks constraint).</p></div>
 </section>
 <section><h2>Assumptions</h2>
 <h3>C20 Name: keep placeholder bot-arena</h3>
 <div class="prose"><p>PENDING OWNER CONFIRMATION - not decided. Placeholder name is &quot;bot-arena&quot; (CLI examples use &quot;arena&quot;). PROJECT.md gives no recommendation and no alternatives. (PROJECT.md Open decisions 1)</p></div>
+<p><em>Retired: Settled by owner decision C26 (2026-10-15)..</em></p>
 <h3>C21 ISA: original ISA strongly inspired by Redcode semantics</h3>
 <div class="prose"><p>PENDING OWNER CONFIRMATION - not decided. Recommendation: an original ISA strongly inspired by Redcode semantics, small enough to specify in a few pages; Redcode compatibility can come later as a mode. Alternatives: (a) implement a subset of the Redcode ICWS&#x27;94 standard (body of existing warriors and literature); (b) design a new small ISA (freedom, distinct identity). (PROJECT.md Open decisions 2)</p></div>
+<p><em>Retired: Settled by owner decision C27 (2026-10-15)..</em></p>
 <h3>C22 Core language: Rust core + WASM, TypeScript viewer</h3>
 <div class="prose"><p>PENDING OWNER CONFIRMATION - not decided. Recommendation: Rust for assembler, VM and tournament runner, compiled to WASM so the web viewer can run live matches with the identical core; web viewer in plain TypeScript + canvas, no framework. Alternatives: (A) all TypeScript (Node CLI, browser viewer; one language, simpler toolchain, slower tournaments); (B) Python stdlib core plus a JS viewer (fastest to prototype; too slow for large tournaments without optimization). Rust + wasm-pack (or equivalent) needs owner approval per dependency rules. (PROJECT.md Stack recommendation, Open decisions 3)</p></div>
+<p><em>Retired: Settled by owner decision C28 (2026-10-15)..</em></p>
 <h3>C23 Replay format: versioned JSON lines for v1</h3>
 <div class="prose"><p>PENDING OWNER CONFIRMATION - not decided. Recommendation: versioned JSON lines for v1 (simple, debuggable), binary format later if size matters. Alternative named in the data model: a periodic snapshot plus a delta log. (PROJECT.md Open decisions 4, Core concepts: Replay)</p></div>
+<p><em>Retired: Settled by owner decision C29 (2026-10-15)..</em></p>
 <h3>C24 Default match parameters: Redcode &#x27;94 hill norms</h3>
 <div class="prose"><p>PENDING OWNER CONFIRMATION - not decided. Recommendation: start from Redcode &#x27;94 hill norms (core 8000, cycles 80000, max processes 8000) and tune. UNVERIFIED: these numbers are from general knowledge and must be checked against a source during the spec slice. PROJECT.md names no alternative values. (PROJECT.md Open decisions 5)</p></div>
+<p><em>Retired: Settled by owner decision C30 (2026-10-15)..</em></p>
 <h3>C25 Visualizer priority: terminal viewer first, web viewer second</h3>
 <div class="prose"><p>PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first (needed for debugging), web viewer second. PROJECT.md names no alternative; both viewers are v1. (PROJECT.md Open decisions 6)</p></div>
+<p><em>Retired: Settled by owner decision C31 (2026-10-15)..</em></p>
 </section>
-<p class="summary">21 items · — 17 · later 4</p>
+<p class="summary">21 items · — 16 · done 1 · later 4</p>
+<table><thead><tr><th>#</th><th>ID</th><th>Title</th><th>Size</th><th>Effort</th><th>Trees</th><th>Findings</th><th>Status</th></tr></thead><tbody>
+<tr class="group"><td></td><td colspan="7"><strong>v1 foundation</strong></td></tr>
+<tr class="open"><td>1</td><td>S02</td><td>Set up project scaffolding</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md Stack recommendation, Risks</td><td class="status">—</td></tr>
+<tr class="open"><td>2</td><td>S03</td><td>Write the ISA spec</td><td>M</td><td>2</td><td>docs</td><td>PROJECT.md Milestone 1, Goals 1</td><td class="status">—</td></tr>
+<tr class="open"><td>3</td><td>S04</td><td>Specify match rules and verify default parameters</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Goals 3-4, Open decisions 5</td><td class="status">—</td></tr>
+<tr class="group"><td></td><td colspan="7"><strong>v1 core</strong></td></tr>
+<tr class="open"><td>4</td><td>S05</td><td>Build VM core memory and addressing modes</td><td>M</td><td>2</td><td>vm</td><td>PROJECT.md Milestone 2</td><td class="status">—</td></tr>
+<tr class="open"><td>5</td><td>S06</td><td>Execute opcodes and process queues in the VM</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Milestone 2, Core concepts</td><td class="status">—</td></tr>
+<tr class="open"><td>6</td><td>S07</td><td>Build the assembler</td><td>M</td><td>2</td><td>asm</td><td>PROJECT.md Milestone 3, Goals 2</td><td class="status">—</td></tr>
+<tr class="open"><td>7</td><td>S08</td><td>Add the disassembler and round-trip tests</td><td>S</td><td>1</td><td>asm</td><td>PROJECT.md Milestone 3</td><td class="status">—</td></tr>
+<tr class="open"><td>8</td><td>S09</td><td>Run matches in the arena</td><td>M</td><td>2</td><td>arena</td><td>PROJECT.md Milestone 4, Goals 3-4</td><td class="status">—</td></tr>
+<tr class="open"><td>9</td><td>S10</td><td>Write the starter bots and golden-result tests</td><td>M</td><td>2</td><td>bots</td><td>PROJECT.md v1 features, Risks</td><td class="status">—</td></tr>
+<tr class="open"><td>10</td><td>S11</td><td>Define and write the replay format</td><td>M</td><td>2</td><td>replay</td><td>PROJECT.md Milestone 5, Goals 7, Risks</td><td class="status">—</td></tr>
+<tr class="group"><td></td><td colspan="7"><strong>v1 tools</strong></td></tr>
+<tr class="open"><td>11</td><td>S12</td><td>Build the terminal viewer</td><td>M</td><td>2</td><td>tui</td><td>PROJECT.md Milestone 5, Goals 6</td><td class="status">—</td></tr>
+<tr class="open"><td>12</td><td>S13</td><td>Run tournaments with a scoreboard</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Milestone 6, Goals 5</td><td class="status">—</td></tr>
+<tr class="open"><td>13</td><td>S14</td><td>Optional Go WASM build for live matches</td><td>S</td><td>1</td><td>vm, web</td><td>PROJECT.md Milestone 7, Stack recommendation</td><td class="status">—</td></tr>
+<tr class="open"><td>14</td><td>S15</td><td>Build the web viewer</td><td>L</td><td>3</td><td>web</td><td>PROJECT.md Milestone 7, Goals 6</td><td class="status">—</td></tr>
+<tr class="open"><td>15</td><td>S16</td><td>Check licensing of Redcode standards and warriors</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Dependency / licensing notes</td><td class="status">—</td></tr>
+<tr class="open"><td>16</td><td>S17</td><td>Verify v1 acceptance criteria</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md v1 acceptance criteria</td><td class="status">—</td></tr>
+<tr class="group"><td></td><td colspan="7"><strong>Later tier</strong></td></tr>
+<tr class="other"><td>17</td><td>S18</td><td>LLM agent harness</td><td>L</td><td>3</td><td>harness</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>18</td><td>S19</td><td>Persistent hill of ranked bots</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>19</td><td>S20</td><td>Host the web visualizer on squalor.xyz</td><td>S</td><td>2</td><td>web</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>20</td><td>S21</td><td>ISA variants and new game modes</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+</tbody></table>
 <table><thead><tr><th>#</th><th>ID</th><th>Title</th><th>Size</th><th>Effort</th><th>Trees</th><th>Findings</th><th>Status</th></tr></thead><tbody>
 <tr class="group"><td></td><td colspan="7"><strong>Decisions</strong></td></tr>
-<tr class="open"><td>1</td><td>S01</td><td>Confirm open decisions</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Open decisions</td><td class="status">—</td></tr>
-<tr class="group"><td></td><td colspan="7"><strong>v1 foundation</strong></td></tr>
-<tr class="open"><td>2</td><td>S02</td><td>Set up project scaffolding</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md Stack recommendation, Risks</td><td class="status">—</td></tr>
-<tr class="open"><td>3</td><td>S03</td><td>Write the ISA spec</td><td>M</td><td>2</td><td>docs</td><td>PROJECT.md Milestone 1, Goals 1</td><td class="status">—</td></tr>
-<tr class="open"><td>4</td><td>S04</td><td>Specify match rules and verify default parameters</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Goals 3-4, Open decisions 5</td><td class="status">—</td></tr>
-<tr class="group"><td></td><td colspan="7"><strong>v1 core</strong></td></tr>
-<tr class="open"><td>5</td><td>S05</td><td>Build VM core memory and addressing modes</td><td>M</td><td>2</td><td>vm</td><td>PROJECT.md Milestone 2</td><td class="status">—</td></tr>
-<tr class="open"><td>6</td><td>S06</td><td>Execute opcodes and process queues in the VM</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Milestone 2, Core concepts</td><td class="status">—</td></tr>
-<tr class="open"><td>7</td><td>S07</td><td>Build the assembler</td><td>M</td><td>2</td><td>asm</td><td>PROJECT.md Milestone 3, Goals 2</td><td class="status">—</td></tr>
-<tr class="open"><td>8</td><td>S08</td><td>Add the disassembler and round-trip tests</td><td>S</td><td>1</td><td>asm</td><td>PROJECT.md Milestone 3</td><td class="status">—</td></tr>
-<tr class="open"><td>9</td><td>S09</td><td>Run matches in the arena</td><td>M</td><td>2</td><td>arena</td><td>PROJECT.md Milestone 4, Goals 3-4</td><td class="status">—</td></tr>
-<tr class="open"><td>10</td><td>S10</td><td>Write the starter bots and golden-result tests</td><td>M</td><td>2</td><td>bots</td><td>PROJECT.md v1 features, Risks</td><td class="status">—</td></tr>
-<tr class="open"><td>11</td><td>S11</td><td>Define and write the replay format</td><td>M</td><td>2</td><td>replay</td><td>PROJECT.md Milestone 5, Goals 7, Risks</td><td class="status">—</td></tr>
-<tr class="group"><td></td><td colspan="7"><strong>v1 tools</strong></td></tr>
-<tr class="open"><td>12</td><td>S12</td><td>Build the terminal viewer</td><td>M</td><td>2</td><td>tui</td><td>PROJECT.md Milestone 5, Goals 6</td><td class="status">—</td></tr>
-<tr class="open"><td>13</td><td>S13</td><td>Run tournaments with a scoreboard</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Milestone 6, Goals 5</td><td class="status">—</td></tr>
-<tr class="open"><td>14</td><td>S14</td><td>Build the VM core for WASM</td><td>M</td><td>2</td><td>vm, web</td><td>PROJECT.md Milestone 7, Stack recommendation</td><td class="status">—</td></tr>
-<tr class="open"><td>15</td><td>S15</td><td>Build the web viewer</td><td>L</td><td>3</td><td>web</td><td>PROJECT.md Milestone 7, Goals 6</td><td class="status">—</td></tr>
-<tr class="open"><td>16</td><td>S16</td><td>Check licensing of Redcode standards and warriors</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Dependency / licensing notes</td><td class="status">—</td></tr>
-<tr class="open"><td>17</td><td>S17</td><td>Verify v1 acceptance criteria</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md v1 acceptance criteria</td><td class="status">—</td></tr>
-<tr class="group"><td></td><td colspan="7"><strong>Later tier</strong></td></tr>
-<tr class="other"><td>18</td><td>S18</td><td>LLM agent harness</td><td>L</td><td>3</td><td>harness</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
-<tr class="other"><td>19</td><td>S19</td><td>Persistent hill of ranked bots</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
-<tr class="other"><td>20</td><td>S20</td><td>Host the web visualizer on squalor.xyz</td><td>S</td><td>2</td><td>web</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
-<tr class="other"><td>21</td><td>S21</td><td>ISA variants and new game modes</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="done"><td>21</td><td>S01</td><td>Confirm open decisions</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Open decisions</td><td class="status">done</td></tr>
 </tbody></table>
 </body></html>

@@ -1,16 +1,16 @@
 {
-  "version": 8,
+  "version": 9,
   "id_prefix": "S",
   "id_width": 2,
   "next_id": 22,
-  "preamble": "bot-arena (working name): a Core War-style programming game. Players write small bots for a tiny virtual machine; the bots share a circular memory arena and try to make each other crash. v1 is the ISA spec, assembler, deterministic VM and arena, tournament runner, replay format, and terminal and web viewers. Source: PROJECT.md.",
+  "preamble": "pitfight (formerly the working name bot-arena; CLI command `pit`): a Core War-style programming game. Players write small bots for a tiny virtual machine; the bots share a circular memory arena and try to make each other crash. v1 is the ISA spec, assembler, deterministic VM and arena, tournament runner, replay format, and terminal and web viewers, in Go (standard library only) with a plain JavaScript + canvas web viewer. Source: PROJECT.md and the owner decisions of 2026-10-15 (C26-C37).",
   "passes": [],
   "items": [
     {
       "id": "S01",
       "title": "Confirm open decisions",
       "short_title": "Confirm open decisions",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [],
       "note_records": [],
@@ -24,13 +24,20 @@
         "trees_literal": false,
         "findings": "PROJECT.md Open decisions",
         "discovered_from": "",
+        "parent": "",
         "cites": [
-          "C20",
-          "C21",
-          "C22",
-          "C23",
-          "C24",
-          "C25"
+          "C26",
+          "C27",
+          "C28",
+          "C29",
+          "C30",
+          "C31",
+          "C32",
+          "C33",
+          "C34",
+          "C35",
+          "C36",
+          "C37"
         ],
         "key": "",
         "pass": "",
@@ -62,12 +69,19 @@
         "trees_literal": false,
         "findings": "PROJECT.md Stack recommendation, Risks",
         "discovered_from": "",
+        "parent": "",
         "cites": [
-          "C20",
-          "C22",
           "C12",
           "C13",
-          "C14"
+          "C14",
+          "C26",
+          "C28",
+          "C32",
+          "C33",
+          "C34",
+          "C35",
+          "C36",
+          "C37"
         ],
         "key": "",
         "pass": "",
@@ -100,10 +114,12 @@
         "trees_literal": false,
         "findings": "PROJECT.md Milestone 1, Goals 1",
         "discovered_from": "",
+        "parent": "",
         "cites": [
-          "C21",
           "C01",
-          "C15"
+          "C15",
+          "C27",
+          "C35"
         ],
         "key": "",
         "pass": "",
@@ -136,10 +152,13 @@
         "trees_literal": false,
         "findings": "PROJECT.md Goals 3-4, Open decisions 5",
         "discovered_from": "",
+        "parent": "",
         "cites": [
-          "C24",
           "C03",
-          "C04"
+          "C04",
+          "C30",
+          "C36",
+          "C35"
         ],
         "key": "",
         "pass": "",
@@ -172,9 +191,14 @@
         "trees_literal": false,
         "findings": "PROJECT.md Milestone 2",
         "discovered_from": "",
+        "parent": "",
         "cites": [
           "C12",
-          "C15"
+          "C15",
+          "C28",
+          "C34",
+          "C36",
+          "C37"
         ],
         "key": "",
         "pass": "",
@@ -206,9 +230,13 @@
         "trees_literal": false,
         "findings": "PROJECT.md Milestone 2, Core concepts",
         "discovered_from": "",
+        "parent": "",
         "cites": [
           "C12",
-          "C15"
+          "C15",
+          "C34",
+          "C36",
+          "C37"
         ],
         "key": "",
         "pass": "",
@@ -241,10 +269,15 @@
         "trees_literal": false,
         "findings": "PROJECT.md Milestone 3, Goals 2",
         "discovered_from": "",
+        "parent": "",
         "cites": [
           "C02",
           "C17",
-          "C13"
+          "C13",
+          "C26",
+          "C34",
+          "C35",
+          "C37"
         ],
         "key": "",
         "pass": "",
@@ -276,8 +309,12 @@
         "trees_literal": false,
         "findings": "PROJECT.md Milestone 3",
         "discovered_from": "",
+        "parent": "",
         "cites": [
-          "C17"
+          "C17",
+          "C26",
+          "C34",
+          "C35"
         ],
         "key": "",
         "pass": "",
@@ -311,11 +348,16 @@
         "trees_literal": false,
         "findings": "PROJECT.md Milestone 4, Goals 3-4",
         "discovered_from": "",
+        "parent": "",
         "cites": [
           "C03",
           "C04",
           "C09",
-          "C16"
+          "C16",
+          "C26",
+          "C34",
+          "C35",
+          "C36"
         ],
         "key": "",
         "pass": "",
@@ -348,10 +390,13 @@
         "trees_literal": false,
         "findings": "PROJECT.md v1 features, Risks",
         "discovered_from": "",
+        "parent": "",
         "cites": [
           "C14",
           "C16",
-          "C18"
+          "C18",
+          "C26",
+          "C34"
         ],
         "key": "",
         "pass": "",
@@ -384,12 +429,16 @@
         "trees_literal": false,
         "findings": "PROJECT.md Milestone 5, Goals 7, Risks",
         "discovered_from": "",
+        "parent": "",
         "cites": [
-          "C23",
           "C07",
           "C16",
           "C19",
-          "C13"
+          "C13",
+          "C29",
+          "C34",
+          "C35",
+          "C36"
         ],
         "key": "",
         "pass": "",
@@ -422,11 +471,15 @@
         "trees_literal": false,
         "findings": "PROJECT.md Milestone 5, Goals 6",
         "discovered_from": "",
+        "parent": "",
         "cites": [
-          "C25",
           "C06",
           "C19",
-          "C13"
+          "C13",
+          "C31",
+          "C28",
+          "C34",
+          "C35"
         ],
         "key": "",
         "pass": "",
@@ -459,9 +512,14 @@
         "trees_literal": false,
         "findings": "PROJECT.md Milestone 6, Goals 5",
         "discovered_from": "",
+        "parent": "",
         "cites": [
           "C05",
-          "C18"
+          "C18",
+          "C26",
+          "C34",
+          "C35",
+          "C36"
         ],
         "key": "",
         "pass": "",
@@ -475,18 +533,20 @@
     },
     {
       "id": "S14",
-      "title": "Build the VM core for WASM",
-      "short_title": "Build the VM core for WASM",
+      "title": "Optional Go WASM build for live matches",
+      "short_title": "Optional Go WASM build for live matches",
       "status": "open",
       "has_slice": true,
       "depends_on": [
         "S09",
+        "S11",
+        "S15",
         "S01"
       ],
       "note_records": [],
       "claim": null,
       "fields": {
-        "size": "M",
+        "size": "S",
         "flags": [],
         "trees": [
           "vm",
@@ -495,17 +555,19 @@
         "trees_literal": false,
         "findings": "PROJECT.md Milestone 7, Stack recommendation",
         "discovered_from": "",
+        "parent": "",
         "cites": [
-          "C22",
-          "C13"
+          "C13",
+          "C28",
+          "C34"
         ],
         "key": "",
         "pass": "",
         "group": "",
         "reason": "",
-        "importance": 2,
+        "importance": 1,
         "urgency": 1,
-        "effort": 2,
+        "effort": 1,
         "attempts": 0
       }
     },
@@ -517,6 +579,7 @@
       "has_slice": true,
       "depends_on": [
         "S11",
+        "S12",
         "S01"
       ],
       "note_records": [],
@@ -530,12 +593,14 @@
         "trees_literal": false,
         "findings": "PROJECT.md Milestone 7, Goals 6",
         "discovered_from": "",
+        "parent": "",
         "cites": [
-          "C22",
-          "C25",
           "C06",
           "C19",
-          "C13"
+          "C13",
+          "C28",
+          "C31",
+          "C35"
         ],
         "key": "",
         "pass": "",
@@ -567,9 +632,10 @@
         "trees_literal": false,
         "findings": "PROJECT.md Dependency / licensing notes",
         "discovered_from": "",
+        "parent": "",
         "cites": [
           "C14",
-          "C21"
+          "C27"
         ],
         "key": "",
         "pass": "",
@@ -605,12 +671,16 @@
         "trees_literal": false,
         "findings": "PROJECT.md v1 acceptance criteria",
         "discovered_from": "",
+        "parent": "",
         "cites": [
           "C15",
           "C16",
           "C17",
           "C18",
-          "C19"
+          "C19",
+          "C26",
+          "C33",
+          "C34"
         ],
         "key": "",
         "pass": "",
@@ -642,6 +712,7 @@
         "trees_literal": false,
         "findings": "PROJECT.md Feature tiers: Later",
         "discovered_from": "",
+        "parent": "",
         "cites": [
           "C09"
         ],
@@ -675,6 +746,7 @@
         "trees_literal": false,
         "findings": "PROJECT.md Feature tiers: Later",
         "discovered_from": "",
+        "parent": "",
         "cites": [
           "C08"
         ],
@@ -708,6 +780,7 @@
         "trees_literal": false,
         "findings": "PROJECT.md Feature tiers: Later",
         "discovered_from": "",
+        "parent": "",
         "cites": [
           "C08"
         ],
@@ -741,8 +814,9 @@
         "trees_literal": false,
         "findings": "PROJECT.md Feature tiers: Later",
         "discovered_from": "",
+        "parent": "",
         "cites": [
-          "C21"
+          "C27"
         ],
         "key": "",
         "pass": "",
@@ -756,10 +830,10 @@
     }
   ],
   "epilogue": "",
-  "goals": "Goal records C01-C07 come from PROJECT.md Goals. Open decisions C20-C25 are assumptions pending owner confirmation in S01; nothing that depends on them starts before S01 lands.",
+  "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 26,
+    "next_id": 38,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -875,7 +949,7 @@
         "id": "C13",
         "kind": "constraint",
         "title": "Every dependency needs owner approval",
-        "body": "Standard library first. Every crate, wasm toolchain or JS package needs owner approval with a stated reason and a FLOSS license. (PROJECT.md Dependency / licensing notes, Risks: Toolchain)",
+        "body": "Standard library first. Every third-party Go module, toolchain (including tsc for TypeScript), wasm toolchain or JS package needs owner approval with a stated reason and a FLOSS license. The Go toolchain itself (go1.27.2) and its stock GOOS=js GOARCH=wasm target are approved by C28. (PROJECT.md Dependency / licensing notes, Risks: Toolchain; updated for C28)",
         "status": "active",
         "reason": "",
         "successor": ""
@@ -901,8 +975,8 @@
       {
         "id": "C16",
         "kind": "requirement",
-        "title": "Same result and replay hash for arena run imp.s dwarf.s --seed 1",
-        "body": "arena run imp.s dwarf.s --seed 1 gives the same result and replay hash on every run and machine. (PROJECT.md v1 acceptance criteria)",
+        "title": "Same result and replay hash for pit run imp.s dwarf.s --seed 1",
+        "body": "pit run imp.s dwarf.s --seed 1 gives the same result and replay hash on every run and machine. (PROJECT.md v1 acceptance criteria, which writes the command as arena run; renamed per C26)",
         "status": "active",
         "reason": "",
         "successor": ""
@@ -939,8 +1013,8 @@
         "kind": "assumption",
         "title": "Name: keep placeholder bot-arena",
         "body": "PENDING OWNER CONFIRMATION - not decided. Placeholder name is \"bot-arena\" (CLI examples use \"arena\"). PROJECT.md gives no recommendation and no alternatives. (PROJECT.md Open decisions 1)",
-        "status": "active",
-        "reason": "",
+        "status": "retired",
+        "reason": "Settled by owner decision C26 (2026-10-15).",
         "successor": ""
       },
       {
@@ -948,8 +1022,8 @@
         "kind": "assumption",
         "title": "ISA: original ISA strongly inspired by Redcode semantics",
         "body": "PENDING OWNER CONFIRMATION - not decided. Recommendation: an original ISA strongly inspired by Redcode semantics, small enough to specify in a few pages; Redcode compatibility can come later as a mode. Alternatives: (a) implement a subset of the Redcode ICWS'94 standard (body of existing warriors and literature); (b) design a new small ISA (freedom, distinct identity). (PROJECT.md Open decisions 2)",
-        "status": "active",
-        "reason": "",
+        "status": "retired",
+        "reason": "Settled by owner decision C27 (2026-10-15).",
         "successor": ""
       },
       {
@@ -957,8 +1031,8 @@
         "kind": "assumption",
         "title": "Core language: Rust core + WASM, TypeScript viewer",
         "body": "PENDING OWNER CONFIRMATION - not decided. Recommendation: Rust for assembler, VM and tournament runner, compiled to WASM so the web viewer can run live matches with the identical core; web viewer in plain TypeScript + canvas, no framework. Alternatives: (A) all TypeScript (Node CLI, browser viewer; one language, simpler toolchain, slower tournaments); (B) Python stdlib core plus a JS viewer (fastest to prototype; too slow for large tournaments without optimization). Rust + wasm-pack (or equivalent) needs owner approval per dependency rules. (PROJECT.md Stack recommendation, Open decisions 3)",
-        "status": "active",
-        "reason": "",
+        "status": "retired",
+        "reason": "Settled by owner decision C28 (2026-10-15).",
         "successor": ""
       },
       {
@@ -966,8 +1040,8 @@
         "kind": "assumption",
         "title": "Replay format: versioned JSON lines for v1",
         "body": "PENDING OWNER CONFIRMATION - not decided. Recommendation: versioned JSON lines for v1 (simple, debuggable), binary format later if size matters. Alternative named in the data model: a periodic snapshot plus a delta log. (PROJECT.md Open decisions 4, Core concepts: Replay)",
-        "status": "active",
-        "reason": "",
+        "status": "retired",
+        "reason": "Settled by owner decision C29 (2026-10-15).",
         "successor": ""
       },
       {
@@ -975,8 +1049,8 @@
         "kind": "assumption",
         "title": "Default match parameters: Redcode '94 hill norms",
         "body": "PENDING OWNER CONFIRMATION - not decided. Recommendation: start from Redcode '94 hill norms (core 8000, cycles 80000, max processes 8000) and tune. UNVERIFIED: these numbers are from general knowledge and must be checked against a source during the spec slice. PROJECT.md names no alternative values. (PROJECT.md Open decisions 5)",
-        "status": "active",
-        "reason": "",
+        "status": "retired",
+        "reason": "Settled by owner decision C30 (2026-10-15).",
         "successor": ""
       },
       {
@@ -984,6 +1058,114 @@
         "kind": "assumption",
         "title": "Visualizer priority: terminal viewer first, web viewer second",
         "body": "PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first (needed for debugging), web viewer second. PROJECT.md names no alternative; both viewers are v1. (PROJECT.md Open decisions 6)",
+        "status": "retired",
+        "reason": "Settled by owner decision C31 (2026-10-15).",
+        "successor": ""
+      },
+      {
+        "id": "C26",
+        "kind": "decision",
+        "title": "Name: pitfight, CLI command pit",
+        "body": "Owner decision 2026-10-15. The project is named pitfight (formerly the placeholder bot-arena). The CLI command is `pit` (PROJECT.md examples that use `arena` become `pit`, e.g. `pit run imp.s dwarf.s --seed 1`). Go module path: github.com/squalor-xyz/pitfight. Replaces assumption C20.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C27",
+        "kind": "decision",
+        "title": "ISA: original ISA strongly inspired by Redcode semantics",
+        "body": "Owner decision 2026-10-15. Accepted: an original ISA strongly inspired by Redcode semantics. Redcode compatibility may come later as a mode. Replaces assumption C21.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C28",
+        "kind": "decision",
+        "title": "Core language: Go standard library only; plain JS + canvas web viewer",
+        "body": "Owner decision 2026-10-15: Go (go1.27.2) standard library only for assembler, VM, arena, tournament runner and terminal viewer; not Rust. Web viewer: plain JavaScript ES modules with JSDoc types and // @ts-check, canvas, no framework, no build step (owner chose plain JS over tsc 2026-10-15; tsc may be added later as a checker only with separate approval). JS tests use node:test from the installed Node (no npm packages). Live in-browser matches, if needed, use Go's stock GOOS=js GOARCH=wasm build.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C29",
+        "kind": "decision",
+        "title": "Replay format: versioned JSON lines for v1",
+        "body": "Owner decision 2026-10-15. Accepted: versioned JSON lines for v1. Replaces assumption C23.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C30",
+        "kind": "decision",
+        "title": "Default match parameters: start from Redcode '94 hill norms (unverified)",
+        "body": "Owner decision 2026-10-15. Accepted: start from Redcode '94 hill norms (core 8000, cycles 80000, max processes 8000). Still UNVERIFIED: the match-rules slice must verify these against a source. Replaces assumption C24.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C31",
+        "kind": "decision",
+        "title": "Visualizer priority: terminal viewer first, web viewer second",
+        "body": "Owner decision 2026-10-15. Accepted: terminal viewer first, web viewer second. Replaces assumption C25.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C32",
+        "kind": "decision",
+        "title": "License: AGPL-3.0-or-later, copyright Squalor LLC",
+        "body": "Owner decision 2026-10-15. The project license is AGPL-3.0-or-later, copyright Squalor LLC. LICENSE must be the verbatim AGPL-3.0 text, which the owner will supply as a file (no network fetch); the license text must not be modified. The copyright line and the or-later notice go in a NOTICE file. Until the owner supplies the text, the scaffolding slice writes NOTICE and flags LICENSE as pending owner input.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C33",
+        "kind": "decision",
+        "title": "CI deferred",
+        "body": "Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run locally (see the in-repo Go cache and checks constraint).",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C34",
+        "kind": "constraint",
+        "title": "Go caches stay in the repo; local checks",
+        "body": "Owner decision 2026-10-15 (carried over from the owner's sibling project). `scripts/env.sh` exports GOCACHE, GOMODCACHE, GOPATH, GOTMPDIR and TMPDIR under a gitignored `.cache/` in the repo, plus GOTOOLCHAIN=local and GOPROXY=off. Every Go command runs with it sourced (`. scripts/env.sh && go ...`). The project checks are `go test ./...`, `go vet ./...` and `gofmt -l cmd internal` (must print nothing).",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C35",
+        "kind": "constraint",
+        "title": "Implementer decides unfixed interface details and records them",
+        "body": "Owner decision 2026-10-15 (standing rule). Interface details not fixed by PROJECT.md or a catalog decision (for example package APIs, CLI flags and output formats, syntax details) are decided by the slice implementer and recorded in the catalog as a decision with a one-line reason. The reviewer checks each one.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C36",
+        "kind": "constraint",
+        "title": "Determinism: no map iteration in core; in-repo seeded PRNG",
+        "body": "Owner decision 2026-10-15. No map iteration in the VM or arena core (Go map order is randomized). Randomness comes only from an in-repo seeded PRNG with a fixed, documented algorithm, not math/rand or math/rand/v2, so results and replays survive Go upgrades. Extends C12 and C03.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C37",
+        "kind": "constraint",
+        "title": "Use Go built-in fuzzing where natural",
+        "body": "Owner decision 2026-10-15. Go's built-in fuzzing (`go test -fuzz`) needs no dependency. Use it for the assembler and VM where a slice benefits. Fuzz targets keep a seed corpus so plain `go test ./...` runs them as regular tests.",
         "status": "active",
         "reason": "",
         "successor": ""

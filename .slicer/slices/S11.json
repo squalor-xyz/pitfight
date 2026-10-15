@@ -2,7 +2,7 @@
   "id": "S11",
   "title": "Define and write the replay format",
   "lead": [
-    "Specify and write a versioned replay file (format per C23) from the VM events, with a stable replay hash and replay-equivalence tests."
+    "Specify and write the v1 replay file, versioned JSON lines (C29), in `internal/replay` from the VM events, with a stable SHA-256 replay hash, a golden fixture and replay-equivalence tests."
   ],
   "depends_note": null,
   "findings_note": "PROJECT.md Milestone 5, Goals 7, Risks",
@@ -14,23 +14,23 @@
   "sections": [
     {
       "heading": "Why",
-      "body": "Goal 7 and acceptance criteria C16 and C19. Replay-equivalence tests and golden hashes are the named mitigation for determinism bugs."
+      "body": "Goal 7 and acceptance criteria C16 and C19. Replay-equivalence tests and golden hashes are the named mitigation for determinism bugs; the replay must survive Go upgrades (C36), so its bytes may not depend on map order or library formatting that could change."
     },
     {
       "heading": "Files",
-      "body": "- `docs/spec/replay.md` (new).\n- Replay package: writer, reader, hash, tests.\n- A CLI option on `arena run` to write a replay."
+      "body": "- `docs/spec/replay.md` (new): the line types, field names and order, the version rule, and the hash definition.\n- `internal/replay/write.go`, `internal/replay/read.go`, `internal/replay/hash.go`, `internal/replay/apply.go` (rebuild core state from events).\n- `internal/replay/replay_test.go`, `internal/replay/fuzz_test.go` (`FuzzRead`).\n- `internal/replay/testdata/imp_dwarf_seed1.jsonl` and its hash, hand-checked before pinning.\n- `cmd/pit/run.go`: a flag to write a replay; its test in `cmd/pit/run_test.go`."
     },
     {
       "heading": "Failing tests",
-      "body": "- The replay of a fixed match matches a golden fixture and hash.\n- Reading a replay and applying it reconstructs the same core state at every cycle as the live simulation (replay equivalence).\n- An unknown version is rejected with a clear error.\n- The imp vs dwarf seed 1 replay hash is stable across runs."
+      "body": "- `TestGoldenReplay`: imp vs dwarf at seed 1 (a reduced cycle limit is fine if the spec says so) writes bytes equal to the golden fixture, and its hash equals the pinned hash.\n- `TestReplayEquivalence`: reading a replay and applying it reconstructs the same core state at every cycle as the live simulation.\n- `TestUnknownVersion`: a replay with an unknown version is rejected with a clear error naming the version.\n- `TestDeterministicFile`: the same match written twice to files under `t.TempDir()` gives identical bytes and hashes.\n- `FuzzRead`: arbitrary input never panics; it either parses or returns an error."
     },
     {
       "heading": "Implement",
-      "body": "- Header: version, match config, bot hashes. Body: per-cycle events (writes, process spawn and death), per the data model.\n- Seek support: decide within C23 whether to add periodic snapshots.\n- Gap: the hash function must be stable across machines and versions. Check whether the confirmed stack's standard library provides one with that guarantee; if not, it needs an in-repo implementation or an approved dependency (C13). Owner decides.\n- JSON writing without a serialization dependency unless the owner approves one (C13).\n- Gap: PROJECT.md does not name the CLI option for writing a replay; propose it."
+      "body": "- Header line: version, match config, bot hashes. Body lines: per-cycle events (writes, process spawn and death), per the data model.\n- Writer emits integers and strings only, with a fixed field order (struct fields or hand-written lines; no maps), so the bytes are stable.\n- Hash: SHA-256 (`crypto/sha256`, standard library, stable across machines and Go versions) of the replay file bytes, printed as lowercase hex. Bot hashes in the header use the same function over the bot's assembled cells in a stated encoding.\n- JSON via `encoding/json` or hand-written lines, standard library only (C13); the implementer chooses and records it per C35.\n- Seek support: whether to add periodic snapshot lines within C29 is the implementer's call, recorded per C35.\n- The replay flag name on `pit run` is the implementer's call, recorded per C35."
     },
     {
       "heading": "Check",
-      "body": "- The project test command passes.\n- The same match run twice gives identical replay files (`cmp`) and hashes."
+      "body": "- `. scripts/env.sh && go test ./... && go vet ./... && test -z \"$(gofmt -l cmd internal)\"` passes.\n- `. scripts/env.sh && go test -run '^$' -fuzz FuzzRead -fuzztime 30s ./internal/replay` finds no failure.\n- Running `pit run bots/imp.s bots/dwarf.s --seed 1` with the replay flag twice into `.cache/tmp/` gives files that `cmp` reports identical, and `shasum -a 256` on each matches the pinned hash.\n- The reviewer checks each C35 decision recorded by this slice."
     },
     {
       "heading": "Git",

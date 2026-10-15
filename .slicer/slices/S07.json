@@ -2,7 +2,7 @@
   "id": "S07",
   "title": "Build the assembler",
   "lead": [
-    "`arena asm bot.s`: turn assembly source into a cell list, with labels, expressions, and errors that carry line and column."
+    "`pit asm bot.s`: turn assembly source into `isa.Cell` values in `internal/asm`, with labels, expressions, and errors that carry line and column; hand-written lexer and parser, Go table-driven tests and a fuzz target."
   ],
   "depends_note": null,
   "findings_note": "PROJECT.md Milestone 3, Goals 2",
@@ -18,19 +18,19 @@
     },
     {
       "heading": "Files",
-      "body": "- Assembler package source and tests.\n- `docs/spec/asm.md` (new): the assembly syntax.\n- The `arena asm` subcommand in the CLI package."
+      "body": "- `docs/spec/asm.md` (new): the assembly syntax, expression operators and precedence, and the `pit asm` output format.\n- `internal/asm/lexer.go`, `internal/asm/parser.go`, `internal/asm/expr.go`, `internal/asm/asm.go` (`Assemble(name string, src []byte) ([]isa.Cell, error)` or equivalent).\n- `internal/asm/error.go`: an error type carrying file, line, column and message, formatted `file:line:col: message`.\n- `internal/asm/asm_test.go`, `internal/asm/expr_test.go`, `internal/asm/fuzz_test.go`.\n- `cmd/pit/asm.go`: the `asm` subcommand; `cmd/pit/asm_test.go`.\n\n- `internal/asm/testdata/undefined_label.s` (a malformed program for the CLI check)."
     },
     {
       "heading": "Failing tests",
-      "body": "- Valid programs assemble to the expected cells, covering every opcode, modifier and addressing mode.\n- Forward and backward label references.\n- Expressions evaluate as the syntax doc defines.\n- Each malformed case errors with the exact line and column: unknown opcode, bad addressing mode, undefined label, duplicate label, malformed expression."
+      "body": "- `TestAssemble`: valid programs (inline source strings) assemble to the expected cells, covering every opcode, modifier and addressing mode; checked against `internal/isa`'s lists so a new opcode without a case fails.\n- `TestLabels`: forward and backward label references.\n- `TestExpr`: expressions evaluate as `docs/spec/asm.md` defines, including precedence and negative values.\n- `TestErrors`: each malformed case errors with the exact line and column: unknown opcode, bad addressing mode, undefined label, duplicate label, malformed expression.\n- `TestAsmCommand` (`cmd/pit`): source files written under `t.TempDir()`; a valid file exits 0 and prints the documented output; a malformed file exits non-zero and prints `file:line:col: message` on stderr.\n- `FuzzAssemble`: arbitrary input never panics; any error is the positioned error type with line and column at least 1."
     },
     {
       "heading": "Implement",
-      "body": "- Gap: PROJECT.md asks for labels and expressions but does not define the syntax, the expression operators, or the `arena asm` output format. The implementer proposes them in `docs/spec/asm.md` for owner review before coding.\n- Hand-written lexer and parser; no parser dependency (C13).\n- Output cells use the VM core cell type."
+      "body": "- PROJECT.md asks for labels and expressions but does not define the syntax, the expression operators, or the `pit asm` output format. The implementer decides them, writes them in `docs/spec/asm.md`, and records each as a catalog decision with a one-line reason (C35); the reviewer checks them.\n- Hand-written lexer and parser; no parser dependency (C13).\n- Output cells use `isa.Cell`."
     },
     {
       "heading": "Check",
-      "body": "- The project test command passes.\n- `arena asm` on a malformed file exits non-zero and prints `file:line:col: message`."
+      "body": "- `. scripts/env.sh && go test ./... && go vet ./... && test -z \"$(gofmt -l cmd internal)\"` passes.\n- `. scripts/env.sh && go test -run '^$' -fuzz FuzzAssemble -fuzztime 60s ./internal/asm` finds no failure.\n- `. scripts/env.sh && go run ./cmd/pit asm internal/asm/testdata/undefined_label.s` exits non-zero and prints `internal/asm/testdata/undefined_label.s:LINE:COL: message` with the label's position.\n- The reviewer checks each C35 decision recorded by this slice."
     },
     {
       "heading": "Git",

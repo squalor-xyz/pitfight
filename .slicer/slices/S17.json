@@ -2,7 +2,7 @@
   "id": "S17",
   "title": "Verify v1 acceptance criteria",
   "lead": [
-    "Run each v1 acceptance criterion (C15-C19) end to end and record the result."
+    "Run each v1 acceptance criterion (C15-C19) end to end as Go tests plus the two manual viewer checks, and record the result."
   ],
   "depends_note": null,
   "findings_note": "PROJECT.md v1 acceptance criteria",
@@ -18,19 +18,19 @@
     },
     {
       "heading": "Files",
-      "body": "- An acceptance check script or test target (path per the scaffolding layout).\n- Golden fixtures for the imp vs dwarf seed 1 result and replay hash."
+      "body": "- `internal/acceptance/acceptance_test.go` (new, test-only package): one test per automatable criterion, driving `cmd/pit`'s `run` function or the packages, with files under `t.TempDir()`.\n- `internal/acceptance/testdata/`: golden imp vs dwarf seed 1 result text and replay hash (the hash equals S11's pinned value)."
     },
     {
       "heading": "Failing tests",
-      "body": "- One automated check per criterion that fails until the criterion holds."
+      "body": "- `TestC15SpecCoverage`: reuses the S06 spec-table parser; every opcode, modifier and mode in `docs/spec/isa.md` has a test case.\n- `TestC16ImpDwarfSeed1`: `pit run bots/imp.s bots/dwarf.s --seed 1` result and replay hash equal the golden files, on two runs.\n- `TestC17Assembler`: the malformed-input cases report line and column; every starter bot and spec example round-trips.\n- `TestC18Tournament`: the starter-bot tournament over 100 rounds runs twice with identical scoreboards (guarded by `testing.Short()` if slow).\n- C19 is checked manually (see Check) unless the owner has approved Node for S15's tests, in which case the web side runs with `node --test`."
     },
     {
       "heading": "Implement",
-      "body": "- C15: compare the spec's opcode, modifier and mode list against the test enumeration.\n- C16: run `arena run imp.s dwarf.s --seed 1` and compare result and replay hash to the golden fixture.\n- C17: run the malformed-input and round-trip suites.\n- C18: run the 100-seed starter-bot tournament twice and diff.\n- C19: play the shared replay in both viewers and compare frame models.\n- Gap: \"every run and machine\" in C16 needs runs on more than one machine; with no CI host chosen, record which machines were used."
+      "body": "- C15: compare the spec's opcode, modifier and mode tables against the test enumeration.\n- C16: run imp vs dwarf at seed 1 and compare result and replay hash to the golden files.\n- C17: run the malformed-input and round-trip suites.\n- C18: run the 100-seed starter-bot tournament twice and compare.\n- C19: the terminal viewer's `TestFrames` and the web viewer's `model.test.js` both check `testdata/viewer/frames.json`; also play `internal/replay/testdata/imp_dwarf_seed1.jsonl` in both viewers by hand.\n- C16 says \"every run and machine\". CI is deferred (C33), so record in the note which machines (OS, arch, Go version) ran the suite; one machine is a recorded limitation, not a pass on \"every machine\"."
     },
     {
       "heading": "Check",
-      "body": "- The acceptance script passes.\n- A note on this item lists each criterion with its command and outcome."
+      "body": "- `. scripts/env.sh && go test ./... && go vet ./... && test -z \"$(gofmt -l cmd internal)\"` passes, including `internal/acceptance` without `-short`.\n- `web/test.html` passes in a browser (or `node --test` if approved).\n- A note on this item lists each criterion with its command and outcome, and the machines used."
     },
     {
       "heading": "Git",

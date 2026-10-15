@@ -1,36 +1,36 @@
 {
   "id": "S14",
-  "title": "Build the VM core for WASM",
+  "title": "Optional Go WASM build for live matches",
   "lead": [
-    "Compile the VM core and arena to WASM so the browser can run matches with the identical core (C22)."
+    "Optional: build the arena for the browser with Go's stock `GOOS=js GOARCH=wasm` target (C28) so a page can run live matches with the identical core, and show that it gives the native result and replay hash. v1 acceptance does not need this; the replay-only web viewer (S15) needs no WASM."
   ],
   "depends_note": null,
   "findings_note": "PROJECT.md Milestone 7, Stack recommendation",
-  "size": "M",
+  "size": "S",
   "flags": [],
   "trees_note": "vm, web",
   "trees_plural": true,
-  "boundary": "**Not in this slice:** the web viewer UI.",
+  "boundary": "**Not in this slice:** web viewer UI or integrating live matches into it (S15 or later); any wasm toolchain beyond the Go distribution (wasm-pack, TinyGo, wasm-opt need owner approval, C13); committing `wasm_exec.js` or the `.wasm` binary.",
   "sections": [
     {
       "heading": "Why",
-      "body": "Milestone 7. The stack recommendation chose Rust partly because it compiles to WASM, letting the web viewer run live matches with the identical core. If C22 changes to all-TypeScript, this slice is replaced or dropped in the decisions slice."
+      "body": "Milestone 7 and C28: live in-browser matches, if wanted, use Go's stock js/wasm build (about 2 MB; `wasm_exec.js` ships with Go), so no extra toolchain is needed. Keeping it a separate optional slice keeps the web viewer replay-only and v1 acceptance (S17) independent of it."
     },
     {
       "heading": "Files",
-      "body": "- A WASM binding package over the pure core, its build script, and tests.\n- `AGENTS.md`: the WASM build command."
+      "body": "- `cmd/pitwasm/match.go` (no build tag): `runMatch(a, b []byte, seed uint64) (result []byte, replay []byte, hash string, err error)` over `internal/asm`, `internal/arena` and `internal/replay`.\n- `cmd/pitwasm/match_test.go`: native test of `runMatch`.\n- `cmd/pitwasm/main_js.go` (`//go:build js && wasm`): registers a `pitRun` function with `syscall/js` and blocks.\n- `scripts/build-wasm.sh` (new): with `scripts/env.sh` sourced, runs `GOOS=js GOARCH=wasm go build -o build/pit.wasm ./cmd/pitwasm` and copies `wasm_exec.js` from the Go installation into `build/` (in Go 1.24 and later it lives under `$(go env GOROOT)/lib/wasm/`; the implementer verifies the path for go1.27.2).\n- `web/live.html`, `web/js/live.js`: load two bot sources and a seed, call `pitRun`, show the result and replay hash. Served with the local static server from S15 (extended to serve `build/` if needed).\n- `AGENTS.md`: the WASM build command."
     },
     {
       "heading": "Failing tests",
-      "body": "- A match run through the WASM build (imp vs dwarf, seed 1) gives the same result and replay hash as the native build."
+      "body": "- `TestRunMatchGolden` (native): `runMatch` on `bots/imp.s` vs `bots/dwarf.s` at seed 1 returns the replay hash pinned in S11.\n- Under WASM (see Check): the page shows the same result text and hash."
     },
     {
       "heading": "Implement",
-      "body": "- Get owner approval for the WASM toolchain (wasm-pack or equivalent) with reason and license before installing (C13).\n- Keep the binding thin; no logic outside the pure core."
+      "body": "- Keep the binding thin; no game logic in `cmd/pitwasm` beyond calling the packages.\n- `cmd/pitwasm/main_js.go` is the only file that imports `syscall/js`; `go vet ./...` on the host must still pass.\n- Record the measured `build/pit.wasm` size in the note on this item."
     },
     {
       "heading": "Check",
-      "body": "- The native and WASM result and hash comparison passes.\n- The WASM build command in AGENTS.md runs as written."
+      "body": "- `. scripts/env.sh && go test ./... && go vet ./... && test -z \"$(gofmt -l cmd internal)\"` passes.\n- `. scripts/env.sh && sh scripts/build-wasm.sh` produces `build/pit.wasm` and `build/wasm_exec.js`; `git status --short` shows neither.\n- Manual: serve the page, run imp vs dwarf at seed 1, and confirm the result and hash equal the native `pit run` output.\n- Owner input, optional: an automated WASM run needs a JS host (Node, already installed here, via Go's `go_js_wasm_exec`). Node is a toolchain under C13, so it needs owner approval; without it, the manual check stands."
     },
     {
       "heading": "Git",

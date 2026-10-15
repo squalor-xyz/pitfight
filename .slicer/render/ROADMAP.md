@@ -2,11 +2,11 @@
 
 # Roadmap
 
-bot-arena (working name): a Core War-style programming game. Players write small bots for a tiny virtual machine; the bots share a circular memory arena and try to make each other crash. v1 is the ISA spec, assembler, deterministic VM and arena, tournament runner, replay format, and terminal and web viewers. Source: PROJECT.md.
+pitfight (formerly the working name bot-arena; CLI command `pit`): a Core War-style programming game. Players write small bots for a tiny virtual machine; the bots share a circular memory arena and try to make each other crash. v1 is the ISA spec, assembler, deterministic VM and arena, tournament runner, replay format, and terminal and web viewers, in Go (standard library only) with a plain JavaScript + canvas web viewer. Source: PROJECT.md and the owner decisions of 2026-10-15 (C26-C37).
 
 ## Goals
 
-Goal records C01-C07 come from PROJECT.md Goals. Open decisions C20-C25 are assumptions pending owner confirmation in S01; nothing that depends on them starts before S01 lands.
+Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).
 
 ### C01 Small, well-specified instruction set with a written spec
 
@@ -62,9 +62,9 @@ Out of scope for v1. (PROJECT.md Non-goals)
 
 The spec documents every opcode, modifier and addressing mode, and each one has tests. (PROJECT.md v1 acceptance criteria)
 
-### C16 Same result and replay hash for arena run imp.s dwarf.s --seed 1
+### C16 Same result and replay hash for pit run imp.s dwarf.s --seed 1
 
-arena run imp.s dwarf.s --seed 1 gives the same result and replay hash on every run and machine. (PROJECT.md v1 acceptance criteria)
+pit run imp.s dwarf.s --seed 1 gives the same result and replay hash on every run and machine. (PROJECT.md v1 acceptance criteria, which writes the command as arena run; renamed per C26)
 
 ### C17 Assembler errors with line and column; asm-disasm-asm round-trips
 
@@ -86,11 +86,61 @@ The VM core has no I/O, no clocks, and uses seeded RNG only for placement. Every
 
 ### C13 Every dependency needs owner approval
 
-Standard library first. Every crate, wasm toolchain or JS package needs owner approval with a stated reason and a FLOSS license. (PROJECT.md Dependency / licensing notes, Risks: Toolchain)
+Standard library first. Every third-party Go module, toolchain (including tsc for TypeScript), wasm toolchain or JS package needs owner approval with a stated reason and a FLOSS license. The Go toolchain itself (go1.27.2) and its stock GOOS=js GOARCH=wasm target are approved by C28. (PROJECT.md Dependency / licensing notes, Risks: Toolchain; updated for C28)
 
 ### C14 Do not bundle existing warriors until licensing is checked
 
 ICWS standards and existing warriors are public material, but their licensing has to be checked before bundling any existing warriors. Not verified yet. (PROJECT.md Dependency / licensing notes)
+
+### C34 Go caches stay in the repo; local checks
+
+Owner decision 2026-10-15 (carried over from the owner's sibling project). `scripts/env.sh` exports GOCACHE, GOMODCACHE, GOPATH, GOTMPDIR and TMPDIR under a gitignored `.cache/` in the repo, plus GOTOOLCHAIN=local and GOPROXY=off. Every Go command runs with it sourced (`. scripts/env.sh && go ...`). The project checks are `go test ./...`, `go vet ./...` and `gofmt -l cmd internal` (must print nothing).
+
+### C35 Implementer decides unfixed interface details and records them
+
+Owner decision 2026-10-15 (standing rule). Interface details not fixed by PROJECT.md or a catalog decision (for example package APIs, CLI flags and output formats, syntax details) are decided by the slice implementer and recorded in the catalog as a decision with a one-line reason. The reviewer checks each one.
+
+### C36 Determinism: no map iteration in core; in-repo seeded PRNG
+
+Owner decision 2026-10-15. No map iteration in the VM or arena core (Go map order is randomized). Randomness comes only from an in-repo seeded PRNG with a fixed, documented algorithm, not math/rand or math/rand/v2, so results and replays survive Go upgrades. Extends C12 and C03.
+
+### C37 Use Go built-in fuzzing where natural
+
+Owner decision 2026-10-15. Go's built-in fuzzing (`go test -fuzz`) needs no dependency. Use it for the assembler and VM where a slice benefits. Fuzz targets keep a seed corpus so plain `go test ./...` runs them as regular tests.
+
+## Decisions
+
+### C26 Name: pitfight, CLI command pit
+
+Owner decision 2026-10-15. The project is named pitfight (formerly the placeholder bot-arena). The CLI command is `pit` (PROJECT.md examples that use `arena` become `pit`, e.g. `pit run imp.s dwarf.s --seed 1`). Go module path: github.com/squalor-xyz/pitfight. Replaces assumption C20.
+
+### C27 ISA: original ISA strongly inspired by Redcode semantics
+
+Owner decision 2026-10-15. Accepted: an original ISA strongly inspired by Redcode semantics. Redcode compatibility may come later as a mode. Replaces assumption C21.
+
+### C28 Core language: Go standard library only; plain JS + canvas web viewer
+
+Owner decision 2026-10-15: Go (go1.27.2) standard library only for assembler, VM, arena, tournament runner and terminal viewer; not Rust. Web viewer: plain JavaScript ES modules with JSDoc types and // @ts-check, canvas, no framework, no build step (owner chose plain JS over tsc 2026-10-15; tsc may be added later as a checker only with separate approval). JS tests use node:test from the installed Node (no npm packages). Live in-browser matches, if needed, use Go's stock GOOS=js GOARCH=wasm build.
+
+### C29 Replay format: versioned JSON lines for v1
+
+Owner decision 2026-10-15. Accepted: versioned JSON lines for v1. Replaces assumption C23.
+
+### C30 Default match parameters: start from Redcode '94 hill norms (unverified)
+
+Owner decision 2026-10-15. Accepted: start from Redcode '94 hill norms (core 8000, cycles 80000, max processes 8000). Still UNVERIFIED: the match-rules slice must verify these against a source. Replaces assumption C24.
+
+### C31 Visualizer priority: terminal viewer first, web viewer second
+
+Owner decision 2026-10-15. Accepted: terminal viewer first, web viewer second. Replaces assumption C25.
+
+### C32 License: AGPL-3.0-or-later, copyright Squalor LLC
+
+Owner decision 2026-10-15. The project license is AGPL-3.0-or-later, copyright Squalor LLC. LICENSE must be the verbatim AGPL-3.0 text, which the owner will supply as a file (no network fetch); the license text must not be modified. The copyright line and the or-later notice go in a NOTICE file. Until the owner supplies the text, the scaffolding slice writes NOTICE and flags LICENSE as pending owner input.
+
+### C33 CI deferred
+
+Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run locally (see the in-repo Go cache and checks constraint).
 
 ## Assumptions
 
@@ -98,53 +148,70 @@ ICWS standards and existing warriors are public material, but their licensing ha
 
 PENDING OWNER CONFIRMATION - not decided. Placeholder name is "bot-arena" (CLI examples use "arena"). PROJECT.md gives no recommendation and no alternatives. (PROJECT.md Open decisions 1)
 
+*Retired: Settled by owner decision C26 (2026-10-15)..*
+
 ### C21 ISA: original ISA strongly inspired by Redcode semantics
 
 PENDING OWNER CONFIRMATION - not decided. Recommendation: an original ISA strongly inspired by Redcode semantics, small enough to specify in a few pages; Redcode compatibility can come later as a mode. Alternatives: (a) implement a subset of the Redcode ICWS'94 standard (body of existing warriors and literature); (b) design a new small ISA (freedom, distinct identity). (PROJECT.md Open decisions 2)
+
+*Retired: Settled by owner decision C27 (2026-10-15)..*
 
 ### C22 Core language: Rust core + WASM, TypeScript viewer
 
 PENDING OWNER CONFIRMATION - not decided. Recommendation: Rust for assembler, VM and tournament runner, compiled to WASM so the web viewer can run live matches with the identical core; web viewer in plain TypeScript + canvas, no framework. Alternatives: (A) all TypeScript (Node CLI, browser viewer; one language, simpler toolchain, slower tournaments); (B) Python stdlib core plus a JS viewer (fastest to prototype; too slow for large tournaments without optimization). Rust + wasm-pack (or equivalent) needs owner approval per dependency rules. (PROJECT.md Stack recommendation, Open decisions 3)
 
+*Retired: Settled by owner decision C28 (2026-10-15)..*
+
 ### C23 Replay format: versioned JSON lines for v1
 
 PENDING OWNER CONFIRMATION - not decided. Recommendation: versioned JSON lines for v1 (simple, debuggable), binary format later if size matters. Alternative named in the data model: a periodic snapshot plus a delta log. (PROJECT.md Open decisions 4, Core concepts: Replay)
+
+*Retired: Settled by owner decision C29 (2026-10-15)..*
 
 ### C24 Default match parameters: Redcode '94 hill norms
 
 PENDING OWNER CONFIRMATION - not decided. Recommendation: start from Redcode '94 hill norms (core 8000, cycles 80000, max processes 8000) and tune. UNVERIFIED: these numbers are from general knowledge and must be checked against a source during the spec slice. PROJECT.md names no alternative values. (PROJECT.md Open decisions 5)
 
+*Retired: Settled by owner decision C30 (2026-10-15)..*
+
 ### C25 Visualizer priority: terminal viewer first, web viewer second
 
 PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first (needed for debugging), web viewer second. PROJECT.md names no alternative; both viewers are v1. (PROJECT.md Open decisions 6)
 
-21 items · — 17 · later 4
+*Retired: Settled by owner decision C31 (2026-10-15)..*
+
+21 items · — 16 · done 1 · later 4
+
+| # | Slice | Title | Size | Effort | Trees | Findings | Status |
+|---|---|---|---|---|---|---|---|
+| v1 foundation | | | | | | | |
+| 1 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks | — |
+| 2 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | — |
+| 3 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | — |
+| v1 core | | | | | | | |
+| 4 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | — |
+| 5 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | — |
+| 6 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | — |
+| 7 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | — |
+| 8 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | — |
+| 9 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | — |
+| 10 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | — |
+| v1 tools | | | | | | | |
+| 11 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | — |
+| 12 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | — |
+| 13 | [S14](slices/S14.md) | Optional Go WASM build for live matches | S | 1 | vm, web | PROJECT.md Milestone 7, Stack recommendation | — |
+| 14 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | — |
+| 15 | [S16](slices/S16.md) | Check licensing of Redcode standards and warriors | S | 1 | docs | PROJECT.md Dependency / licensing notes | — |
+| 16 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria | — |
+| Later tier | | | | | | | |
+| 17 | [S18](slices/S18.md) | LLM agent harness | L | 3 | harness | PROJECT.md Feature tiers: Later | later |
+| 18 | [S19](slices/S19.md) | Persistent hill of ranked bots | M | 2 | tourney | PROJECT.md Feature tiers: Later | later |
+| 19 | [S20](slices/S20.md) | Host the web visualizer on squalor.xyz | S | 2 | web | PROJECT.md Feature tiers: Later | later |
+| 20 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
+
+---
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
 | Decisions | | | | | | | |
-| 1 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions | — |
-| v1 foundation | | | | | | | |
-| 2 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks | — |
-| 3 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | — |
-| 4 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | — |
-| v1 core | | | | | | | |
-| 5 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | — |
-| 6 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | — |
-| 7 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | — |
-| 8 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | — |
-| 9 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | — |
-| 10 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | — |
-| 11 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | — |
-| v1 tools | | | | | | | |
-| 12 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | — |
-| 13 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | — |
-| 14 | [S14](slices/S14.md) | Build the VM core for WASM | M | 2 | vm, web | PROJECT.md Milestone 7, Stack recommendation | — |
-| 15 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | — |
-| 16 | [S16](slices/S16.md) | Check licensing of Redcode standards and warriors | S | 1 | docs | PROJECT.md Dependency / licensing notes | — |
-| 17 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria | — |
-| Later tier | | | | | | | |
-| 18 | [S18](slices/S18.md) | LLM agent harness | L | 3 | harness | PROJECT.md Feature tiers: Later | later |
-| 19 | [S19](slices/S19.md) | Persistent hill of ranked bots | M | 2 | tourney | PROJECT.md Feature tiers: Later | later |
-| 20 | [S20](slices/S20.md) | Host the web visualizer on squalor.xyz | S | 2 | web | PROJECT.md Feature tiers: Later | later |
-| 21 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
+| 21 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions | done |

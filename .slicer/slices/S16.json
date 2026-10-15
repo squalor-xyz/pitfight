@@ -2,7 +2,7 @@
   "id": "S16",
   "title": "Check licensing of Redcode standards and warriors",
   "lead": [
-    "Find and record the licensing of the ICWS standard texts and published warriors before any of them is bundled or adapted."
+    "Find and record the licensing of the ICWS standard texts and published warriors before any of them is bundled or adapted, including whether each is compatible with pitfight's AGPL-3.0-or-later license (C32)."
   ],
   "depends_note": null,
   "findings_note": "PROJECT.md Dependency / licensing notes",
@@ -10,7 +10,7 @@
   "flags": [],
   "trees_note": "docs",
   "trees_plural": false,
-  "boundary": "**Not in this slice:** bundling any warrior; choosing the project's own license.",
+  "boundary": "**Not in this slice:** bundling any warrior; the project's own license (decided in C32).",
   "sections": [
     {
       "heading": "Why",
@@ -18,7 +18,7 @@
     },
     {
       "heading": "Files",
-      "body": "- `docs/licensing.md` (new; final path per the scaffolding layout)."
+      "body": "- `docs/licensing.md` (new)."
     },
     {
       "heading": "Failing tests",
@@ -26,7 +26,7 @@
     },
     {
       "heading": "Implement",
-      "body": "- Read public sources (read-only) for the ICWS'94 text and commonly published warriors; record the license or terms for each with a citation.\n- Give the owner a bundle or do-not-bundle recommendation per item."
+      "body": "- Read public sources (read-only) for the ICWS'94 text and commonly published warriors; record the license or terms for each with a citation.\n- For each item, state whether bundling it in an AGPL-3.0-or-later repository is permitted by its terms, or that the terms are unclear.\n- Give the owner a bundle or do-not-bundle recommendation per item."
     },
     {
       "heading": "Check",

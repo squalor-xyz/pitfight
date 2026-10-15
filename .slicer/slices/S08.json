@@ -2,7 +2,7 @@
   "id": "S08",
   "title": "Add the disassembler and round-trip tests",
   "lead": [
-    "Disassemble a cell list back to source for debugging, and prove asm -> disasm -> asm round-trips."
+    "Disassemble `isa.Cell` values back to source in `internal/asm` for debugging, expose it from `pit`, and prove asm -> disasm -> asm round-trips with table-driven and fuzz tests."
   ],
   "depends_note": null,
   "findings_note": "PROJECT.md Milestone 3",
@@ -18,19 +18,19 @@
     },
     {
       "heading": "Files",
-      "body": "- Assembler package: disassembler and round-trip tests.\n- CLI package: the disassembly entry point."
+      "body": "- `internal/asm/disasm.go`: `Disassemble([]isa.Cell) []byte` (or equivalent), output in the syntax of `docs/spec/asm.md`.\n- `internal/asm/roundtrip_test.go`, and `FuzzRoundTrip` in `internal/asm/fuzz_test.go`.\n- `cmd/pit/`: the disassembly entry point and its test.\n- `docs/spec/asm.md`: a short section on disassembly output and the CLI entry point."
     },
     {
       "heading": "Failing tests",
-      "body": "- For every opcode, modifier and addressing mode: `assemble(disassemble(cells)) == cells`.\n- Round trip over every worked example program in the spec docs."
+      "body": "- `TestRoundTripCells`: for every opcode, modifier and addressing mode (from `internal/isa`'s lists), `Assemble(Disassemble(cells)) == cells`.\n- `TestRoundTripSpecExamples`: every example program in `docs/spec/isa.md` and `docs/spec/asm.md` (extracted from fenced code blocks) assembles, disassembles and reassembles to identical cells.\n- `FuzzRoundTrip`: arbitrary bytes decoded into valid cells round-trip unchanged.\n- A `cmd/pit` test: the disassembly entry point on a file under `t.TempDir()` prints source that reassembles to the same cells."
     },
     {
       "heading": "Implement",
-      "body": "- Gap: PROJECT.md does not say how disassembly is invoked from the CLI. Propose a subcommand or flag to the owner."
+      "body": "- PROJECT.md does not say how disassembly is invoked. The implementer decides (a `pit disasm` subcommand or a `pit asm` flag) and records it per C35; the reviewer checks it.\n- Last-writer ids are not part of the source and are excluded from the round-trip comparison."
     },
     {
       "heading": "Check",
-      "body": "- The project test command passes.\n- Disassembling and reassembling each spec example gives identical cells."
+      "body": "- `. scripts/env.sh && go test ./... && go vet ./... && test -z \"$(gofmt -l cmd internal)\"` passes.\n- `. scripts/env.sh && go test -run '^$' -fuzz FuzzRoundTrip -fuzztime 60s ./internal/asm` finds no failure.\n- Disassembling and reassembling each spec example gives identical cells (`TestRoundTripSpecExamples`)."
     },
     {
       "heading": "Git",

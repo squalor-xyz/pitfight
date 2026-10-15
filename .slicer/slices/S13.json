@@ -2,7 +2,7 @@
   "id": "S13",
   "title": "Run tournaments with a scoreboard",
   "lead": [
-    "`arena tourney bots/ --rounds R`: round-robin over many seeds, run in parallel, with a reproducible scoreboard."
+    "`pit tourney bots/ --rounds R`: in `internal/tourney`, round-robin over many seeds, run in parallel with goroutines, with a reproducible scoreboard."
   ],
   "depends_note": null,
   "findings_note": "PROJECT.md Milestone 6, Goals 5",
@@ -18,19 +18,19 @@
     },
     {
       "heading": "Files",
-      "body": "- Tournament module and tests.\n- The `arena tourney` subcommand."
+      "body": "- `internal/tourney/pairings.go`, `internal/tourney/seeds.go`, `internal/tourney/run.go` (worker pool), `internal/tourney/score.go`.\n- `internal/tourney/tourney_test.go`.\n- `cmd/pit/tourney.go`: the `tourney` subcommand; `cmd/pit/tourney_test.go`."
     },
     {
       "heading": "Failing tests",
-      "body": "- The pairing list for N bots is complete with no duplicates.\n- Seeds derive deterministically from the round number.\n- The scoreboard is identical regardless of thread count and match completion order."
+      "body": "- `TestPairings`: table-driven for N = 2, 3, 4 and 5 bots; the pairing list is complete, has no duplicates, and is in a fixed order.\n- `TestSeeds`: seeds derive deterministically from the round number through a stated function (no clock, no math/rand; C36).\n- `TestScoreboardIndependentOfJobs`: the scoreboard bytes for the starter bots over 10 rounds are identical with 1, 2 and 8 workers, and when results arrive in reverse order.\n- `TestTourneyCommand` (`cmd/pit`): bots copied into `t.TempDir()`; two runs print identical output."
     },
     {
       "heading": "Implement",
-      "body": "- Parallel matches with standard-library threads; results gathered and ordered deterministically.\n- Per-bot stats across seeds for the balance check.\n- Gap: PROJECT.md does not define the scoring rule (points for win, tie, loss). Propose one to the owner."
+      "body": "- Parallel matches with goroutines and `sync` (allowed here; the core stays single-threaded). Results are collected by match index and ordered before scoring, never by completion order or map iteration (C36).\n- Bot discovery: `*.s` files in the directory, sorted by name.\n- Per-bot stats across seeds for the balance check (wins, ties, losses, mean cycles).\n- PROJECT.md does not define the scoring rule (points for win, tie, loss). The implementer decides it and records it as a catalog decision with a one-line reason (C35); the reviewer checks it. The worker-count flag and output format are also the implementer's call, recorded per C35."
     },
     {
       "heading": "Check",
-      "body": "- The project test command passes.\n- `arena tourney bots/ --rounds 100` finishes, and two runs give identical output (`diff` is empty)."
+      "body": "- `. scripts/env.sh && go test ./... && go vet ./... && test -z \"$(gofmt -l cmd internal)\"` passes.\n- `. scripts/env.sh && go test -race ./internal/tourney` passes where the race detector is available (it needs cgo and a C toolchain); if it is not, say so in the note on this item.\n- `. scripts/env.sh && go run ./cmd/pit tourney bots/ --rounds 100 > .cache/tmp/t1.txt && go run ./cmd/pit tourney bots/ --rounds 100 > .cache/tmp/t2.txt && cmp .cache/tmp/t1.txt .cache/tmp/t2.txt` succeeds.\n- The reviewer checks each C35 decision recorded by this slice."
     },
     {
       "heading": "Git",

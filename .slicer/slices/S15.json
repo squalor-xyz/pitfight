@@ -2,7 +2,7 @@
   "id": "S15",
   "title": "Build the web viewer",
   "lead": [
-    "A plain TypeScript + canvas viewer, without a framework, that plays replay files with step, play, pause and seek."
+    "A replay-only web viewer in `web/`: plain JavaScript ES modules with JSDoc types and canvas, no framework, no build step, that plays replay files with step, play, pause and seek and matches the terminal viewer's frame model on the shared fixture."
   ],
   "depends_note": null,
   "findings_note": "PROJECT.md Milestone 7, Goals 6",
@@ -10,27 +10,27 @@
   "flags": [],
   "trees_note": "web",
   "trees_plural": false,
-  "boundary": "**Not in this slice:** hosting (later tier); live matches through the WASM build, which v1 acceptance does not require (scope with the owner).",
+  "boundary": "**Not in this slice:** hosting (later tier, S20); live matches through WASM (optional S14); TypeScript or `tsc` (needs separate owner approval, C28); any JS package, bundler or test framework (C13).",
   "sections": [
     {
       "heading": "Why",
-      "body": "v1 feature list, goal 6 and acceptance criterion C19: the terminal and web viewers both play the same replay file correctly."
+      "body": "v1 feature list, goal 6 and acceptance criterion C19: the terminal and web viewers both play the same replay file correctly. C31 puts it after the terminal viewer, whose fixture (`testdata/viewer/`) it reuses. A replay-only viewer needs no WASM (C28)."
     },
     {
       "heading": "Files",
-      "body": "- Web viewer directory: TypeScript sources, a static HTML page, and tests."
+      "body": "- `web/index.html`, `web/style.css`.\n- `web/js/replay.js` (parse the JSON-lines replay per `docs/spec/replay.md`), `web/js/model.js` (frame model), `web/js/player.js` (step, play, pause, seek), `web/js/render.js` (canvas), `web/js/main.js` (wiring; replay chosen with a file input).\n- `web/test/harness.js`: a tiny in-repo test harness (test registration, deep-equal assert, results list); `web/test/*.test.js`; `web/test.html` runs them and shows pass/fail.\n- A local static server for `web/` and `testdata/viewer/`, since browsers block `fetch` from `file://`: the smallest stdlib option, for example a `pit serve` subcommand on 127.0.0.1 using `net/http`, with a Go test using `net/http/httptest`. The implementer decides and records it per C35. S14 reuses it.\n- `AGENTS.md`: how to serve and run the web tests."
     },
     {
       "heading": "Failing tests",
-      "body": "- Replay parsing and the frame model are tested in TypeScript.\n- For the shared fixture replay, the frame model at sampled cycles equals the terminal viewer's frame model.\n- Seeking to cycle N equals stepping N times."
+      "body": "- `replay.test.js`: parsing `testdata/viewer/fixture.jsonl` gives the expected header and event counts; an unknown version is rejected.\n- `model.test.js`: the frame model at each sampled cycle equals `testdata/viewer/frames.json` (the same expectation the terminal viewer's `TestFrames` uses).\n- `player.test.js`: seeking to cycle N equals stepping N times; table-driven state machine transitions.\n- Go: the serve command's test (if added) serves a file from a `t.TempDir()` and refuses paths outside its root."
     },
     {
       "heading": "Implement",
-      "body": "- Gap: the TypeScript compiler and any test runner are dependencies that need owner approval (C13). Propose the minimum.\n- Canvas drawing of cell ownership and execution pointers."
+      "body": "- Every JS file starts with `// @ts-check` and uses JSDoc types for editor checking only; no `tsc` run, no `package.json`.\n- Keep parsing, model and player free of DOM access so the tests can run them directly; only `render.js` and `main.js` touch the DOM and canvas.\n- Canvas drawing of cell ownership (color per bot from last-writer id) and execution pointers; the layout and colors are the implementer's call, recorded per C35."
     },
     {
       "heading": "Check",
-      "body": "- The web viewer tests pass.\n- Manual: open the page, load the shared fixture replay, and step, play, pause and seek."
+      "body": "- `. scripts/env.sh && go test ./... && go vet ./... && test -z \"$(gofmt -l cmd internal)\"` passes.\n- Manual: serve the files, open `web/test.html`; every test passes.\n- Manual: open `web/index.html`, load `internal/replay/testdata/imp_dwarf_seed1.jsonl`, and step, play, pause and seek.\n- Owner input, optional: automated JS tests in a terminal (`node --test`, Node is installed here) need owner approval of Node as a toolchain (C13). Without it, the browser test page is the check."
     },
     {
       "heading": "Git",

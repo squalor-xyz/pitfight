@@ -2,7 +2,7 @@
   "id": "S04",
   "title": "Specify match rules and verify default parameters",
   "lead": [
-    "Specify the match: config fields, seeded placement, turn order, cycle limit, tie rule and result. Verify the recommended default parameters against a cited source."
+    "Write `docs/spec/match.md`: config fields, the in-repo seeded PRNG and placement, turn order, cycle limit, tie rule and result. Verify the default parameters accepted in C30 against a cited source."
   ],
   "depends_note": null,
   "findings_note": "PROJECT.md Goals 3-4, Open decisions 5",
@@ -14,23 +14,23 @@
   "sections": [
     {
       "heading": "Why",
-      "body": "Goals 3 and 4 need a deterministic match with a defined tie rule. The recommended defaults (core 8000, cycles 80000, max processes 8000) are from general knowledge and must be checked against a source (C24)."
+      "body": "Goals 3 and 4 need a deterministic match with a defined tie rule. C30 accepts the Redcode '94 hill norms (core 8000, cycles 80000, max processes 8000) as a starting point but they are still unverified. C36 requires an in-repo seeded PRNG with a fixed algorithm so replays survive Go upgrades; this spec fixes that algorithm."
     },
     {
       "heading": "Files",
-      "body": "- `docs/spec/match.md` (new; final path per the scaffolding layout)."
+      "body": "- `docs/spec/match.md` (new)."
     },
     {
       "heading": "Failing tests",
-      "body": "None (document). The spec includes worked placement examples for fixed seeds that the arena slice turns into tests."
+      "body": "None (document). The spec includes test vectors that S09 turns into Go tests:\n- the first 10 PRNG outputs for seeds 0, 1 and 2^64-1 (or the algorithm's full seed range);\n- worked placement examples for fixed seeds, bot lengths and config, including one config where placement is impossible."
     },
     {
       "heading": "Implement",
-      "body": "- Config fields from the data model: core size, cycle limit, max processes, min separation, seed.\n- Placement: random non-overlapping start positions from the seed, honoring min separation. Specify the RNG algorithm exactly and implement it in-repo later, so native and WASM builds agree; define the error when placement is impossible.\n- Turn: each live bot executes one instruction from the front of its queue, then requeues it; a bot with no processes is dead. Define bot order within a cycle and what one cycle counts.\n- Result: winner, survivors at the cycle limit, cycles run.\n- Gap: PROJECT.md requires \"a defined tie rule\" but gives none. Propose options to the owner.\n- Gap: PROJECT.md gives no default min separation. Propose one to the owner.\n- Verify the three defaults against a public source (ICWS'94 text or hill documentation); cite it in the spec; record the confirmed defaults as a catalog decision."
+      "body": "- Config fields from the data model: core size, cycle limit, max processes, min separation, seed. Give each a default and its valid range.\n- PRNG (C36): one fully specified algorithm with integer-only steps (for example SplitMix64 or a PCG variant), the seed type, and how a value in [0, n) is drawn without modulo bias or with documented bias. Not math/rand. The implementer picks the algorithm and records it per C35 with a one-line reason.\n- Placement: random non-overlapping start positions from the seed, honoring min separation, in a stated order; the error when placement is impossible.\n- Turn: each live bot executes one instruction from the front of its queue, then requeues it; a bot with no processes is dead. Define bot order within a cycle and what one cycle counts.\n- Result: winner, survivors at the cycle limit, cycles run.\n- Tie rule and default min separation: PROJECT.md requires \"a defined tie rule\" and names no min separation. The implementer decides both and records each as a catalog decision with a one-line reason (C35); the reviewer checks them.\n- Verify the three C30 defaults against a public source (ICWS'94 text or hill documentation; read-only). Cite it in the spec and record the confirmed defaults as a catalog decision. If no source can be found, keep the C30 values, mark them UNVERIFIED in the spec and the decision, and note it on this item."
     },
     {
       "heading": "Check",
-      "body": "- Every config field has a default and, where it comes from Redcode norms, a cited source.\n- The tie rule and min separation are owner-confirmed.\n- `slicer catalog list --kind decision --json --lean` includes the confirmed defaults."
+      "body": "- Every config field has a default and range; the three C30 defaults cite a source or are marked UNVERIFIED with a note on this item.\n- The PRNG section has the algorithm, constants and test vectors; nothing refers to math/rand.\n- `grep -nE 'TODO|TBD' docs/spec/match.md` prints nothing.\n- `slicer catalog list --kind decision --json --lean` includes the defaults, PRNG, tie rule and min separation decisions; the reviewer checks each."
     },
     {
       "heading": "Git",

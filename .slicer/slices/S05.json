@@ -2,7 +2,7 @@
   "id": "S05",
   "title": "Build VM core memory and addressing modes",
   "lead": [
-    "Implement the circular core of CORESIZE cells with modulo addressing, the cell type with its last-writer id, and operand evaluation for every addressing mode, test-first."
+    "Implement the ISA types in `internal/isa` and, in `internal/vm`, the circular core of CORESIZE cells with modulo addressing, the last-writer id, and operand evaluation for every addressing mode, test-first with Go table-driven tests and a fuzz target."
   ],
   "depends_note": null,
   "findings_note": "PROJECT.md Milestone 2",
@@ -14,23 +14,23 @@
   "sections": [
     {
       "heading": "Why",
-      "body": "Milestone 2 (VM core with unit tests per opcode and addressing mode). Every other component reads and writes cells through this layer. The core must be pure (C12)."
+      "body": "Milestone 2 (VM core with unit tests per opcode and addressing mode). Every other package reads and writes cells through this layer. The core must be pure (C12) and deterministic (C36)."
     },
     {
       "heading": "Files",
-      "body": "- VM core package source and unit tests (package path per the scaffolding layout)."
+      "body": "- `internal/isa/isa.go`: `Opcode`, `Modifier`, `Mode` types with constants in spec order, `Cell` (opcode, modifier, A and B operands with modes, last-writer id), and exported slices listing every opcode, modifier and mode (used by later enumeration tests).\n- `internal/isa/isa_test.go`: the lists have no duplicates and match the constants.\n- `internal/vm/core.go`: `Core` (fixed-size cell slice), constructor filling the spec's empty cell, address normalization, read and write (write records the bot id).\n- `internal/vm/operand.go`: operand evaluation for every addressing mode.\n- `internal/vm/core_test.go`, `internal/vm/operand_test.go`: table-driven tests.\n- `internal/vm/fuzz_test.go`: `FuzzResolve` with a seed corpus."
     },
     {
       "heading": "Failing tests",
-      "body": "- One test per addressing mode, taken from the ISA spec's worked cases.\n- Wraparound at address 0 and CORESIZE-1, and negative offsets.\n- A write records the writing bot's id as last writer.\n- A fresh core holds the spec's empty-cell value everywhere."
+      "body": "- `TestAddressingModes`: one table row per addressing mode, taken from the ISA spec's worked cases, each row named by its mnemonic (`t.Run(mnemonic, ...)`).\n- `TestWrap`: addresses 0, CORESIZE-1, CORESIZE, -1 and large negative offsets normalize per the spec, for at least core sizes 1, 8 and 8000.\n- `TestWriteRecordsWriter`: a write sets the cell's last-writer id; a read does not change it.\n- `TestEmptyCore`: a fresh core holds the spec's empty-cell value at every address.\n- `FuzzResolve`: for any core size in the spec's range, any operand value and any mode, the resolved address is in [0, CORESIZE) and evaluation does not panic."
     },
     {
       "heading": "Implement",
-      "body": "- Pure module: no I/O, no clock, no RNG.\n- Choose integer types so modulo arithmetic is exact and cannot overflow for any configured CORESIZE.\n- Public read/write API that later slices use."
+      "body": "- Pure packages: no I/O, clock, goroutines or randomness (C12); no maps (C36).\n- Choose integer types so modulo arithmetic is exact and cannot overflow for any allowed CORESIZE; one normalization function used everywhere.\n- The exported API (type and function names, error handling) is the implementer's call, recorded per C35."
     },
     {
       "heading": "Check",
-      "body": "- The project test command passes.\n- Each addressing mode in the spec has a named test.\n- The VM core imports no I/O, time, thread or random APIs (under Rust: `rg -n 'std::(fs|io|net|time|thread|process)' <vm-core-dir>` prints nothing)."
+      "body": "- `. scripts/env.sh && go test ./... && go vet ./... && test -z \"$(gofmt -l cmd internal)\"` passes.\n- `. scripts/env.sh && go test -run '^$' -fuzz FuzzResolve -fuzztime 30s ./internal/vm` finds no failure.\n- Each addressing mode in the spec has a named subtest (`go test -v -run TestAddressingModes ./internal/vm` lists one per mnemonic).\n- Purity: `. scripts/env.sh && go list -f '{{join .Imports \"\\n\"}}' ./internal/isa ./internal/vm | grep -xE 'os|os/.*|io|io/.*|net|net/.*|time|math/rand|math/rand/v2|sync|sync/.*|syscall|log|log/.*|unsafe'` prints nothing.\n- No maps: `grep -rn --include='*.go' --exclude='*_test.go' 'map\\[' internal/vm` prints nothing."
     },
     {
       "heading": "Git",
