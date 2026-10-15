@@ -543,7 +543,19 @@
         "S15",
         "S01"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "59ffb7bc-d8ea-4be7-9940-f4d7f626f2a1",
+          "kind": "",
+          "text": "**2026-10-15** — Owner 2026-10-15 (C28): Node (installed) with node:test is approved for automated JS tests (no npm packages). Replace manual-browser-only checks with node:test where the logic is testable outside a browser (replay parsing, frame model, WASM glue via Node where feasible); keep a manual browser check only for canvas rendering.",
+          "created_at": "2026-10-15T12:55:38Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "S",
@@ -582,7 +594,19 @@
         "S12",
         "S01"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "eebe7151-3bb7-4d5f-9ad6-37149c312c0b",
+          "kind": "",
+          "text": "**2026-10-15** — Owner 2026-10-15 (C28): Node (installed) with node:test is approved for automated JS tests (no npm packages). Replace manual-browser-only checks with node:test where the logic is testable outside a browser (replay parsing, frame model, WASM glue via Node where feasible); keep a manual browser check only for canvas rendering.",
+          "created_at": "2026-10-15T12:55:38Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "L",
@@ -660,7 +684,19 @@
         "S13",
         "S15"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "b01fd1b2-b1af-4314-8462-56ec87c71a74",
+          "kind": "",
+          "text": "**2026-10-15** — Owner 2026-10-15 (C28): Node (installed) with node:test is approved for automated JS tests (no npm packages). Replace manual-browser-only checks with node:test where the logic is testable outside a browser (replay parsing, frame model, WASM glue via Node where feasible); keep a manual browser check only for canvas rendering.",
+          "created_at": "2026-10-15T12:55:38Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "S",

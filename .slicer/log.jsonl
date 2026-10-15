@@ -220,3 +220,6 @@
 {"when": "2026-10-15T12:53:53Z", "item": "S17", "action": "edit", "from": "", "to": "", "note": "Check"}
 {"when": "2026-10-15T12:54:12Z", "item": "S01", "action": "status", "from": "open", "to": "done", "note": "Owner decisions 2026-10-15 recorded: C26-C33 (name pitfight/pit, ISA, Go stdlib + plain JS viewer, JSON lines replay, '94 defaults unverified, TUI first, AGPL-3.0-or-later Squalor LLC, CI deferred) and constraints C34-C37; C20-C25 retired; v1 slices S02-S17 re-specified for Go.", "by": "Jon R"}
 {"when": "2026-10-15T12:55:28Z", "item": "C28", "action": "catalog", "from": "", "to": "body", "note": "edit"}
+{"when": "2026-10-15T12:55:38Z", "item": "S14", "action": "note", "from": "", "to": "", "note": "Owner 2026-10-15 (C28): Node (installed) with node:test is a", "by": "Jon R"}
+{"when": "2026-10-15T12:55:38Z", "item": "S15", "action": "note", "from": "", "to": "", "note": "Owner 2026-10-15 (C28): Node (installed) with node:test is a", "by": "Jon R"}
+{"when": "2026-10-15T12:55:38Z", "item": "S17", "action": "note", "from": "", "to": "", "note": "Owner 2026-10-15 (C28): Node (installed) with node:test is a", "by": "Jon R"}
