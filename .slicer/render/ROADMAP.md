@@ -142,6 +142,10 @@ Owner decision 2026-10-15. The project license is AGPL-3.0-or-later, copyright S
 
 Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run locally (see the in-repo Go cache and checks constraint).
 
+### C38 Game rules are the implementer's call
+
+Owner decision 2026-10-15: the tie rule, minimum starting separation and tournament scoring rule are decided by the implementing slice under C35 (record each with a one-line reason; reviewer checks). The ISA spec (S03) still needs owner sign-off.
+
 ## Assumptions
 
 ### C20 Name: keep placeholder bot-arena

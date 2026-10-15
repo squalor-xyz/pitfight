@@ -227,3 +227,4 @@
 {"when": "2026-10-15T13:27:58Z", "item": "relay-roles.r1", "action": "relay-roles", "from": "", "to": "model,reasoning,note", "note": "set"}
 {"when": "2026-10-15T13:27:58Z", "item": "relay-roles.r2", "action": "relay-roles", "from": "", "to": "model,reasoning,note", "note": "set"}
 {"when": "2026-10-15T13:27:58Z", "item": "relay-roles.r4", "action": "relay-roles", "from": "", "to": "model,reasoning,note", "note": "set"}
+{"when": "2026-10-15T13:34:16Z", "item": "C38", "action": "catalog", "from": "", "to": "Game rules are the implementer's call", "note": "add"}

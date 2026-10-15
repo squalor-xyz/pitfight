@@ -869,7 +869,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 38,
+    "next_id": 39,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -1202,6 +1202,15 @@
         "kind": "constraint",
         "title": "Use Go built-in fuzzing where natural",
         "body": "Owner decision 2026-10-15. Go's built-in fuzzing (`go test -fuzz`) needs no dependency. Use it for the assembler and VM where a slice benefits. Fuzz targets keep a seed corpus so plain `go test ./...` runs them as regular tests.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C38",
+        "kind": "decision",
+        "title": "Game rules are the implementer's call",
+        "body": "Owner decision 2026-10-15: the tie rule, minimum starting separation and tournament scoring rule are decided by the implementing slice under C35 (record each with a one-line reason; reviewer checks). The ISA spec (S03) still needs owner sign-off.",
         "status": "active",
         "reason": "",
         "successor": ""
