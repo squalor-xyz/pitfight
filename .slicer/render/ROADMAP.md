@@ -150,6 +150,18 @@ Owner decision 2026-10-15: the tie rule, minimum starting separation and tournam
 
 Owner decision 2026-10-15: v1 keeps match state in memory (pure VM, C36) and replays and tournament results as JSON-lines files (C29). No database dependency in v1. The hill slice (S19) proposes SQLite through a cgo-free driver (ncruces/go-sqlite3 or modernc.org/sqlite; confirm license) as the first non-stdlib dependency, for owner approval then. DuckDB or the sqlite3 CLI may analyse the JSONL files externally, with no code dependency.
 
+### C40 pit usage handling: stderr+exit 2 for no args or unknown subcommand, help on stdout
+
+Implementer decision under C35 (S02). `pit` with no arguments prints usage to stderr and exits 2; `pit help` prints usage to stdout and exits 0; an unknown subcommand prints `pit: unknown subcommand "X"`, a blank line and the usage to stderr, exit 2. The usage lists asm, run, tourney, view and help as planned, and states exit codes 0 success, 2 usage error (1 is reserved for a failed operation in later slices). Planned subcommands that are not built yet also report unknown. Reason: it matches the slice text and the shell convention that usage errors are 2 and requested help is 0; the planned-not-built case disappears as each subcommand lands.
+
+### C41 scripts/env.sh needs bash or zsh and refuses to run outside a repo root
+
+Implementer decision under C35 (S02), accepted by the owner 2026-10-15, overriding the slice's 'POSIX sh, no bashisms' text. A sourced POSIX script cannot learn its own path, so env.sh reads BASH_SOURCE or zsh's %x, derives the repo root from it, clears CDPATH for the cd, and exports nothing and creates nothing unless that root holds go.mod and scripts/env.sh (otherwise it prints an error and returns 1; dash fails the same way). It is sourced by absolute path from anywhere. Reason: the cache directories must follow the checkout (each worktree has its own .cache/) and a wrong or copied env.sh must never write Go caches elsewhere. env.sh does not set GOFLAGS=-modcacherw (the module has no dependencies); a slice that adds an approved dependency should revisit that.
+
+### C42 LICENSE left absent; pending state recorded in AGENTS.md and NOTICE; SPDX header on Go and shell files
+
+Implementer decision under C35 and C32 (S02). LICENSE is not created because the owner has not supplied the AGPL-3.0 text; AGENTS.md has a License section stating it is PENDING and that the text must not be written, fetched or edited, and NOTICE's last line points to it. Every Go file and scripts/env.sh start with SPDX-License-Identifier: AGPL-3.0-or-later. Reason: slice step 5 allows either outcome; the flag in both files keeps a missing LICENSE from reading as an oversight.
+
 ## Assumptions
 
 ### C20 Name: keep placeholder bot-arena
@@ -188,38 +200,38 @@ PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first 
 
 *Retired: Settled by owner decision C31 (2026-10-15)..*
 
-21 items · — 16 · done 1 · later 4
+21 items · — 15 · done 2 · later 4
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
-| v1 foundation | | | | | | | |
-| 1 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks | — |
-| 2 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | — |
-| 3 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | — |
+| 1 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | — |
+| 2 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | — |
 | v1 core | | | | | | | |
-| 4 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | — |
-| 5 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | — |
-| 6 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | — |
-| 7 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | — |
-| 8 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | — |
-| 9 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | — |
-| 10 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | — |
+| 3 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | — |
+| 4 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | — |
+| 5 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | — |
+| 6 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | — |
+| 7 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | — |
+| 8 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | — |
+| 9 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | — |
 | v1 tools | | | | | | | |
-| 11 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | — |
-| 12 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | — |
-| 13 | [S14](slices/S14.md) | Optional Go WASM build for live matches | S | 1 | vm, web | PROJECT.md Milestone 7, Stack recommendation | — |
-| 14 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | — |
-| 15 | [S16](slices/S16.md) | Check licensing of Redcode standards and warriors | S | 1 | docs | PROJECT.md Dependency / licensing notes | — |
-| 16 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria | — |
+| 10 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | — |
+| 11 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | — |
+| 12 | [S14](slices/S14.md) | Optional Go WASM build for live matches | S | 1 | vm, web | PROJECT.md Milestone 7, Stack recommendation | — |
+| 13 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | — |
+| 14 | [S16](slices/S16.md) | Check licensing of Redcode standards and warriors | S | 1 | docs | PROJECT.md Dependency / licensing notes | — |
+| 15 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria | — |
 | Later tier | | | | | | | |
-| 17 | [S18](slices/S18.md) | LLM agent harness | L | 3 | harness | PROJECT.md Feature tiers: Later | later |
-| 18 | [S19](slices/S19.md) | Persistent hill of ranked bots | M | 2 | tourney | PROJECT.md Feature tiers: Later | later |
-| 19 | [S20](slices/S20.md) | Host the web visualizer on squalor.xyz | S | 2 | web | PROJECT.md Feature tiers: Later | later |
-| 20 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
+| 16 | [S18](slices/S18.md) | LLM agent harness | L | 3 | harness | PROJECT.md Feature tiers: Later | later |
+| 17 | [S19](slices/S19.md) | Persistent hill of ranked bots | M | 2 | tourney | PROJECT.md Feature tiers: Later | later |
+| 18 | [S20](slices/S20.md) | Host the web visualizer on squalor.xyz | S | 2 | web | PROJECT.md Feature tiers: Later | later |
+| 19 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
 
 ---
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
 | Decisions | | | | | | | |
-| 21 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions | done |
+| 20 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions | done |
+| v1 foundation | | | | | | | |
+| 21 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks | done |

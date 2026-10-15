@@ -15,3 +15,10 @@ node_modules/
 __pycache__/
 .cache/
 *.log
+
+# Go test and profile output; a locally built binary at the repo root.
+# Failing fuzz inputs under testdata/fuzz/ are committed, so never ignore them.
+*.test
+*.prof
+*.out
+/pit
