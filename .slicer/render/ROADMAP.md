@@ -162,6 +162,38 @@ Implementer decision under C35 (S02), accepted by the owner 2026-10-15, overridi
 
 Implementer decision under C35 and C32 (S02). LICENSE is not created because the owner has not supplied the AGPL-3.0 text; AGENTS.md has a License section stating it is PENDING and that the text must not be written, fetched or edited, and NOTICE's last line points to it. Every Go file and scripts/env.sh start with SPDX-License-Identifier: AGPL-3.0-or-later. Reason: slice step 5 allows either outcome; the flag in both files keeps a missing LICENSE from reading as an oversight.
 
+### C43 ISA opcode set: 15 opcodes, codes in table order, no MOD or CMP
+
+Implementer decision under C35 (S03). Opcodes in code order: DAT MOV ADD SUB MUL DIV JMP JMZ JMN DJN SPL SEQ SNE SLT NOP (codes 0..14). No MOD, LDP, STP or CMP alias. All 7 modifiers and 8 modes are valid with every opcode. Reason: the smallest Redcode-like set that still expresses imp, bomber, replicator and scanner, which keeps the spec to a few pages (C27, PROJECT.md); the code order is the order of the Go constants in internal/isa. Defined in docs/spec/isa.md section 3.
+
+### C44 ISA modifiers and addressing-mode tokens: A B AB BA F X I; # $ * @ { < } >
+
+Implementer decision under C35 (S03). Modifier mnemonics A B AB BA F X I (codes 0..6) and mode tokens # $ * @ { < } > (codes 0..7), with Redcode field pairing and mode meanings; I acts as F except for MOV, SEQ and SNE, where it covers the whole cell. DAT, JMP, SPL and NOP ignore the modifier. Reason: the owner chose an ISA strongly inspired by Redcode semantics (C27); familiar tokens let later Redcode compatibility reuse them and need no new vocabulary. docs/spec/isa.md section 3.
+
+### C45 ISA numbers: CORESIZE 1..2^20, stored values int32 in [0,CORESIZE), arithmetic in int64
+
+Implementer decision under C35 (S03). 1 <= CORESIZE <= 1048576; Norm(x) = ((x mod N) + N) mod N in int64; stored operand values are int32 in [0,N); written values are any integer, stored as Norm. Reason: int64 intermediates make ADD, SUB and MUL (up to 2^40) overflow-free for every allowed size, and the range includes the sizes 1, 8 and 8000 that the S05 tests name. docs/spec/isa.md section 1.
+
+### C46 ISA empty cell is DAT.F $0, $0 with writer 0; bot ids start at 1
+
+Implementer decision under C35 (S03). A fresh core cell is DAT.F $0, $0, writer 0 (no bot); bot ids are 1 and up; the writer is metadata that no instruction reads and SEQ.I/SNE.I ignore. Every cell write, including pre-decrement, post-increment and DJN decrement writes, sets the writer to the executing bot. Reason: matches the Redcode empty cell and makes unwritten core visible to the visualizer as owner 0 without a special value. docs/spec/isa.md section 2 and 4.
+
+### C47 ISA step semantics: A then B evaluation with snapshots, post-increments after execute
+
+Implementer decision under C35 (S03). A step fetches a copy IR, evaluates A (with pre-decrement writes) then B, taking a snapshot of each target at evaluation time; an immediate operand targets the executing cell; both operands are always evaluated; the opcode writes at most one cell; post-increments of A then B apply after execution, even if the process dies; then the process effect is appended. Reason: one fixed order makes events and worked cases unambiguous for the VM, replay and visualizer. Post-increment timing may differ from Redcode and is flagged in the spec. docs/spec/isa.md section 4.
+
+### C48 ISA faults: only DAT and division by zero kill; DIV writes nothing if any divisor is 0
+
+Implementer decision under C35 (S03). A process dies only by executing DAT or by DIV with a zero divisor in any of its pairs; in that case DIV writes nothing for any pair. Every cell content is legal, so there is no illegal-instruction fault. Reason: a single all-or-nothing rule is simpler to specify and test than Redcode's per-pair partial write. docs/spec/isa.md section 5.
+
+### C49 ISA SPL at the process limit acts as a continue-only NOP
+
+Implementer decision under C35 (S03). SPL appends PC+1 then the A target; if the bot already has MAXPROCESSES live processes (the executing one counts), only PC+1 is appended and nothing is signalled. The value and range of MAXPROCESSES are left to the match spec (S04). Reason: a failed spawn must not kill or error the bot, and the executing process counts so the cap is exact. docs/spec/isa.md section 5.
+
+### C50 ISA spec table format and worked-case format (parsed by S06)
+
+Implementer decision under C35 (S03). Three tables, each with header first column Mnemonic, the exact assembler token in backticks, rows in code order from 0 (opcodes, modifiers, addressing modes); no other table starts with Mnemonic. Worked cases are tables headed Case | Setup | Before | After | Queue; the Case id is OPCODE.MODIFIER[/suffix] or a mode mnemonic[/suffix]; Setup is N=<core size>[, MAXPROCESSES=<n>]; Before lists address: cell separated by semicolons with unlisted cells empty; After lists each write in order; Queue lists the addresses appended, [] for a dead bot. Reason: S06 parses these tables, so a fixed machine-readable layout lets it check that every entry has a test. Cases were checked against a scratch reference stepper outside the repo. docs/spec/isa.md sections 3 and 6.
+
 ## Assumptions
 
 ### C20 Name: keep placeholder bot-arena
@@ -200,38 +232,38 @@ PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first 
 
 *Retired: Settled by owner decision C31 (2026-10-15)..*
 
-21 items · — 15 · done 2 · later 4
+21 items · — 14 · done 3 · later 4
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
-| 1 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | — |
-| 2 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | — |
+| 1 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | — |
 | v1 core | | | | | | | |
-| 3 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | — |
-| 4 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | — |
-| 5 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | — |
-| 6 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | — |
-| 7 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | — |
-| 8 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | — |
-| 9 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | — |
+| 2 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | — |
+| 3 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | — |
+| 4 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | — |
+| 5 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | — |
+| 6 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | — |
+| 7 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | — |
+| 8 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | — |
 | v1 tools | | | | | | | |
-| 10 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | — |
-| 11 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | — |
-| 12 | [S14](slices/S14.md) | Optional Go WASM build for live matches | S | 1 | vm, web | PROJECT.md Milestone 7, Stack recommendation | — |
-| 13 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | — |
-| 14 | [S16](slices/S16.md) | Check licensing of Redcode standards and warriors | S | 1 | docs | PROJECT.md Dependency / licensing notes | — |
-| 15 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria | — |
+| 9 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | — |
+| 10 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | — |
+| 11 | [S14](slices/S14.md) | Optional Go WASM build for live matches | S | 1 | vm, web | PROJECT.md Milestone 7, Stack recommendation | — |
+| 12 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | — |
+| 13 | [S16](slices/S16.md) | Check licensing of Redcode standards and warriors | S | 1 | docs | PROJECT.md Dependency / licensing notes | — |
+| 14 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria | — |
 | Later tier | | | | | | | |
-| 16 | [S18](slices/S18.md) | LLM agent harness | L | 3 | harness | PROJECT.md Feature tiers: Later | later |
-| 17 | [S19](slices/S19.md) | Persistent hill of ranked bots | M | 2 | tourney | PROJECT.md Feature tiers: Later | later |
-| 18 | [S20](slices/S20.md) | Host the web visualizer on squalor.xyz | S | 2 | web | PROJECT.md Feature tiers: Later | later |
-| 19 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
+| 15 | [S18](slices/S18.md) | LLM agent harness | L | 3 | harness | PROJECT.md Feature tiers: Later | later |
+| 16 | [S19](slices/S19.md) | Persistent hill of ranked bots | M | 2 | tourney | PROJECT.md Feature tiers: Later | later |
+| 17 | [S20](slices/S20.md) | Host the web visualizer on squalor.xyz | S | 2 | web | PROJECT.md Feature tiers: Later | later |
+| 18 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
 
 ---
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
 | Decisions | | | | | | | |
-| 20 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions | done |
+| 19 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions | done |
 | v1 foundation | | | | | | | |
-| 21 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks | done |
+| 20 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks | done |
+| 21 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |

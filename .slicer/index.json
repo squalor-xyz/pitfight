@@ -131,13 +131,25 @@
       "id": "S03",
       "title": "Write the ISA spec",
       "short_title": "Write the ISA spec",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [
         "S01",
         "S02"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "93d66ce6-f11d-46e5-b504-dcae3aede5ee",
+          "kind": "",
+          "text": "**2026-10-15** — Wrote docs/spec/isa.md: cell format, 15 opcodes, 7 modifiers, 8 addressing modes (three Mnemonic tables), step semantics, 55 worked cases, Redcode comparison, four starter sketches. All 55 cases and the sketches checked against a scratch reference stepper outside the repo; no TODO/TBD; slicer check ok; go test and vet green. C35 decisions C43-C50 recorded. Owner review of the ISA still due.",
+          "created_at": "2026-10-15T16:11:49Z",
+          "attempt": 1,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "M",
@@ -162,7 +174,7 @@
         "importance": 3,
         "urgency": 3,
         "effort": 2,
-        "attempts": 0
+        "attempts": 1
       }
     },
     {
@@ -929,7 +941,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 43,
+    "next_id": 51,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -1307,6 +1319,78 @@
         "kind": "decision",
         "title": "LICENSE left absent; pending state recorded in AGENTS.md and NOTICE; SPDX header on Go and shell files",
         "body": "Implementer decision under C35 and C32 (S02). LICENSE is not created because the owner has not supplied the AGPL-3.0 text; AGENTS.md has a License section stating it is PENDING and that the text must not be written, fetched or edited, and NOTICE's last line points to it. Every Go file and scripts/env.sh start with SPDX-License-Identifier: AGPL-3.0-or-later. Reason: slice step 5 allows either outcome; the flag in both files keeps a missing LICENSE from reading as an oversight.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C43",
+        "kind": "decision",
+        "title": "ISA opcode set: 15 opcodes, codes in table order, no MOD or CMP",
+        "body": "Implementer decision under C35 (S03). Opcodes in code order: DAT MOV ADD SUB MUL DIV JMP JMZ JMN DJN SPL SEQ SNE SLT NOP (codes 0..14). No MOD, LDP, STP or CMP alias. All 7 modifiers and 8 modes are valid with every opcode. Reason: the smallest Redcode-like set that still expresses imp, bomber, replicator and scanner, which keeps the spec to a few pages (C27, PROJECT.md); the code order is the order of the Go constants in internal/isa. Defined in docs/spec/isa.md section 3.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C44",
+        "kind": "decision",
+        "title": "ISA modifiers and addressing-mode tokens: A B AB BA F X I; # $ * @ { < } >",
+        "body": "Implementer decision under C35 (S03). Modifier mnemonics A B AB BA F X I (codes 0..6) and mode tokens # $ * @ { < } > (codes 0..7), with Redcode field pairing and mode meanings; I acts as F except for MOV, SEQ and SNE, where it covers the whole cell. DAT, JMP, SPL and NOP ignore the modifier. Reason: the owner chose an ISA strongly inspired by Redcode semantics (C27); familiar tokens let later Redcode compatibility reuse them and need no new vocabulary. docs/spec/isa.md section 3.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C45",
+        "kind": "decision",
+        "title": "ISA numbers: CORESIZE 1..2^20, stored values int32 in [0,CORESIZE), arithmetic in int64",
+        "body": "Implementer decision under C35 (S03). 1 <= CORESIZE <= 1048576; Norm(x) = ((x mod N) + N) mod N in int64; stored operand values are int32 in [0,N); written values are any integer, stored as Norm. Reason: int64 intermediates make ADD, SUB and MUL (up to 2^40) overflow-free for every allowed size, and the range includes the sizes 1, 8 and 8000 that the S05 tests name. docs/spec/isa.md section 1.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C46",
+        "kind": "decision",
+        "title": "ISA empty cell is DAT.F $0, $0 with writer 0; bot ids start at 1",
+        "body": "Implementer decision under C35 (S03). A fresh core cell is DAT.F $0, $0, writer 0 (no bot); bot ids are 1 and up; the writer is metadata that no instruction reads and SEQ.I/SNE.I ignore. Every cell write, including pre-decrement, post-increment and DJN decrement writes, sets the writer to the executing bot. Reason: matches the Redcode empty cell and makes unwritten core visible to the visualizer as owner 0 without a special value. docs/spec/isa.md section 2 and 4.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C47",
+        "kind": "decision",
+        "title": "ISA step semantics: A then B evaluation with snapshots, post-increments after execute",
+        "body": "Implementer decision under C35 (S03). A step fetches a copy IR, evaluates A (with pre-decrement writes) then B, taking a snapshot of each target at evaluation time; an immediate operand targets the executing cell; both operands are always evaluated; the opcode writes at most one cell; post-increments of A then B apply after execution, even if the process dies; then the process effect is appended. Reason: one fixed order makes events and worked cases unambiguous for the VM, replay and visualizer. Post-increment timing may differ from Redcode and is flagged in the spec. docs/spec/isa.md section 4.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C48",
+        "kind": "decision",
+        "title": "ISA faults: only DAT and division by zero kill; DIV writes nothing if any divisor is 0",
+        "body": "Implementer decision under C35 (S03). A process dies only by executing DAT or by DIV with a zero divisor in any of its pairs; in that case DIV writes nothing for any pair. Every cell content is legal, so there is no illegal-instruction fault. Reason: a single all-or-nothing rule is simpler to specify and test than Redcode's per-pair partial write. docs/spec/isa.md section 5.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C49",
+        "kind": "decision",
+        "title": "ISA SPL at the process limit acts as a continue-only NOP",
+        "body": "Implementer decision under C35 (S03). SPL appends PC+1 then the A target; if the bot already has MAXPROCESSES live processes (the executing one counts), only PC+1 is appended and nothing is signalled. The value and range of MAXPROCESSES are left to the match spec (S04). Reason: a failed spawn must not kill or error the bot, and the executing process counts so the cap is exact. docs/spec/isa.md section 5.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C50",
+        "kind": "decision",
+        "title": "ISA spec table format and worked-case format (parsed by S06)",
+        "body": "Implementer decision under C35 (S03). Three tables, each with header first column Mnemonic, the exact assembler token in backticks, rows in code order from 0 (opcodes, modifiers, addressing modes); no other table starts with Mnemonic. Worked cases are tables headed Case | Setup | Before | After | Queue; the Case id is OPCODE.MODIFIER[/suffix] or a mode mnemonic[/suffix]; Setup is N=<core size>[, MAXPROCESSES=<n>]; Before lists address: cell separated by semicolons with unlisted cells empty; After lists each write in order; Queue lists the addresses appended, [] for a dead bot. Reason: S06 parses these tables, so a fixed machine-readable layout lets it check that every entry has a test. Cases were checked against a scratch reference stepper outside the repo. docs/spec/isa.md sections 3 and 6.",
         "status": "active",
         "reason": "",
         "successor": ""

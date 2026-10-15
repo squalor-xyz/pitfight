@@ -109,6 +109,22 @@
 <div class="prose"><p>Implementer decision under C35 (S02), accepted by the owner 2026-10-15, overriding the slice&#x27;s &#x27;POSIX sh, no bashisms&#x27; text. A sourced POSIX script cannot learn its own path, so env.sh reads BASH_SOURCE or zsh&#x27;s %x, derives the repo root from it, clears CDPATH for the cd, and exports nothing and creates nothing unless that root holds go.mod and scripts/env.sh (otherwise it prints an error and returns 1; dash fails the same way). It is sourced by absolute path from anywhere. Reason: the cache directories must follow the checkout (each worktree has its own .cache/) and a wrong or copied env.sh must never write Go caches elsewhere. env.sh does not set GOFLAGS=-modcacherw (the module has no dependencies); a slice that adds an approved dependency should revisit that.</p></div>
 <h3>C42 LICENSE left absent; pending state recorded in AGENTS.md and NOTICE; SPDX header on Go and shell files</h3>
 <div class="prose"><p>Implementer decision under C35 and C32 (S02). LICENSE is not created because the owner has not supplied the AGPL-3.0 text; AGENTS.md has a License section stating it is PENDING and that the text must not be written, fetched or edited, and NOTICE&#x27;s last line points to it. Every Go file and scripts/env.sh start with SPDX-License-Identifier: AGPL-3.0-or-later. Reason: slice step 5 allows either outcome; the flag in both files keeps a missing LICENSE from reading as an oversight.</p></div>
+<h3>C43 ISA opcode set: 15 opcodes, codes in table order, no MOD or CMP</h3>
+<div class="prose"><p>Implementer decision under C35 (S03). Opcodes in code order: DAT MOV ADD SUB MUL DIV JMP JMZ JMN DJN SPL SEQ SNE SLT NOP (codes 0..14). No MOD, LDP, STP or CMP alias. All 7 modifiers and 8 modes are valid with every opcode. Reason: the smallest Redcode-like set that still expresses imp, bomber, replicator and scanner, which keeps the spec to a few pages (C27, PROJECT.md); the code order is the order of the Go constants in internal/isa. Defined in docs/spec/isa.md section 3.</p></div>
+<h3>C44 ISA modifiers and addressing-mode tokens: A B AB BA F X I; # $ * @ { &lt; } &gt;</h3>
+<div class="prose"><p>Implementer decision under C35 (S03). Modifier mnemonics A B AB BA F X I (codes 0..6) and mode tokens # $ * @ { &lt; } &gt; (codes 0..7), with Redcode field pairing and mode meanings; I acts as F except for MOV, SEQ and SNE, where it covers the whole cell. DAT, JMP, SPL and NOP ignore the modifier. Reason: the owner chose an ISA strongly inspired by Redcode semantics (C27); familiar tokens let later Redcode compatibility reuse them and need no new vocabulary. docs/spec/isa.md section 3.</p></div>
+<h3>C45 ISA numbers: CORESIZE 1..2^20, stored values int32 in [0,CORESIZE), arithmetic in int64</h3>
+<div class="prose"><p>Implementer decision under C35 (S03). 1 &lt;= CORESIZE &lt;= 1048576; Norm(x) = ((x mod N) + N) mod N in int64; stored operand values are int32 in [0,N); written values are any integer, stored as Norm. Reason: int64 intermediates make ADD, SUB and MUL (up to 2^40) overflow-free for every allowed size, and the range includes the sizes 1, 8 and 8000 that the S05 tests name. docs/spec/isa.md section 1.</p></div>
+<h3>C46 ISA empty cell is DAT.F $0, $0 with writer 0; bot ids start at 1</h3>
+<div class="prose"><p>Implementer decision under C35 (S03). A fresh core cell is DAT.F $0, $0, writer 0 (no bot); bot ids are 1 and up; the writer is metadata that no instruction reads and SEQ.I/SNE.I ignore. Every cell write, including pre-decrement, post-increment and DJN decrement writes, sets the writer to the executing bot. Reason: matches the Redcode empty cell and makes unwritten core visible to the visualizer as owner 0 without a special value. docs/spec/isa.md section 2 and 4.</p></div>
+<h3>C47 ISA step semantics: A then B evaluation with snapshots, post-increments after execute</h3>
+<div class="prose"><p>Implementer decision under C35 (S03). A step fetches a copy IR, evaluates A (with pre-decrement writes) then B, taking a snapshot of each target at evaluation time; an immediate operand targets the executing cell; both operands are always evaluated; the opcode writes at most one cell; post-increments of A then B apply after execution, even if the process dies; then the process effect is appended. Reason: one fixed order makes events and worked cases unambiguous for the VM, replay and visualizer. Post-increment timing may differ from Redcode and is flagged in the spec. docs/spec/isa.md section 4.</p></div>
+<h3>C48 ISA faults: only DAT and division by zero kill; DIV writes nothing if any divisor is 0</h3>
+<div class="prose"><p>Implementer decision under C35 (S03). A process dies only by executing DAT or by DIV with a zero divisor in any of its pairs; in that case DIV writes nothing for any pair. Every cell content is legal, so there is no illegal-instruction fault. Reason: a single all-or-nothing rule is simpler to specify and test than Redcode&#x27;s per-pair partial write. docs/spec/isa.md section 5.</p></div>
+<h3>C49 ISA SPL at the process limit acts as a continue-only NOP</h3>
+<div class="prose"><p>Implementer decision under C35 (S03). SPL appends PC+1 then the A target; if the bot already has MAXPROCESSES live processes (the executing one counts), only PC+1 is appended and nothing is signalled. The value and range of MAXPROCESSES are left to the match spec (S04). Reason: a failed spawn must not kill or error the bot, and the executing process counts so the cap is exact. docs/spec/isa.md section 5.</p></div>
+<h3>C50 ISA spec table format and worked-case format (parsed by S06)</h3>
+<div class="prose"><p>Implementer decision under C35 (S03). Three tables, each with header first column Mnemonic, the exact assembler token in backticks, rows in code order from 0 (opcodes, modifiers, addressing modes); no other table starts with Mnemonic. Worked cases are tables headed Case | Setup | Before | After | Queue; the Case id is OPCODE.MODIFIER[/suffix] or a mode mnemonic[/suffix]; Setup is N=&lt;core size&gt;[, MAXPROCESSES=&lt;n&gt;]; Before lists address: cell separated by semicolons with unlisted cells empty; After lists each write in order; Queue lists the addresses appended, [] for a dead bot. Reason: S06 parses these tables, so a fixed machine-readable layout lets it check that every entry has a test. Cases were checked against a scratch reference stepper outside the repo. docs/spec/isa.md sections 3 and 6.</p></div>
 </section>
 <section><h2>Assumptions</h2>
 <h3>C20 Name: keep placeholder bot-arena</h3>
@@ -130,35 +146,35 @@
 <div class="prose"><p>PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first (needed for debugging), web viewer second. PROJECT.md names no alternative; both viewers are v1. (PROJECT.md Open decisions 6)</p></div>
 <p><em>Retired: Settled by owner decision C31 (2026-10-15)..</em></p>
 </section>
-<p class="summary">21 items · — 15 · done 2 · later 4</p>
+<p class="summary">21 items · — 14 · done 3 · later 4</p>
 <table><thead><tr><th>#</th><th>ID</th><th>Title</th><th>Size</th><th>Effort</th><th>Trees</th><th>Findings</th><th>Status</th></tr></thead><tbody>
-<tr class="open"><td>1</td><td>S03</td><td>Write the ISA spec</td><td>M</td><td>2</td><td>docs</td><td>PROJECT.md Milestone 1, Goals 1</td><td class="status">—</td></tr>
-<tr class="open"><td>2</td><td>S04</td><td>Specify match rules and verify default parameters</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Goals 3-4, Open decisions 5</td><td class="status">—</td></tr>
+<tr class="open"><td>1</td><td>S04</td><td>Specify match rules and verify default parameters</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Goals 3-4, Open decisions 5</td><td class="status">—</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v1 core</strong></td></tr>
-<tr class="open"><td>3</td><td>S05</td><td>Build VM core memory and addressing modes</td><td>M</td><td>2</td><td>vm</td><td>PROJECT.md Milestone 2</td><td class="status">—</td></tr>
-<tr class="open"><td>4</td><td>S06</td><td>Execute opcodes and process queues in the VM</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Milestone 2, Core concepts</td><td class="status">—</td></tr>
-<tr class="open"><td>5</td><td>S07</td><td>Build the assembler</td><td>M</td><td>2</td><td>asm</td><td>PROJECT.md Milestone 3, Goals 2</td><td class="status">—</td></tr>
-<tr class="open"><td>6</td><td>S08</td><td>Add the disassembler and round-trip tests</td><td>S</td><td>1</td><td>asm</td><td>PROJECT.md Milestone 3</td><td class="status">—</td></tr>
-<tr class="open"><td>7</td><td>S09</td><td>Run matches in the arena</td><td>M</td><td>2</td><td>arena</td><td>PROJECT.md Milestone 4, Goals 3-4</td><td class="status">—</td></tr>
-<tr class="open"><td>8</td><td>S10</td><td>Write the starter bots and golden-result tests</td><td>M</td><td>2</td><td>bots</td><td>PROJECT.md v1 features, Risks</td><td class="status">—</td></tr>
-<tr class="open"><td>9</td><td>S11</td><td>Define and write the replay format</td><td>M</td><td>2</td><td>replay</td><td>PROJECT.md Milestone 5, Goals 7, Risks</td><td class="status">—</td></tr>
+<tr class="open"><td>2</td><td>S05</td><td>Build VM core memory and addressing modes</td><td>M</td><td>2</td><td>vm</td><td>PROJECT.md Milestone 2</td><td class="status">—</td></tr>
+<tr class="open"><td>3</td><td>S06</td><td>Execute opcodes and process queues in the VM</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Milestone 2, Core concepts</td><td class="status">—</td></tr>
+<tr class="open"><td>4</td><td>S07</td><td>Build the assembler</td><td>M</td><td>2</td><td>asm</td><td>PROJECT.md Milestone 3, Goals 2</td><td class="status">—</td></tr>
+<tr class="open"><td>5</td><td>S08</td><td>Add the disassembler and round-trip tests</td><td>S</td><td>1</td><td>asm</td><td>PROJECT.md Milestone 3</td><td class="status">—</td></tr>
+<tr class="open"><td>6</td><td>S09</td><td>Run matches in the arena</td><td>M</td><td>2</td><td>arena</td><td>PROJECT.md Milestone 4, Goals 3-4</td><td class="status">—</td></tr>
+<tr class="open"><td>7</td><td>S10</td><td>Write the starter bots and golden-result tests</td><td>M</td><td>2</td><td>bots</td><td>PROJECT.md v1 features, Risks</td><td class="status">—</td></tr>
+<tr class="open"><td>8</td><td>S11</td><td>Define and write the replay format</td><td>M</td><td>2</td><td>replay</td><td>PROJECT.md Milestone 5, Goals 7, Risks</td><td class="status">—</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v1 tools</strong></td></tr>
-<tr class="open"><td>10</td><td>S12</td><td>Build the terminal viewer</td><td>M</td><td>2</td><td>tui</td><td>PROJECT.md Milestone 5, Goals 6</td><td class="status">—</td></tr>
-<tr class="open"><td>11</td><td>S13</td><td>Run tournaments with a scoreboard</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Milestone 6, Goals 5</td><td class="status">—</td></tr>
-<tr class="open"><td>12</td><td>S14</td><td>Optional Go WASM build for live matches</td><td>S</td><td>1</td><td>vm, web</td><td>PROJECT.md Milestone 7, Stack recommendation</td><td class="status">—</td></tr>
-<tr class="open"><td>13</td><td>S15</td><td>Build the web viewer</td><td>L</td><td>3</td><td>web</td><td>PROJECT.md Milestone 7, Goals 6</td><td class="status">—</td></tr>
-<tr class="open"><td>14</td><td>S16</td><td>Check licensing of Redcode standards and warriors</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Dependency / licensing notes</td><td class="status">—</td></tr>
-<tr class="open"><td>15</td><td>S17</td><td>Verify v1 acceptance criteria</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md v1 acceptance criteria</td><td class="status">—</td></tr>
+<tr class="open"><td>9</td><td>S12</td><td>Build the terminal viewer</td><td>M</td><td>2</td><td>tui</td><td>PROJECT.md Milestone 5, Goals 6</td><td class="status">—</td></tr>
+<tr class="open"><td>10</td><td>S13</td><td>Run tournaments with a scoreboard</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Milestone 6, Goals 5</td><td class="status">—</td></tr>
+<tr class="open"><td>11</td><td>S14</td><td>Optional Go WASM build for live matches</td><td>S</td><td>1</td><td>vm, web</td><td>PROJECT.md Milestone 7, Stack recommendation</td><td class="status">—</td></tr>
+<tr class="open"><td>12</td><td>S15</td><td>Build the web viewer</td><td>L</td><td>3</td><td>web</td><td>PROJECT.md Milestone 7, Goals 6</td><td class="status">—</td></tr>
+<tr class="open"><td>13</td><td>S16</td><td>Check licensing of Redcode standards and warriors</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Dependency / licensing notes</td><td class="status">—</td></tr>
+<tr class="open"><td>14</td><td>S17</td><td>Verify v1 acceptance criteria</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md v1 acceptance criteria</td><td class="status">—</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>Later tier</strong></td></tr>
-<tr class="other"><td>16</td><td>S18</td><td>LLM agent harness</td><td>L</td><td>3</td><td>harness</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
-<tr class="other"><td>17</td><td>S19</td><td>Persistent hill of ranked bots</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
-<tr class="other"><td>18</td><td>S20</td><td>Host the web visualizer on squalor.xyz</td><td>S</td><td>2</td><td>web</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
-<tr class="other"><td>19</td><td>S21</td><td>ISA variants and new game modes</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>15</td><td>S18</td><td>LLM agent harness</td><td>L</td><td>3</td><td>harness</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>16</td><td>S19</td><td>Persistent hill of ranked bots</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>17</td><td>S20</td><td>Host the web visualizer on squalor.xyz</td><td>S</td><td>2</td><td>web</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>18</td><td>S21</td><td>ISA variants and new game modes</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
 </tbody></table>
 <table><thead><tr><th>#</th><th>ID</th><th>Title</th><th>Size</th><th>Effort</th><th>Trees</th><th>Findings</th><th>Status</th></tr></thead><tbody>
 <tr class="group"><td></td><td colspan="7"><strong>Decisions</strong></td></tr>
-<tr class="done"><td>20</td><td>S01</td><td>Confirm open decisions</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Open decisions</td><td class="status">done</td></tr>
+<tr class="done"><td>19</td><td>S01</td><td>Confirm open decisions</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Open decisions</td><td class="status">done</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v1 foundation</strong></td></tr>
-<tr class="done"><td>21</td><td>S02</td><td>Set up project scaffolding</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md Stack recommendation, Risks</td><td class="status">done</td></tr>
+<tr class="done"><td>20</td><td>S02</td><td>Set up project scaffolding</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md Stack recommendation, Risks</td><td class="status">done</td></tr>
+<tr class="done"><td>21</td><td>S03</td><td>Write the ISA spec</td><td>M</td><td>2</td><td>docs</td><td>PROJECT.md Milestone 1, Goals 1</td><td class="status">done</td></tr>
 </tbody></table>
 </body></html>
