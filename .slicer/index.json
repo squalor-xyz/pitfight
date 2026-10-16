@@ -181,13 +181,25 @@
       "id": "S04",
       "title": "Specify match rules and verify default parameters",
       "short_title": "Specify match rules and verify default parameters",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [
         "S01",
         "S03"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "fae9ebc8-66eb-4b33-811c-8a3b2c517bb9",
+          "kind": "",
+          "text": "**2026-10-16** — docs/spec/match.md written. C30 defaults (core 8000, cycles 80000, max processes 8000) confirmed against the ICWS'94 draft predefined variables and the 94 Standard Hill page; the pMARS manual confirms 8000 for -s and -p and gives no -c default. Decisions C51-C56 record the defaults, PRNG, tie rule, min separation, placement and turn order. PRNG and placement vectors were computed independently by the implementer in Go and Python (identical output); M1-M6 were traced with a small stepper; the orchestrator reports the reviewer and the gate recomputed them with VERDICT: PASS. C30 itself still reads as unverified; C51 records its verification.",
+          "created_at": "2026-10-16T03:18:47Z",
+          "attempt": 1,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "S",
@@ -213,7 +225,7 @@
         "importance": 3,
         "urgency": 2,
         "effort": 1,
-        "attempts": 0
+        "attempts": 1
       }
     },
     {
@@ -316,7 +328,19 @@
         "S03",
         "S05"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "1fadd337-f698-415b-ae11-7fe1d1e24f24",
+          "kind": "",
+          "text": "**2026-10-16** — From S04: match.md section 5 takes a bot as L >= 1 cells plus an entry offset e in [0, L). isa.md has no entry offset, so the assembler spec must define how a source file names it (S04 only needs the number).",
+          "created_at": "2026-10-16T03:18:59Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "M",
@@ -395,7 +419,19 @@
         "S04",
         "S07"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "15819136-8e27-4066-8f97-8295c7d0a93b",
+          "kind": "",
+          "text": "**2026-10-16** — From S04: turn the vectors in docs/spec/match.md into tests: section 4 Next() and Draw tables (seeds 0, 1, 2^64-1, including the rejection rows), section 6 P1-P6, X2 and the exact X1/X3/X4/X5 error strings, section 8 M1-M6 (M6 has three bots). Validation order and messages are in section 1; K >= 2 bots, loaded cells carry the owner's bot id as writer (C56).",
+          "created_at": "2026-10-16T03:18:59Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "M",
@@ -577,6 +613,17 @@
           "kind": "",
           "text": "**2026-10-15** — Owner 2026-10-15 (C39): tournament results stay as files (JSON or JSON lines) in v1; no database. Keep the output easy to analyse externally (e.g. duckdb read_json).",
           "created_at": "2026-10-15T13:37:19Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        },
+        {
+          "id": "6c91145f-7606-42ef-be6b-1b486294625d",
+          "kind": "",
+          "text": "**2026-10-16** — From S04 review: match.md section 7 gives the lower bot id the first move in every cycle (ids are not rotated). TestPairings should play each pair in both orders, or state another neutraliser, and record it per C35.",
+          "created_at": "2026-10-16T03:18:59Z",
           "attempt": 0,
           "by": "Jon R",
           "verified_by": "",
@@ -965,7 +1012,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 51,
+    "next_id": 57,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -1415,6 +1462,60 @@
         "kind": "decision",
         "title": "ISA spec table format and worked-case format (parsed by S06)",
         "body": "Implementer decision under C35 (S03). Three tables, each with header first column Mnemonic, the exact assembler token in backticks, rows in code order from 0 (opcodes, modifiers, addressing modes); no other table starts with Mnemonic. Worked cases are tables headed Case | Setup | Before | After | Queue; the Case id is OPCODE.MODIFIER[/suffix] or a mode mnemonic[/suffix]; Setup is N=<core size>[, MAXPROCESSES=<n>]; Before lists address: cell separated by semicolons with unlisted cells empty; After lists each write in order; Queue lists the addresses appended, [] for a dead bot. Reason: S06 parses these tables, so a fixed machine-readable layout lets it check that every entry has a test. Cases were checked against a scratch reference stepper outside the repo. docs/spec/isa.md sections 3 and 6.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C51",
+        "kind": "decision",
+        "title": "Match defaults confirmed: core 8000, cycle limit 80000, max processes 8000",
+        "body": "Implementer decision under C35 (S04). Verifies C30 on 2026-10-15: all three values are stated as defaults in the ICWS'94 draft predefined variables (https://corewar.info/lexicon/94draft.htm: CORESIZE 8000, MAXCYCLES 80000, MAXPROCESSES 8000) and on the 94 Standard Hill page (http://www.corewar.info/hills/94.htm: core size 8000, max cycles 80000, max processes 8000); the pMARS manual (https://manpages.ubuntu.com/manpages/noble/man6/pmars.6.html) confirms 8000 for -s and -p and gives no -c default. Ranges: CORESIZE 1..2^20, CYCLELIMIT 1..2^31-1, MAXPROCESSES 1..2^20, MINSEPARATION 0..2^20, SEED any uint64 (default 0). Reason: two independent public sources agree on each value, so C30 no longer needs its unverified flag. docs/spec/match.md sections 1 and 2.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C52",
+        "kind": "decision",
+        "title": "Match PRNG: SplitMix64, seed uint64, rejection-sampled Draw(n)",
+        "body": "Implementer decision under C35 and C36 (S04). Generator is fixed-increment SplitMix64 (state += 0x9E3779B97F4A7C15; two xor-shift-multiply rounds with 0xBF58476D1CE4E5B9 and 0x94D049BB133111EB; final xor-shift 31), seed any uint64 including 0, all arithmetic modulo 2^64. Draw(n) for uint64 n>=1 rejects outputs below (2^64-n) mod n, so there is no modulo bias, and always consumes at least one output. Reason: a few lines of integer-only code with one 64-bit state and a published public-domain reference (https://prng.di.unimi.it/splitmix64.c), and rejection sampling removes modulo bias at the cost of a rule that is still easy to state exactly. Test vectors for seeds 0, 1 and 2^64-1 and rejection cases are in docs/spec/match.md section 4.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C53",
+        "kind": "decision",
+        "title": "Tie rule: sole survivor wins; otherwise a tie among the last live bots",
+        "body": "Implementer decision under C35 and C38 (S04). After the last cycle, exactly one live bot wins; two or more survivors at the cycle limit tie (tied = survivors); no survivor (all remaining bots died in the last cycle) is a tie among the bots live at the start of that cycle. No tiebreak by process count or owned cells. Reason: it keeps the pMARS manual's 'single warrior remains' win and 'both lasted until time-out' tie, and treats bots that die in the same complete cycle as equal because each took the same number of steps. docs/spec/match.md section 8.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C54",
+        "kind": "decision",
+        "title": "Default min separation: 100 empty cells between neighbouring bots",
+        "body": "Implementer decision under C35 and C38 (S04). MINSEPARATION is the minimum count of unowned cells between the end of one bot's block and the start of the next, going around the circular core; default 100, range 0..2^20. Placement is possible if and only if total bot length + bots * MINSEPARATION <= CORESIZE, else the error 'placement impossible: ...'. Reason: 100 is the default of the pMARS -d option and ICWS'94 draft MINDISTANCE (https://manpages.ubuntu.com/manpages/noble/man6/pmars.6.html), which pMARS measures between the first instructions of two warriors; pitfight deliberately counts empty cells between blocks instead, which makes impossibility an exact sum test independent of bot length and is stricter than 100 start-to-start. docs/spec/match.md sections 2 and 6.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C55",
+        "kind": "decision",
+        "title": "Placement algorithm: shuffle, rotation, sequential gap draws; no retries",
+        "body": "Implementer decision under C35 (S04). With the seeded generator: Fisher-Yates shuffle of bot ids (draws Draw(i+1) for i=K-1..1), rotation Draw(CORESIZE), then gaps g[k]=Draw(R+1) for k=0..K-2 from remaining slack R with the last gap taking the rest, start of each bot = previous start + length + MINSEPARATION + gap; 2K-1 draws, always made. Reason: it is deterministic and bounded, never needs a retry loop, and is exact for any input that passes the feasibility sum, so two implementations agree; the gap distribution is documented as non-uniform. Worked placements and impossible cases in docs/spec/match.md section 6.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C56",
+        "kind": "decision",
+        "title": "Turn order: all live bots step once per cycle in ascending id; match ends at end of cycle",
+        "body": "Implementer decision under C35 and C38 (S04). A cycle is one step for each bot live at its start, in ascending bot id (ids = input order, not rotated); the match ends after the first cycle that leaves at most one live bot or that is cycle CYCLELIMIT; at least 2 and at most 2^20 bots; loaded cells carry the owner's bot id as writer; each bot starts with one process at its entry offset. Result fields: cycles, survivors, outcome (win or tie), winner, tied. Reason: it follows the pMARS definition of a cycle as one execution of each warrior and checking at the cycle end gives every bot the same number of steps; fixed id order is the simplest rule and fairness across orders is left to the tournament runner. docs/spec/match.md sections 5, 7 and 8.",
         "status": "active",
         "reason": "",
         "successor": ""

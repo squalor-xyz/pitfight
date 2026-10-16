@@ -194,6 +194,30 @@ Implementer decision under C35 (S03). SPL appends PC+1 then the A target; if the
 
 Implementer decision under C35 (S03). Three tables, each with header first column Mnemonic, the exact assembler token in backticks, rows in code order from 0 (opcodes, modifiers, addressing modes); no other table starts with Mnemonic. Worked cases are tables headed Case | Setup | Before | After | Queue; the Case id is OPCODE.MODIFIER[/suffix] or a mode mnemonic[/suffix]; Setup is N=<core size>[, MAXPROCESSES=<n>]; Before lists address: cell separated by semicolons with unlisted cells empty; After lists each write in order; Queue lists the addresses appended, [] for a dead bot. Reason: S06 parses these tables, so a fixed machine-readable layout lets it check that every entry has a test. Cases were checked against a scratch reference stepper outside the repo. docs/spec/isa.md sections 3 and 6.
 
+### C51 Match defaults confirmed: core 8000, cycle limit 80000, max processes 8000
+
+Implementer decision under C35 (S04). Verifies C30 on 2026-10-15: all three values are stated as defaults in the ICWS'94 draft predefined variables (https://corewar.info/lexicon/94draft.htm: CORESIZE 8000, MAXCYCLES 80000, MAXPROCESSES 8000) and on the 94 Standard Hill page (http://www.corewar.info/hills/94.htm: core size 8000, max cycles 80000, max processes 8000); the pMARS manual (https://manpages.ubuntu.com/manpages/noble/man6/pmars.6.html) confirms 8000 for -s and -p and gives no -c default. Ranges: CORESIZE 1..2^20, CYCLELIMIT 1..2^31-1, MAXPROCESSES 1..2^20, MINSEPARATION 0..2^20, SEED any uint64 (default 0). Reason: two independent public sources agree on each value, so C30 no longer needs its unverified flag. docs/spec/match.md sections 1 and 2.
+
+### C52 Match PRNG: SplitMix64, seed uint64, rejection-sampled Draw(n)
+
+Implementer decision under C35 and C36 (S04). Generator is fixed-increment SplitMix64 (state += 0x9E3779B97F4A7C15; two xor-shift-multiply rounds with 0xBF58476D1CE4E5B9 and 0x94D049BB133111EB; final xor-shift 31), seed any uint64 including 0, all arithmetic modulo 2^64. Draw(n) for uint64 n>=1 rejects outputs below (2^64-n) mod n, so there is no modulo bias, and always consumes at least one output. Reason: a few lines of integer-only code with one 64-bit state and a published public-domain reference (https://prng.di.unimi.it/splitmix64.c), and rejection sampling removes modulo bias at the cost of a rule that is still easy to state exactly. Test vectors for seeds 0, 1 and 2^64-1 and rejection cases are in docs/spec/match.md section 4.
+
+### C53 Tie rule: sole survivor wins; otherwise a tie among the last live bots
+
+Implementer decision under C35 and C38 (S04). After the last cycle, exactly one live bot wins; two or more survivors at the cycle limit tie (tied = survivors); no survivor (all remaining bots died in the last cycle) is a tie among the bots live at the start of that cycle. No tiebreak by process count or owned cells. Reason: it keeps the pMARS manual's 'single warrior remains' win and 'both lasted until time-out' tie, and treats bots that die in the same complete cycle as equal because each took the same number of steps. docs/spec/match.md section 8.
+
+### C54 Default min separation: 100 empty cells between neighbouring bots
+
+Implementer decision under C35 and C38 (S04). MINSEPARATION is the minimum count of unowned cells between the end of one bot's block and the start of the next, going around the circular core; default 100, range 0..2^20. Placement is possible if and only if total bot length + bots * MINSEPARATION <= CORESIZE, else the error 'placement impossible: ...'. Reason: 100 is the default of the pMARS -d option and ICWS'94 draft MINDISTANCE (https://manpages.ubuntu.com/manpages/noble/man6/pmars.6.html), which pMARS measures between the first instructions of two warriors; pitfight deliberately counts empty cells between blocks instead, which makes impossibility an exact sum test independent of bot length and is stricter than 100 start-to-start. docs/spec/match.md sections 2 and 6.
+
+### C55 Placement algorithm: shuffle, rotation, sequential gap draws; no retries
+
+Implementer decision under C35 (S04). With the seeded generator: Fisher-Yates shuffle of bot ids (draws Draw(i+1) for i=K-1..1), rotation Draw(CORESIZE), then gaps g[k]=Draw(R+1) for k=0..K-2 from remaining slack R with the last gap taking the rest, start of each bot = previous start + length + MINSEPARATION + gap; 2K-1 draws, always made. Reason: it is deterministic and bounded, never needs a retry loop, and is exact for any input that passes the feasibility sum, so two implementations agree; the gap distribution is documented as non-uniform. Worked placements and impossible cases in docs/spec/match.md section 6.
+
+### C56 Turn order: all live bots step once per cycle in ascending id; match ends at end of cycle
+
+Implementer decision under C35 and C38 (S04). A cycle is one step for each bot live at its start, in ascending bot id (ids = input order, not rotated); the match ends after the first cycle that leaves at most one live bot or that is cycle CYCLELIMIT; at least 2 and at most 2^20 bots; loaded cells carry the owner's bot id as writer; each bot starts with one process at its entry offset. Result fields: cycles, survivors, outcome (win or tie), winner, tied. Reason: it follows the pMARS definition of a cycle as one execution of each warrior and checking at the cycle end gives every bot the same number of steps; fixed id order is the simplest rule and fairness across orders is left to the tournament runner. docs/spec/match.md sections 5, 7 and 8.
+
 ## Assumptions
 
 ### C20 Name: keep placeholder bot-arena
@@ -232,38 +256,38 @@ PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first 
 
 *Retired: Settled by owner decision C31 (2026-10-15)..*
 
-21 items · — 14 · done 3 · later 4
+21 items · — 13 · done 4 · later 4
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
-| 1 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | — |
 | v1 core | | | | | | | |
-| 2 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | — |
-| 3 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | — |
-| 4 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | — |
-| 5 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | — |
-| 6 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | — |
-| 7 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | — |
-| 8 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | — |
+| 1 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | — |
+| 2 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | — |
+| 3 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | — |
+| 4 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | — |
+| 5 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | — |
+| 6 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | — |
+| 7 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | — |
 | v1 tools | | | | | | | |
-| 9 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | — |
-| 10 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | — |
-| 11 | [S14](slices/S14.md) | Optional Go WASM build for live matches | S | 1 | vm, web | PROJECT.md Milestone 7, Stack recommendation | — |
-| 12 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | — |
-| 13 | [S16](slices/S16.md) | Check licensing of Redcode standards and warriors | S | 1 | docs | PROJECT.md Dependency / licensing notes | — |
-| 14 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria | — |
+| 8 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | — |
+| 9 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | — |
+| 10 | [S14](slices/S14.md) | Optional Go WASM build for live matches | S | 1 | vm, web | PROJECT.md Milestone 7, Stack recommendation | — |
+| 11 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | — |
+| 12 | [S16](slices/S16.md) | Check licensing of Redcode standards and warriors | S | 1 | docs | PROJECT.md Dependency / licensing notes | — |
+| 13 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria | — |
 | Later tier | | | | | | | |
-| 15 | [S18](slices/S18.md) | LLM agent harness | L | 3 | harness | PROJECT.md Feature tiers: Later | later |
-| 16 | [S19](slices/S19.md) | Persistent hill of ranked bots | M | 2 | tourney | PROJECT.md Feature tiers: Later | later |
-| 17 | [S20](slices/S20.md) | Host the web visualizer on squalor.xyz | S | 2 | web | PROJECT.md Feature tiers: Later | later |
-| 18 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
+| 14 | [S18](slices/S18.md) | LLM agent harness | L | 3 | harness | PROJECT.md Feature tiers: Later | later |
+| 15 | [S19](slices/S19.md) | Persistent hill of ranked bots | M | 2 | tourney | PROJECT.md Feature tiers: Later | later |
+| 16 | [S20](slices/S20.md) | Host the web visualizer on squalor.xyz | S | 2 | web | PROJECT.md Feature tiers: Later | later |
+| 17 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
 
 ---
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
 | Decisions | | | | | | | |
-| 19 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions | done |
+| 18 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions | done |
 | v1 foundation | | | | | | | |
-| 20 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks | done |
-| 21 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |
+| 19 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks | done |
+| 20 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |
+| 21 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | done |

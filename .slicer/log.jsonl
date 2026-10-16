@@ -255,3 +255,17 @@
 {"when": "2026-10-15T16:11:49Z", "item": "S03", "action": "status", "from": "started", "to": "done", "note": "Wrote docs/spec/isa.md: cell format, 15 opcodes, 7 modifiers, 8 addressing modes (three Mnemonic tables), step semantics, 55 worked cases, Redcode comparison, four starter sketches. All 55 cases and the sketches checked against a scratch reference stepper outside the repo; no TODO/TBD; slicer check ok; go test and vet green. C35 decisions C43-C50 recorded. Owner review of the ISA still due.", "by": "Jon R"}
 {"when": "2026-10-15T16:35:30Z", "item": "S10", "action": "note", "from": "", "to": "", "note": "**2026-10-15** — From S03 review: isa.md §8 replicator sketc", "by": "Jon R"}
 {"when": "2026-10-15T16:35:30Z", "item": "S05", "action": "note", "from": "", "to": "", "note": "**2026-10-15** — From S03 review: isa.md §6 mode cases show ", "by": "Jon R"}
+{"when": "2026-10-16T03:06:58Z", "item": "S04", "action": "status", "from": "open", "to": "started", "note": "", "by": "Jon R"}
+{"when": "2026-10-16T03:12:07Z", "item": "C51", "action": "catalog", "from": "", "to": "Match defaults confirmed: core 8000, cycle limit 80000, max processes 8000", "note": "add"}
+{"when": "2026-10-16T03:12:07Z", "item": "C52", "action": "catalog", "from": "", "to": "Match PRNG: SplitMix64, seed uint64, rejection-sampled Draw(n)", "note": "add"}
+{"when": "2026-10-16T03:12:07Z", "item": "C53", "action": "catalog", "from": "", "to": "Tie rule: sole survivor wins; otherwise a tie among the last live bots", "note": "add"}
+{"when": "2026-10-16T03:12:07Z", "item": "C54", "action": "catalog", "from": "", "to": "Default min separation: 100 empty cells between neighbouring bots", "note": "add"}
+{"when": "2026-10-16T03:12:08Z", "item": "C55", "action": "catalog", "from": "", "to": "Placement algorithm: shuffle, rotation, sequential gap draws; no retries", "note": "add"}
+{"when": "2026-10-16T03:12:08Z", "item": "C56", "action": "catalog", "from": "", "to": "Turn order: all live bots step once per cycle in ascending id; match ends at end of cycle", "note": "add"}
+{"when": "2026-10-16T03:12:18Z", "item": "C52", "action": "catalog", "from": "", "to": "body", "note": "edit"}
+{"when": "2026-10-16T03:16:29Z", "item": "C54", "action": "catalog", "from": "", "to": "body", "note": "edit"}
+{"when": "2026-10-16T03:18:47Z", "item": "S04", "action": "note", "from": "", "to": "", "note": "docs/spec/match.md written. C30 defaults (core 8000, cycles ", "by": "Jon R"}
+{"when": "2026-10-16T03:18:47Z", "item": "S04", "action": "status", "from": "started", "to": "done", "note": "match.md written; C30 defaults verified (C51); decisions C51-C56; gate PASS", "by": "Jon R"}
+{"when": "2026-10-16T03:18:59Z", "item": "S13", "action": "note", "from": "", "to": "", "note": "From S04 review: match.md section 7 gives the lower bot id t", "by": "Jon R"}
+{"when": "2026-10-16T03:18:59Z", "item": "S07", "action": "note", "from": "", "to": "", "note": "From S04: match.md section 5 takes a bot as L >= 1 cells plu", "by": "Jon R"}
+{"when": "2026-10-16T03:18:59Z", "item": "S09", "action": "note", "from": "", "to": "", "note": "From S04: turn the vectors in docs/spec/match.md into tests:", "by": "Jon R"}
