@@ -269,3 +269,10 @@
 {"when": "2026-10-16T03:18:59Z", "item": "S13", "action": "note", "from": "", "to": "", "note": "From S04 review: match.md section 7 gives the lower bot id t", "by": "Jon R"}
 {"when": "2026-10-16T03:18:59Z", "item": "S07", "action": "note", "from": "", "to": "", "note": "From S04: match.md section 5 takes a bot as L >= 1 cells plu", "by": "Jon R"}
 {"when": "2026-10-16T03:18:59Z", "item": "S09", "action": "note", "from": "", "to": "", "note": "From S04: turn the vectors in docs/spec/match.md into tests:", "by": "Jon R"}
+{"when": "2026-10-17T04:23:56Z", "item": "S05", "action": "status", "from": "open", "to": "started", "note": "", "by": "Jon R"}
+{"when": "2026-10-17T04:28:51Z", "item": "C57", "action": "catalog", "from": "", "to": "isa package API: Opcode/Modifier/Mode uint8 types with Op*/Mod*/Mode* constants in spec order, Opcodes/Modifiers/Modes lists, String() mnemonics, Cell{Opcode,Modifier,AMode,AValue int32,BMode,BValue int32,Writer uint32}, EmptyCell", "note": "add"}
+{"when": "2026-10-17T04:28:51Z", "item": "C58", "action": "catalog", "from": "", "to": "vm core API: NewCore(size) (*Core, error) with ErrCoreSize, Size, Norm(int64) int32, Read(int64) Cell, Write(int64, Cell, bot uint32)", "note": "add"}
+{"when": "2026-10-17T04:28:51Z", "item": "C59", "action": "catalog", "from": "", "to": "vm operand API: Core.Resolve(pc, mode, value, bot) (Operand{Target, Snapshot, Post}, error) and Core.ApplyPostInc(PostInc, bot)", "note": "add"}
+{"when": "2026-10-17T04:29:35Z", "item": "S05", "action": "handoff", "from": "started", "to": "review", "note": "claim Jon R cleared", "by": "Jon R"}
+{"when": "2026-10-17T04:36:58Z", "item": "S05", "action": "note", "from": "", "to": "", "note": "Verified: internal/isa (Opcode/Modifier/Mode types, spec-ord", "by": "Jon R"}
+{"when": "2026-10-17T04:36:58Z", "item": "S05", "action": "status", "from": "review", "to": "done", "note": "Core memory, wrap normalization, writer tracking and operand evaluation for all 8 modes built and verified: tests, vet, gofmt, purity and no-maps greps, 30s fuzz and slicer check all pass; gate PASS.", "by": "Jon R"}

@@ -232,7 +232,7 @@
       "id": "S05",
       "title": "Build VM core memory and addressing modes",
       "short_title": "Build VM core memory and addressing modes",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [
         "S02",
@@ -245,6 +245,17 @@
           "text": "**2026-10-15** — **2026-10-15** — From S03 review: isa.md §6 mode cases show MOV results; TestAddressingModes should assert the resolved tA/tB (cell 3, PC for '#', cell 0 for wraps) and the pre/post-increment writes. The MOV write itself is S06's.",
           "created_at": "2026-10-15T16:35:30Z",
           "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        },
+        {
+          "id": "54725289-8c1d-4913-ba56-b1605095229d",
+          "kind": "",
+          "text": "**2026-10-17** — Verified: internal/isa (Opcode/Modifier/Mode types, spec-order constants and lists, Cell, EmptyCell) and internal/vm (Core with single Norm, Read/Write recording the writer, Resolve for all 8 addressing modes plus ApplyPostInc) built test-first; go test/vet/gofmt clean (184 passes), purity and no-maps greps empty, 30s FuzzResolve clean (~6.9M execs), slicer check passes; every new assertion mutation-checked; decisions C57-C59. For S06: Operand carries no pre-decrement pointer address, so S06's TestEvents must either get one added to Operand or recompute it.",
+          "created_at": "2026-10-17T04:36:58Z",
+          "attempt": 1,
           "by": "Jon R",
           "verified_by": "",
           "verified_at": "",
@@ -277,7 +288,7 @@
         "importance": 3,
         "urgency": 2,
         "effort": 2,
-        "attempts": 0
+        "attempts": 1
       }
     },
     {
@@ -1012,7 +1023,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 57,
+    "next_id": 60,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -1516,6 +1527,33 @@
         "kind": "decision",
         "title": "Turn order: all live bots step once per cycle in ascending id; match ends at end of cycle",
         "body": "Implementer decision under C35 and C38 (S04). A cycle is one step for each bot live at its start, in ascending bot id (ids = input order, not rotated); the match ends after the first cycle that leaves at most one live bot or that is cycle CYCLELIMIT; at least 2 and at most 2^20 bots; loaded cells carry the owner's bot id as writer; each bot starts with one process at its entry offset. Result fields: cycles, survivors, outcome (win or tie), winner, tied. Reason: it follows the pMARS definition of a cycle as one execution of each warrior and checking at the cycle end gives every bot the same number of steps; fixed id order is the simplest rule and fairness across orders is left to the tournament runner. docs/spec/match.md sections 5, 7 and 8.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C57",
+        "kind": "decision",
+        "title": "isa package API: Opcode/Modifier/Mode uint8 types with Op*/Mod*/Mode* constants in spec order, Opcodes/Modifiers/Modes lists, String() mnemonics, Cell{Opcode,Modifier,AMode,AValue int32,BMode,BValue int32,Writer uint32}, EmptyCell",
+        "body": "Plain typed constants and exported slices give later enumeration tests and the assembler one source for codes and mnemonics; int32 values and uint32 writer match isa.md section 1-2; no maps (C36).",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C58",
+        "kind": "decision",
+        "title": "vm core API: NewCore(size) (*Core, error) with ErrCoreSize, Size, Norm(int64) int32, Read(int64) Cell, Write(int64, Cell, bot uint32)",
+        "body": "Addresses are int64 and Core.Norm is the single normalization (spec section 1), so sums cannot overflow and callers need no pre-reduction; Write sets the writer from the bot argument, Read never changes it; out-of-range size is an error rather than a panic.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C59",
+        "kind": "decision",
+        "title": "vm operand API: Core.Resolve(pc, mode, value, bot) (Operand{Target, Snapshot, Post}, error) and Core.ApplyPostInc(PostInc, bot)",
+        "body": "Splitting evaluation from post-increment lets S06 follow isa.md section 4 (evaluate A, evaluate B, execute, then post-increments on the field as it is in the core then); Resolve applies pre-decrements immediately as bot and returns ErrBadMode for a mode code above 7 instead of panicking.",
         "status": "active",
         "reason": "",
         "successor": ""
