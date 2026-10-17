@@ -300,7 +300,19 @@
       "depends_on": [
         "S05"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "ab43f7f4-d129-4c01-9f20-ba6d34aba357",
+          "kind": "",
+          "text": "**2026-10-17** — From S05 review: vm.Resolve writes pre-decrements straight to the core, and Operand carries no pre-decrement pointer address. TestEvents needs those writes in order (isa.md section 4). Either add a pre-write address to Operand, or emit the write event between the A and B Resolve calls from Norm(pc+v) with the core cell contents at that moment (needed for </order, which writes the same cell twice). Also assert the intermediate writes of </order and >/order.",
+          "created_at": "2026-10-17T04:38:08Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "L",

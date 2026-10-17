@@ -276,3 +276,4 @@
 {"when": "2026-10-17T04:29:35Z", "item": "S05", "action": "handoff", "from": "started", "to": "review", "note": "claim Jon R cleared", "by": "Jon R"}
 {"when": "2026-10-17T04:36:58Z", "item": "S05", "action": "note", "from": "", "to": "", "note": "Verified: internal/isa (Opcode/Modifier/Mode types, spec-ord", "by": "Jon R"}
 {"when": "2026-10-17T04:36:58Z", "item": "S05", "action": "status", "from": "review", "to": "done", "note": "Core memory, wrap normalization, writer tracking and operand evaluation for all 8 modes built and verified: tests, vet, gofmt, purity and no-maps greps, 30s fuzz and slicer check all pass; gate PASS.", "by": "Jon R"}
+{"when": "2026-10-17T04:38:08Z", "item": "S06", "action": "note", "from": "", "to": "", "note": "From S05 review: vm.Resolve writes pre-decrements straight t", "by": "Jon R"}
