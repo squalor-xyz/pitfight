@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 // Package vm implements the pitfight virtual machine core: the circular memory
-// and operand evaluation (docs/spec/isa.md). It is pure: no I/O, clock,
+// operand evaluation, opcode execution and process queues (docs/spec/isa.md). It is pure: no I/O, clock,
 // goroutines or randomness, and no map iteration (C12, C36).
 package vm
 

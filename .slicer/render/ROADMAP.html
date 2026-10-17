@@ -143,6 +143,10 @@
 <div class="prose"><p>Addresses are int64 and Core.Norm is the single normalization (spec section 1), so sums cannot overflow and callers need no pre-reduction; Write sets the writer from the bot argument, Read never changes it; out-of-range size is an error rather than a panic.</p></div>
 <h3>C59 vm operand API: Core.Resolve(pc, mode, value, bot) (Operand{Target, Snapshot, Post}, error) and Core.ApplyPostInc(PostInc, bot)</h3>
 <div class="prose"><p>Splitting evaluation from post-increment lets S06 follow isa.md section 4 (evaluate A, evaluate B, execute, then post-increments on the field as it is in the core then); Resolve applies pre-decrements immediately as bot and returns ErrBadMode for a mode code above 7 instead of panicking.</p></div>
+<h3>C60 VM execution and process queue API</h3>
+<div class="prose"><p>S06 implementer decision under C35: Core.NewQueue(max, pcs...) returns (*Queue,error), normalizes initial addresses, validates MAXPROCESSES 1..2^20 and initial count, and copies input; Queue exposes Len, Dead and caller-owned Addresses. Core.Step(queue, bot, events) appends value events and executes one FIFO process, with dead queues a no-op. Queue uses a circular slice bounded by max for O(1) removal/requeue. Queues belong to their creating core and must not be copied; Step requires valid ISA codes and normalized cell fields and a nonzero bot id, matching the spec domain. Reason: arena can own one queue per bot, preserve deterministic FIFO order, and reuse its event buffer without shifting up to a million processes each turn.</p></div>
+<h3>C61 VM integer event records and ordering</h3>
+<div class="prose"><p>S06 implementer decision under C35: Event contains Kind (uint8 EventKind: CellWrite=0, ProcessSpawn=1, ProcessDeath=2), Bot uint32, PC int32, Address int32 and Cell isa.Cell. CellWrite holds the complete post-write cell including writer; process events have zero Cell. PC identifies the executed instruction, Address the written cell, child PC or dead PC. Only actual SPL child creation emits spawn; continuations and denied spawns emit nothing. All cell writes, including equal-value writes, appear in spec phase order; process events follow A/B post-increments. Reason: plain integer values retain intermediate writes for replay without I/O or clocks; caller-owned buffers avoid imposing event storage on the VM.</p></div>
 </section>
 <section><h2>Assumptions</h2>
 <h3>C20 Name: keep placeholder bot-arena</h3>
@@ -164,35 +168,35 @@
 <div class="prose"><p>PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first (needed for debugging), web viewer second. PROJECT.md names no alternative; both viewers are v1. (PROJECT.md Open decisions 6)</p></div>
 <p><em>Retired: Settled by owner decision C31 (2026-10-15)..</em></p>
 </section>
-<p class="summary">21 items · — 12 · done 5 · later 4</p>
+<p class="summary">21 items · — 11 · done 6 · later 4</p>
 <table><thead><tr><th>#</th><th>ID</th><th>Title</th><th>Size</th><th>Effort</th><th>Trees</th><th>Findings</th><th>Status</th></tr></thead><tbody>
-<tr class="open"><td>1</td><td>S06</td><td>Execute opcodes and process queues in the VM</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Milestone 2, Core concepts</td><td class="status">—</td></tr>
-<tr class="open"><td>2</td><td>S07</td><td>Build the assembler</td><td>M</td><td>2</td><td>asm</td><td>PROJECT.md Milestone 3, Goals 2</td><td class="status">—</td></tr>
-<tr class="open"><td>3</td><td>S08</td><td>Add the disassembler and round-trip tests</td><td>S</td><td>1</td><td>asm</td><td>PROJECT.md Milestone 3</td><td class="status">—</td></tr>
-<tr class="open"><td>4</td><td>S09</td><td>Run matches in the arena</td><td>M</td><td>2</td><td>arena</td><td>PROJECT.md Milestone 4, Goals 3-4</td><td class="status">—</td></tr>
-<tr class="open"><td>5</td><td>S10</td><td>Write the starter bots and golden-result tests</td><td>M</td><td>2</td><td>bots</td><td>PROJECT.md v1 features, Risks</td><td class="status">—</td></tr>
-<tr class="open"><td>6</td><td>S11</td><td>Define and write the replay format</td><td>M</td><td>2</td><td>replay</td><td>PROJECT.md Milestone 5, Goals 7, Risks</td><td class="status">—</td></tr>
+<tr class="open"><td>1</td><td>S07</td><td>Build the assembler</td><td>M</td><td>2</td><td>asm</td><td>PROJECT.md Milestone 3, Goals 2</td><td class="status">—</td></tr>
+<tr class="open"><td>2</td><td>S08</td><td>Add the disassembler and round-trip tests</td><td>S</td><td>1</td><td>asm</td><td>PROJECT.md Milestone 3</td><td class="status">—</td></tr>
+<tr class="open"><td>3</td><td>S09</td><td>Run matches in the arena</td><td>M</td><td>2</td><td>arena</td><td>PROJECT.md Milestone 4, Goals 3-4</td><td class="status">—</td></tr>
+<tr class="open"><td>4</td><td>S10</td><td>Write the starter bots and golden-result tests</td><td>M</td><td>2</td><td>bots</td><td>PROJECT.md v1 features, Risks</td><td class="status">—</td></tr>
+<tr class="open"><td>5</td><td>S11</td><td>Define and write the replay format</td><td>M</td><td>2</td><td>replay</td><td>PROJECT.md Milestone 5, Goals 7, Risks</td><td class="status">—</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v1 tools</strong></td></tr>
-<tr class="open"><td>7</td><td>S12</td><td>Build the terminal viewer</td><td>M</td><td>2</td><td>tui</td><td>PROJECT.md Milestone 5, Goals 6</td><td class="status">—</td></tr>
-<tr class="open"><td>8</td><td>S13</td><td>Run tournaments with a scoreboard</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Milestone 6, Goals 5</td><td class="status">—</td></tr>
-<tr class="open"><td>9</td><td>S14</td><td>Optional Go WASM build for live matches</td><td>S</td><td>1</td><td>vm, web</td><td>PROJECT.md Milestone 7, Stack recommendation</td><td class="status">—</td></tr>
-<tr class="open"><td>10</td><td>S15</td><td>Build the web viewer</td><td>L</td><td>3</td><td>web</td><td>PROJECT.md Milestone 7, Goals 6</td><td class="status">—</td></tr>
-<tr class="open"><td>11</td><td>S16</td><td>Check licensing of Redcode standards and warriors</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Dependency / licensing notes</td><td class="status">—</td></tr>
-<tr class="open"><td>12</td><td>S17</td><td>Verify v1 acceptance criteria</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md v1 acceptance criteria</td><td class="status">—</td></tr>
+<tr class="open"><td>6</td><td>S12</td><td>Build the terminal viewer</td><td>M</td><td>2</td><td>tui</td><td>PROJECT.md Milestone 5, Goals 6</td><td class="status">—</td></tr>
+<tr class="open"><td>7</td><td>S13</td><td>Run tournaments with a scoreboard</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Milestone 6, Goals 5</td><td class="status">—</td></tr>
+<tr class="open"><td>8</td><td>S14</td><td>Optional Go WASM build for live matches</td><td>S</td><td>1</td><td>vm, web</td><td>PROJECT.md Milestone 7, Stack recommendation</td><td class="status">—</td></tr>
+<tr class="open"><td>9</td><td>S15</td><td>Build the web viewer</td><td>L</td><td>3</td><td>web</td><td>PROJECT.md Milestone 7, Goals 6</td><td class="status">—</td></tr>
+<tr class="open"><td>10</td><td>S16</td><td>Check licensing of Redcode standards and warriors</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Dependency / licensing notes</td><td class="status">—</td></tr>
+<tr class="open"><td>11</td><td>S17</td><td>Verify v1 acceptance criteria</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md v1 acceptance criteria</td><td class="status">—</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>Later tier</strong></td></tr>
-<tr class="other"><td>13</td><td>S18</td><td>LLM agent harness</td><td>L</td><td>3</td><td>harness</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
-<tr class="other"><td>14</td><td>S19</td><td>Persistent hill of ranked bots</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
-<tr class="other"><td>15</td><td>S20</td><td>Host the web visualizer on squalor.xyz</td><td>S</td><td>2</td><td>web</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
-<tr class="other"><td>16</td><td>S21</td><td>ISA variants and new game modes</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>12</td><td>S18</td><td>LLM agent harness</td><td>L</td><td>3</td><td>harness</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>13</td><td>S19</td><td>Persistent hill of ranked bots</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>14</td><td>S20</td><td>Host the web visualizer on squalor.xyz</td><td>S</td><td>2</td><td>web</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>15</td><td>S21</td><td>ISA variants and new game modes</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
 </tbody></table>
 <table><thead><tr><th>#</th><th>ID</th><th>Title</th><th>Size</th><th>Effort</th><th>Trees</th><th>Findings</th><th>Status</th></tr></thead><tbody>
 <tr class="group"><td></td><td colspan="7"><strong>Decisions</strong></td></tr>
-<tr class="done"><td>17</td><td>S01</td><td>Confirm open decisions</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Open decisions</td><td class="status">done</td></tr>
+<tr class="done"><td>16</td><td>S01</td><td>Confirm open decisions</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Open decisions</td><td class="status">done</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v1 foundation</strong></td></tr>
-<tr class="done"><td>18</td><td>S02</td><td>Set up project scaffolding</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md Stack recommendation, Risks</td><td class="status">done</td></tr>
-<tr class="done"><td>19</td><td>S03</td><td>Write the ISA spec</td><td>M</td><td>2</td><td>docs</td><td>PROJECT.md Milestone 1, Goals 1</td><td class="status">done</td></tr>
-<tr class="done"><td>20</td><td>S04</td><td>Specify match rules and verify default parameters</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Goals 3-4, Open decisions 5</td><td class="status">done</td></tr>
+<tr class="done"><td>17</td><td>S02</td><td>Set up project scaffolding</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md Stack recommendation, Risks</td><td class="status">done</td></tr>
+<tr class="done"><td>18</td><td>S03</td><td>Write the ISA spec</td><td>M</td><td>2</td><td>docs</td><td>PROJECT.md Milestone 1, Goals 1</td><td class="status">done</td></tr>
+<tr class="done"><td>19</td><td>S04</td><td>Specify match rules and verify default parameters</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Goals 3-4, Open decisions 5</td><td class="status">done</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v1 core</strong></td></tr>
-<tr class="done"><td>21</td><td>S05</td><td>Build VM core memory and addressing modes</td><td>M</td><td>2</td><td>vm</td><td>PROJECT.md Milestone 2</td><td class="status">done</td></tr>
+<tr class="done"><td>20</td><td>S05</td><td>Build VM core memory and addressing modes</td><td>M</td><td>2</td><td>vm</td><td>PROJECT.md Milestone 2</td><td class="status">done</td></tr>
+<tr class="done"><td>21</td><td>S06</td><td>Execute opcodes and process queues in the VM</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Milestone 2, Core concepts</td><td class="status">done</td></tr>
 </tbody></table>
 </body></html>

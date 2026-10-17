@@ -295,7 +295,7 @@
       "id": "S06",
       "title": "Execute opcodes and process queues in the VM",
       "short_title": "Execute opcodes and process queues in the VM",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [
         "S05"
@@ -338,7 +338,7 @@
         "importance": 3,
         "urgency": 2,
         "effort": 3,
-        "attempts": 0
+        "attempts": 1
       }
     },
     {
@@ -1035,7 +1035,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 60,
+    "next_id": 62,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -1566,6 +1566,24 @@
         "kind": "decision",
         "title": "vm operand API: Core.Resolve(pc, mode, value, bot) (Operand{Target, Snapshot, Post}, error) and Core.ApplyPostInc(PostInc, bot)",
         "body": "Splitting evaluation from post-increment lets S06 follow isa.md section 4 (evaluate A, evaluate B, execute, then post-increments on the field as it is in the core then); Resolve applies pre-decrements immediately as bot and returns ErrBadMode for a mode code above 7 instead of panicking.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C60",
+        "kind": "decision",
+        "title": "VM execution and process queue API",
+        "body": "S06 implementer decision under C35: Core.NewQueue(max, pcs...) returns (*Queue,error), normalizes initial addresses, validates MAXPROCESSES 1..2^20 and initial count, and copies input; Queue exposes Len, Dead and caller-owned Addresses. Core.Step(queue, bot, events) appends value events and executes one FIFO process, with dead queues a no-op. Queue uses a circular slice bounded by max for O(1) removal/requeue. Queues belong to their creating core and must not be copied; Step requires valid ISA codes and normalized cell fields and a nonzero bot id, matching the spec domain. Reason: arena can own one queue per bot, preserve deterministic FIFO order, and reuse its event buffer without shifting up to a million processes each turn.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C61",
+        "kind": "decision",
+        "title": "VM integer event records and ordering",
+        "body": "S06 implementer decision under C35: Event contains Kind (uint8 EventKind: CellWrite=0, ProcessSpawn=1, ProcessDeath=2), Bot uint32, PC int32, Address int32 and Cell isa.Cell. CellWrite holds the complete post-write cell including writer; process events have zero Cell. PC identifies the executed instruction, Address the written cell, child PC or dead PC. Only actual SPL child creation emits spawn; continuations and denied spawns emit nothing. All cell writes, including equal-value writes, appear in spec phase order; process events follow A/B post-increments. Reason: plain integer values retain intermediate writes for replay without I/O or clocks; caller-owned buffers avoid imposing event storage on the VM.",
         "status": "active",
         "reason": "",
         "successor": ""

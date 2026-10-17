@@ -28,7 +28,7 @@ a shared circular memory arena. Go, standard library only.
   it handles usage only.
 - `internal/isa`, `asm`, `vm`, `arena`, `replay`, `tourney`, `tui`: the
   packages, one slice at a time. Only `internal/isa` (instruction types) and
-  `internal/vm` (core memory and operand evaluation, no opcode execution yet)
+  `internal/vm` (core memory, operand evaluation, opcode execution, process queues and events)
   exist so far.
 - `web/`: the web viewer. `docs/spec/`: the ISA and format specs (`isa.md`,
   `match.md`). `bots/`: the starter bots. `web/` and `bots/` do not exist yet.
