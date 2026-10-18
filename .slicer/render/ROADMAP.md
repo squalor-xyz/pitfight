@@ -296,12 +296,12 @@ PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first 
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
+| v0.1.0 | | | | | | | |
 | 1 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | — |
 | 2 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | — |
 | 3 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | — |
 | 4 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | — |
 | 5 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | — |
-| v1 tools | | | | | | | |
 | 6 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | — |
 | 7 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | — |
 | 8 | [S14](slices/S14.md) | Optional Go WASM build for live matches | S | 1 | vm, web | PROJECT.md Milestone 7, Stack recommendation | — |

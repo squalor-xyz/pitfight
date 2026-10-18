@@ -287,3 +287,12 @@
 {"when": "2026-10-18T03:21:20Z", "item": "C63", "action": "catalog", "from": "", "to": "CI and releases on GitHub Actions", "note": "add"}
 {"when": "2026-10-18T03:21:42Z", "item": "C33", "action": "catalog", "from": "active", "to": "retired", "note": "retire"}
 {"when": "2026-10-18T03:31:11Z", "item": "C64", "action": "catalog", "from": "", "to": "Logo: Squalor product mark, ring with two facing pointers; asset is all rights reserved, not AGPL", "note": "add"}
+{"when": "2026-10-18T03:38:10Z", "item": "S07", "action": "set", "from": "", "to": "", "note": "group -→v0.1.0"}
+{"when": "2026-10-18T03:38:10Z", "item": "S08", "action": "set", "from": "", "to": "", "note": "group -→v0.1.0"}
+{"when": "2026-10-18T03:38:10Z", "item": "S09", "action": "set", "from": "", "to": "", "note": "group -→v0.1.0"}
+{"when": "2026-10-18T03:38:10Z", "item": "S10", "action": "set", "from": "", "to": "", "note": "group -→v0.1.0"}
+{"when": "2026-10-18T03:38:10Z", "item": "S11", "action": "set", "from": "", "to": "", "note": "group -→v0.1.0"}
+{"when": "2026-10-18T03:38:10Z", "item": "S12", "action": "set", "from": "", "to": "", "note": "group v1 tools→v0.1.0"}
+{"when": "2026-10-18T03:38:10Z", "item": "S13", "action": "set", "from": "", "to": "", "note": "group -→v0.1.0"}
+{"when": "2026-10-18T03:38:10Z", "item": "S15", "action": "set", "from": "", "to": "", "note": "group -→v0.1.0"}
+{"when": "2026-10-18T03:38:10Z", "item": "S17", "action": "set", "from": "", "to": "", "note": "group -→v0.1.0"}
