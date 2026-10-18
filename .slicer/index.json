@@ -1082,6 +1082,17 @@
           "verified_by": "",
           "verified_at": "",
           "stale_after": ""
+        },
+        {
+          "id": "b635691d-6c9a-4d4b-898f-e2bf350c1610",
+          "kind": "",
+          "text": "**2026-10-18** — Later notes from the S17 relay: README.md:34-36 'checks the five v1 acceptance criteria' overstates C19 (canvas check is manual); web/test/model.test.js:25 hard-codes 13 frames for both fixture pairs (Go uses cycles+1); C17/C18 assert exactly the 4 starter bots; TestC19's web half only checks the web tests reference the fixture files. Earlier cleanup notes on this item remain open as later work.",
+          "created_at": "2026-10-18T16:37:47Z",
+          "attempt": 1,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
         }
       ],
       "claim": null,
