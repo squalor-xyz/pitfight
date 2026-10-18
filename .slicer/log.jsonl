@@ -419,3 +419,11 @@
 {"when": "2026-10-18T21:50:15Z", "item": "S26", "action": "add", "from": "", "to": "open", "note": "Add pit play to run a match and watch it in one command"}
 {"when": "2026-10-18T21:50:18Z", "item": "S24", "action": "set", "from": "", "to": "", "note": "depends_on S23→S23,S26"}
 {"when": "2026-10-18T21:50:18Z", "item": "S24", "action": "edit", "from": "", "to": "", "note": "Why"}
+{"when": "2026-10-18T21:51:07Z", "item": "S25", "action": "status", "from": "open", "to": "started", "note": "", "by": "Jon R"}
+{"when": "2026-10-18T22:29:46Z", "item": "C117", "action": "catalog", "from": "", "to": "S25 (C35): amends C103: pit serve takes POST /api/match; files stay GET and HEAD", "note": "add"}
+{"when": "2026-10-18T22:29:46Z", "item": "C118", "action": "catalog", "from": "", "to": "S25 (C35): pit serve API: GET /api/list and POST /api/match, JSON shapes and limits", "note": "add"}
+{"when": "2026-10-18T22:29:47Z", "item": "C119", "action": "catalog", "from": "", "to": "S25 (C35): pit serve --bots DIR (default bots if present); start page behaviour", "note": "add"}
+{"when": "2026-10-18T22:29:55Z", "item": "S25", "action": "cite", "from": "", "to": "C117,C118,C119", "note": ""}
+{"when": "2026-10-18T22:41:54Z", "item": "S25", "action": "status", "from": "started", "to": "done", "note": "Start page lists bots and replays; GET /api/list and POST /api/match (C117-C119); Fight runs a match and plays it; replay hash equals pit run; security guards (Host, Origin, Sec-Fetch-Site, content type, body/seed/cycle/one-at-a-time bounds, FIFO and symlink refusal); go test/vet/gofmt/build, 82 node tests and slicer check green; manual browser check is the owner's.", "by": "Jon R"}
+{"when": "2026-10-18T22:42:27Z", "item": "S26", "action": "note", "from": "", "to": "", "note": "From S25: serveapi.match takes names from the one --bots lis", "by": "Jon R"}
+{"when": "2026-10-18T22:42:28Z", "item": "S25", "action": "note", "from": "", "to": "", "note": "Later notes from the S25 relay: an 80000-cycle tie returns a", "by": "Jon R"}

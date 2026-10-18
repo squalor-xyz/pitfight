@@ -40,9 +40,10 @@ a shared circular memory arena. Go, standard library only.
 - `testdata/viewer/`: the shared viewer fixtures (`fixture.jsonl` and `spl_fixture.jsonl`,
   written by `pit run`) and `frames.json` and `spl_frames.json`, the frames every viewer
   (terminal and web) must produce from them. The SPL pair covers spawns and deaths.
-- `web/`: the replay-only web viewer: `index.html`, `style.css` and the ES modules in
+- `web/`: the web viewer: `index.html`, `style.css` and the ES modules in
   `js/` (`replay.js` parser, `model.js` frame model, `player.js` state machine,
-  `render.js` canvas, `main.js` wiring; only `render.js` and `main.js` touch the DOM).
+  `home.js` start page logic: listing, pickers, seed, match request; `render.js`
+  canvas, `main.js` wiring; only `render.js` and `main.js` touch the DOM).
   `web/test/*.test.js` are the `node:test` tests; `web/embed.go` embeds the viewer
   into `pit` (not the tests) for `pit serve`. `docs/spec/`: the ISA, assembly and
   format specs (`isa.md`, `asm.md`, `match.md`, `replay.md`, `tourney.md`). `bots/`:
@@ -76,19 +77,29 @@ and `scripts/env.sh`. Run every Go command with it sourced. Never run
 `go env -w`; it writes outside the repo. Do not add a Makefile.
 
 Web viewer. Browsers do not let a page read files from `file://`, so serve it:
-`.cache/bin/pit serve` (viewer built into the binary, http://127.0.0.1:8080/) or
-`.cache/bin/pit serve --web web --replays testdata/viewer` to serve the files of
-`web/` from disk while you edit them and a directory of replays at `/replays/`
-(`/?replay=/replays/fixture.jsonl` loads one; the page also has a file picker).
-Stop it with Ctrl-C and never leave one running. The JS tests need no server:
+`.cache/bin/pit serve` (viewer built into the binary, http://127.0.0.1:8080/; run from
+the repo root, it lists `bots/` on the start page) or
+`.cache/bin/pit serve --web web --bots bots --replays testdata/viewer` to serve the
+files of `web/` from disk while you edit them. The start page lists the `*.s` files of
+`--bots` (default `bots`, if that directory exists) and the `*.jsonl` files of
+`--replays` (also served at `/replays/`; `/?replay=/replays/fixture.jsonl` loads one):
+pick two bots, optionally set the seed, press Fight and the page plays the match the
+server ran; click a replay to play it; the page also has a file picker. The API
+(`cmd/pit/serveapi.go`, built to be reused by `pit play`): `GET /api/list` and
+`POST /api/match` with JSON `{"bots":[A,B],"seed":"N"}`, which returns the replay of
+`pit run --replay` for those listed bots (default configuration, cycle limit 80000).
+A match is one at a time, takes only application/json and refuses a foreign Origin;
+a bot name must be in the listing, never a path. Stop the server with Ctrl-C and
+never leave one running. The JS tests need no server:
 `node --test web/test/*.test.js` (shell glob, not a directory; the modules are `.js`
 ES modules with no `package.json`, so the Node must detect module syntax and run
 `.js` files that use `import`/`export` as ES modules; Node 26.12.0 does, older
 versions are not verified and CI prints `node --version`). Parsing, model and
-player are tested against `testdata/viewer/`; only canvas drawing has no automated
-check beyond a fake context, so after a change to `web/js/render.js` or `main.js`
-look at it in a browser (load `internal/replay/testdata/imp_dwarf_seed1.jsonl`;
-step, play, pause, seek).
+player are tested against `testdata/viewer/`, `home.js` by its own tests; only canvas
+drawing and the page wiring have no automated check beyond a fake context, so after a
+change to `web/js/render.js` or `main.js` look at it in a browser (run `pit serve`
+from the repo root, pick imp and dwarf and press Fight; load
+`internal/replay/testdata/imp_dwarf_seed1.jsonl`; step, play, pause, seek).
 `web/embed.go` is Go, so the gofmt check covers `web` too.
 
 CI runs on GitHub Actions (C63): `.github/workflows/ci.yml` runs the checks above

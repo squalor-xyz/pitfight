@@ -42,6 +42,18 @@ code { font-family: ui-monospace, monospace; }
   white-space: pre-wrap;
 }
 
+#home { padding-bottom: 12px; }
+#home h2 { margin: 12px 0 4px; font-size: 15px; }
+#home p { margin: 8px 0; }
+#fight { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin: 8px 0; }
+#fight label { display: inline-flex; align-items: center; gap: 6px; }
+#fight .hint { flex-basis: 100%; }
+#seed { width: 21ch; font: inherit; font-family: ui-monospace, monospace; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; }
+#fight-button { border-color: var(--accent); }
+button:disabled { opacity: 0.6; cursor: progress; }
+#replay-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+#replay-list button { text-align: left; }
+
 .controls {
   display: flex;
   flex-wrap: wrap;

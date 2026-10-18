@@ -1,14 +1,16 @@
 // @ts-check
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-// Wires the page: choose a replay (file input, or ?replay=URL), build the model and
-// player, run the play clock and draw. This and render.js are the only modules that
+// Wires the page: choose a replay (the start page's lists, a match run by the server,
+// the file input, or ?replay=URL), build the model and player, run the play clock and
+// draw. This and render.js are the only modules that
 // touch the DOM; the logic lives in replay.js, model.js and player.js.
 
 import { parseReplay } from './replay.js';
 import { Model } from './model.js';
 import { Player } from './player.js';
 import { draw, botColor } from './render.js';
+import { parseListing, listingOptions, defaultPicks, randomSeed, resolveSeed, buildMatchRequest, describeMatchError } from './home.js';
 
 /**
  * @template {HTMLElement} T
@@ -33,6 +35,14 @@ const seekBar = /** @type {HTMLInputElement} */ (el('seek'));
 const canvas = /** @type {HTMLCanvasElement} */ (el('canvas'));
 const botList = el('bots');
 const resultLine = el('result');
+const fightForm = el('fight');
+const bot1Select = /** @type {HTMLSelectElement} */ (el('bot1'));
+const bot2Select = /** @type {HTMLSelectElement} */ (el('bot2'));
+const seedInput = /** @type {HTMLInputElement} */ (el('seed'));
+const fightButton = /** @type {HTMLButtonElement} */ (el('fight-button'));
+const replaySection = el('replay-section');
+const replayList = el('replay-list');
+const listNote = el('list-note');
 
 /** @type {Player | null} */
 let player = null;
@@ -41,6 +51,9 @@ let botRows = [];
 let lastTime = 0;
 let carry = 0; // fractional cycles owed to the clock
 let frameRequest = 0;
+let loadToken = 0; // a newer request makes the answer of an older one stale
+/** The seed field: `auto` while the page chose it and the user has not typed. */
+let seedState = { text: '', auto: true };
 
 /** @param {string} message */
 function showError(message) {
@@ -52,8 +65,9 @@ function showError(message) {
  * Loads replay text: parse, build the player, show the viewer.
  * @param {string} text
  * @param {string} name
+ * @param {boolean} [autoplay]  start playing at once
  */
-function load(text, name) {
+function load(text, name, autoplay = false) {
   errorBox.hidden = true;
   let replay;
   try {
@@ -62,6 +76,7 @@ function load(text, name) {
     showError(`${name}: ${e instanceof Error ? e.message : e}`);
     return;
   }
+  loadToken++;
   stopClock();
   player = new Player(new Model(replay));
   sourceLabel.textContent = `${name}: core ${replay.config.coreSize}, ${replay.bots.length} bots, ${player.cycles} cycles`;
@@ -87,6 +102,7 @@ function load(text, name) {
   intro.hidden = true;
   viewer.hidden = false;
   render();
+  if (autoplay) act(() => player?.play());
 }
 
 /** Redraws everything that shows the player's state. */
@@ -163,6 +179,122 @@ fileInput.addEventListener('change', async () => {
   }
 });
 
+/** @param {{text: string, auto: boolean}} seed */
+function setSeed(seed) {
+  seedState = seed;
+  seedInput.value = seed.text;
+}
+
+seedInput.addEventListener('input', () => {
+  seedState = { text: seedInput.value, auto: false };
+});
+el('reroll').addEventListener('click', () => setSeed({ text: randomSeed(), auto: true }));
+
+// Fight: ask the server to run the match of the two chosen bots and play its replay.
+fightForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (fightButton.disabled) return;
+  setSeed(resolveSeed(seedState, randomSeed));
+  let request;
+  try {
+    request = buildMatchRequest({ first: bot1Select.value, second: bot2Select.value, seedText: seedState.text });
+  } catch (err) {
+    showError(err instanceof Error ? err.message : String(err));
+    return;
+  }
+  const token = ++loadToken;
+  fightButton.disabled = true;
+  fightButton.textContent = 'Running...';
+  try {
+    const response = await fetch(request.url, request.init);
+    const text = await response.text();
+    if (token !== loadToken) return;
+    if (response.ok) load(text, request.label, true);
+    else showError(describeMatchError(response.status, text));
+  } catch (err) {
+    if (token === loadToken) showError(`Could not run the match: ${err instanceof Error ? err.message : err}`);
+  } finally {
+    fightButton.disabled = false;
+    fightButton.textContent = 'Fight';
+    // Space plays and pauses the replay, so the button must not keep the keys.
+    fightButton.blur();
+  }
+});
+
+/**
+ * Fetches a replay from the server and plays it or, for ?replay=, shows it paused.
+ * @param {string} url
+ * @param {string} name
+ * @param {boolean} autoplay
+ */
+async function fetchReplay(url, name, autoplay) {
+  const token = ++loadToken;
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+    const text = await r.text();
+    if (token === loadToken) load(text, name, autoplay);
+  } catch (e) {
+    if (token === loadToken) showError(`${name}: ${e instanceof Error ? e.message : e}`);
+  }
+}
+
+/**
+ * Fills a bot picker.
+ * @param {HTMLSelectElement} select
+ * @param {Array<{value: string, label: string}>} options
+ * @param {string} chosen
+ */
+function fillPicker(select, options, chosen) {
+  select.replaceChildren(
+    ...options.map((o) => {
+      const option = document.createElement('option');
+      option.value = o.value;
+      option.textContent = o.label;
+      return option;
+    }),
+  );
+  select.value = chosen;
+}
+
+/** Shows the bots and replays that "pit serve" lists. Without a listing the page is the file picker only. */
+async function showListing() {
+  let options;
+  try {
+    const r = await fetch('/api/list', { cache: 'no-store' });
+    if (!r.ok) return;
+    options = listingOptions(parseListing(await r.json()));
+  } catch {
+    return; // not served by pit serve, or an older one: the file picker remains
+  }
+  if (options.bots.length > 0) {
+    const [first, second] = defaultPicks(options.bots.map((b) => b.value));
+    fillPicker(bot1Select, options.bots, first);
+    fillPicker(bot2Select, options.bots, second);
+    setSeed({ text: randomSeed(), auto: true });
+    fightForm.hidden = false;
+  }
+  if (options.replays.length > 0) {
+    replayList.replaceChildren(
+      ...options.replays.map((replay) => {
+        const li = document.createElement('li');
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = replay.label;
+        button.title = replay.name;
+        button.addEventListener('click', () => {
+          button.blur();
+          fetchReplay(replay.url, replay.name, true);
+        });
+        li.append(button);
+        return li;
+      }),
+    );
+    replaySection.hidden = false;
+  }
+  listNote.hidden = !options.truncated;
+}
+
 el('first').addEventListener('click', () => act(() => player?.seek(0)));
 el('back').addEventListener('click', () => act(() => player?.step(-1)));
 el('forward').addEventListener('click', () => act(() => player?.step(1)));
@@ -192,9 +324,5 @@ document.addEventListener('keydown', (e) => {
 // ?replay=URL loads a replay from a URL, for example one served by "pit serve
 // --replays DIR" at /replays/NAME.
 const wanted = new URLSearchParams(location.search).get('replay');
-if (wanted) {
-  fetch(wanted)
-    .then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${r.status} ${r.statusText}`))))
-    .then((text) => load(text, wanted))
-    .catch((e) => showError(`${wanted}: ${e instanceof Error ? e.message : e}`));
-}
+if (wanted) fetchReplay(wanted, wanted, false);
+showListing();

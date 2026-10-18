@@ -12,7 +12,9 @@ This page summarizes them.
 - The web viewer (`web/`) is plain JavaScript ES modules with canvas, no framework
   and no build step. Its tests use `node:test` (`node --test web/test/*.test.js`,
   a Node that runs `.js` ES modules without a `package.json`; 26.12.0 is verified,
-  older versions are not). `pit serve` serves it on 127.0.0.1.
+  older versions are not). `pit serve` serves it on 127.0.0.1; its start page lists
+  the bots of `--bots DIR` (default `bots`) and the replays of `--replays DIR`, and a
+  Fight button runs a match of two bots on the server (`cmd/pit/serveapi.go`).
 - Do not run `go env -w`, and do not add a Makefile.
 
 ## Checks

@@ -50,12 +50,17 @@ Early development. What exists today:
   a reproducible scoreboard ([docs/spec/tourney.md](docs/spec/tourney.md)). Try
   `pit tourney bots/ --rounds 100`.
 
-- `web/`: the replay-only web viewer: plain JavaScript ES modules and canvas, no
-  framework and no build step. It plays a replay with step, play, pause and seek,
-  and shows the same frames as the terminal viewer. `pit serve` serves it on
-  127.0.0.1 (a browser cannot read files from `file://`); open the printed address
-  and pick a replay file, or run `pit serve --replays DIR` and open
-  `/?replay=/replays/NAME`. The viewer is built into the `pit` binary.
+- `web/`: the web viewer: plain JavaScript ES modules and canvas, no framework and
+  no build step. It plays a replay with step, play, pause and seek, and shows the
+  same frames as the terminal viewer. `pit serve` serves it on 127.0.0.1 (a browser
+  cannot read files from `file://`). Its start page lists the bots (`*.s`) of
+  `--bots DIR` (default `bots`, if it exists) and the replays (`*.jsonl`) of
+  `--replays DIR`: pick two bots, optionally set the seed, press Fight and the
+  server runs the match and the page plays it; or click a replay. Try
+  `pit serve --replays testdata/viewer` from the repo root. A replay file can still
+  be chosen with the file picker, and `/?replay=/replays/NAME` loads one by address.
+  A match runs with the defaults of `pit run` (cycle limit 80000), one at a time,
+  and only for a page of this server. The viewer is built into the `pit` binary.
 
 ## Build and test
 

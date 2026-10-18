@@ -57,7 +57,7 @@ func serveRoots(t *testing.T) (parent, root string) {
 // TestServeFile: a file under the replay root is served at /replays/.
 func TestServeFile(t *testing.T) {
 	_, root := serveRoots(t)
-	h, closeRoots, err := newServeHandler("", root)
+	h, closeRoots, err := newServeHandler("", root, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +79,7 @@ func TestServeRefusesOutsideRoot(t *testing.T) {
 	if err := os.Symlink(filepath.Join(parent, "secret"), filepath.Join(root, "link")); err != nil {
 		t.Skipf("no symlinks here: %v", err)
 	}
-	h, closeRoots, err := newServeHandler("", root)
+	h, closeRoots, err := newServeHandler("", root, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,7 +114,7 @@ func TestServeSymlinks(t *testing.T) {
 			t.Skipf("no symlinks here: %v", err)
 		}
 	}
-	h, closeRoots, err := newServeHandler("", root)
+	h, closeRoots, err := newServeHandler("", root, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -131,7 +131,7 @@ func TestServeSymlinks(t *testing.T) {
 // a web page on another site cannot read replays through a DNS-rebinding name.
 func TestServeHostCheck(t *testing.T) {
 	_, root := serveRoots(t)
-	h, closeRoots, err := newServeHandler("", root)
+	h, closeRoots, err := newServeHandler("", root, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -171,7 +171,7 @@ func TestServeHostCheck(t *testing.T) {
 // TestServeMethods: GET and HEAD are served; anything else is 405 with an Allow header.
 func TestServeMethods(t *testing.T) {
 	_, root := serveRoots(t)
-	h, closeRoots, err := newServeHandler("", root)
+	h, closeRoots, err := newServeHandler("", root, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,7 +200,7 @@ func TestServeMethods(t *testing.T) {
 // TestServeViewer: the viewer files built into pit are served at / with the types a
 // browser needs for ES modules, and --web replaces them with a directory.
 func TestServeViewer(t *testing.T) {
-	h, closeRoots, err := newServeHandler("", "")
+	h, closeRoots, err := newServeHandler("", "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -209,7 +209,7 @@ func TestServeViewer(t *testing.T) {
 	if code != http.StatusOK || !strings.Contains(ct, "text/html") || !strings.Contains(body, "pitfight") {
 		t.Errorf("GET / = %d %q %.60q, want 200 text/html with the viewer page", code, ct, body)
 	}
-	for _, p := range []string{"/js/main.js", "/js/replay.js", "/js/model.js", "/js/player.js", "/js/render.js"} {
+	for _, p := range []string{"/js/main.js", "/js/replay.js", "/js/model.js", "/js/player.js", "/js/render.js", "/js/home.js"} {
 		code, ct, _ := get(t, h, p)
 		if code != http.StatusOK || !strings.Contains(ct, "javascript") {
 			t.Errorf("GET %s = %d %q, want 200 with a javascript type", p, code, ct)
@@ -231,7 +231,7 @@ func TestServeViewer(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(web, "index.html"), []byte("custom page"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	h2, close2, err := newServeHandler(web, "")
+	h2, close2, err := newServeHandler(web, "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -244,10 +244,10 @@ func TestServeViewer(t *testing.T) {
 // TestServeBadRoots: a missing directory is an error, not a server that serves nothing.
 func TestServeBadRoots(t *testing.T) {
 	missing := filepath.Join(t.TempDir(), "nope")
-	if _, _, err := newServeHandler(missing, ""); err == nil {
+	if _, _, err := newServeHandler(missing, "", ""); err == nil {
 		t.Error("missing --web: want an error")
 	}
-	if _, _, err := newServeHandler("", missing); err == nil {
+	if _, _, err := newServeHandler("", missing, ""); err == nil {
 		t.Error("missing --replays: want an error")
 	}
 }

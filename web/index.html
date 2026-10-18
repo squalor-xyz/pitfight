@@ -4,18 +4,36 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>pitfight replay viewer</title>
+  <title>pitfight</title>
   <link rel="stylesheet" href="style.css">
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
   <header>
     <h1>pitfight</h1>
-    <label class="file">Replay file
-      <input id="file" type="file" accept=".jsonl,.json,.txt,application/x-ndjson,application/json,text/plain">
-    </label>
     <span id="source"></span>
   </header>
+
+  <section id="home" aria-label="Start a match or open a replay">
+    <form id="fight" autocomplete="off" hidden>
+      <label>Bot 1 <select id="bot1"></select></label>
+      <label>Bot 2 <select id="bot2"></select></label>
+      <label>Seed <input id="seed" type="text" inputmode="numeric" spellcheck="false" aria-describedby="seed-help"></label>
+      <button id="reroll" type="button" title="Choose a new random seed">Random seed</button>
+      <button id="fight-button" type="submit">Fight</button>
+      <span id="seed-help" class="hint">The same bots and seed always give the same match.</span>
+    </form>
+    <div id="replay-section" hidden>
+      <h2>Replays</h2>
+      <ul id="replay-list"></ul>
+    </div>
+    <p id="list-note" class="hint" hidden>The directories hold more files than are listed here.</p>
+    <p id="intro">Pick two bots and press Fight, click a replay, or open a replay file written by
+      <code>pit run --replay FILE</code>. <code>pit serve --bots DIR --replays DIR</code> lists the files of those directories.</p>
+    <label class="file">Open a replay file
+      <input id="file" type="file" accept=".jsonl,.json,.txt,application/x-ndjson,application/json,text/plain">
+    </label>
+  </section>
 
   <p id="error" role="alert" hidden></p>
 
@@ -48,7 +66,5 @@
       </aside>
     </div>
   </main>
-
-  <p id="intro">Choose a replay file written by <code>pit run --replay FILE</code>.</p>
 </body>
 </html>
