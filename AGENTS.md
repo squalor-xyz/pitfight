@@ -25,8 +25,17 @@ a shared circular memory arena. Go, standard library only.
 ## Layout
 
 - `cmd/pit/`: `main`. `run(args, stdout, stderr)` returns the exit code; today
-  it handles usage, `pit asm`, `pit run`, `pit tourney`, `pit view` and `pit serve`
-  (`runIn` is `run` with a stdin for the commands of `pit view`).
+  it handles usage, `pit asm`, `pit run`, `pit tourney`, `pit view`, `pit serve` and
+  `pit play` (`runIn` is `run` with a stdin for the commands of `pit view` and
+  `pit play --terminal`). `pit play A B` is `pit run` plus `pit serve` in one command:
+  it assembles the bots (`assembleFiles`, shared with `pit run`), records the match in
+  memory, serves the replay at `/replays/match.jsonl` through `newPlayHandler` (the
+  `pit serve` handler and Host check) on 127.0.0.1, opens `/?replay=...&autoplay=1`
+  with the platform opener (`open`, `xdg-open`; the opener is injected in tests, which
+  never start a browser) and stops on Ctrl-C; `--terminal` hands the replay to
+  `viewSession`. The seed is random (crypto/rand) unless `--seed`, and is printed (with `--terminal`
+  after the viewer ends with `q` or at end of input, so pass `--seed N` to keep a match
+  that you may stop with Ctrl-C).
 - `internal/isa`, `asm`, `vm`, `arena`, `replay`, `tourney`, `tui`: the
   packages, one slice at a time. Only `internal/isa` (instruction types),
   `internal/asm` (the assembler and disassembler), `internal/vm` (core memory, operand
@@ -45,7 +54,7 @@ a shared circular memory arena. Go, standard library only.
   `home.js` start page logic: listing, pickers, seed, match request; `render.js`
   canvas, `main.js` wiring; only `render.js` and `main.js` touch the DOM).
   `web/test/*.test.js` are the `node:test` tests; `web/embed.go` embeds the viewer
-  into `pit` (not the tests) for `pit serve`. `docs/spec/`: the ISA, assembly and
+  into `pit` (not the tests) for `pit serve` and `pit play`. `docs/spec/`: the ISA, assembly and
   format specs (`isa.md`, `asm.md`, `match.md`, `replay.md`, `tourney.md`). `bots/`:
   the starter bots (`imp.s`, `dwarf.s`, `replicator.s`, `scanner.s`).
 - `scripts/env.sh`: Go cache and temp setup (see below).
@@ -89,7 +98,11 @@ server ran; click a replay to play it; the page also has a file picker. The API
 `POST /api/match` with JSON `{"bots":[A,B],"seed":"N"}`, which returns the replay of
 `pit run --replay` for those listed bots (default configuration, cycle limit 80000).
 A match is one at a time, takes only application/json and refuses a foreign Origin;
-a bot name must be in the listing, never a path. Stop the server with Ctrl-C and
+a bot name must be in the listing, never a path. `pit play A B` (flags `--seed N`,
+`--cycle-limit N`, `--port N`, `--no-open`, `--terminal`, `--replay FILE`) runs a match of
+two or more arbitrary bot files and opens the viewer on it, at
+`/?replay=/replays/match.jsonl&autoplay=1` (`autoplay=1` plays the replay at once;
+`?replay=` alone shows it paused). Stop the server with Ctrl-C and
 never leave one running. The JS tests need no server:
 `node --test web/test/*.test.js` (shell glob, not a directory; the modules are `.js`
 ES modules with no `package.json`, so the Node must detect module syntax and run
@@ -98,7 +111,8 @@ versions are not verified and CI prints `node --version`). Parsing, model and
 player are tested against `testdata/viewer/`, `home.js` by its own tests; only canvas
 drawing and the page wiring have no automated check beyond a fake context, so after a
 change to `web/js/render.js` or `main.js` look at it in a browser (run `pit serve`
-from the repo root, pick imp and dwarf and press Fight; load
+from the repo root, pick imp and dwarf and press Fight, and run
+`pit play bots/imp.s bots/dwarf.s`, which must open on a playing match; load
 `internal/replay/testdata/imp_dwarf_seed1.jsonl`; step, play, pause, seek).
 `web/embed.go` is Go, so the gofmt check covers `web` too.
 

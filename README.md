@@ -9,6 +9,20 @@ Players write bots in a small assembly language. The bots are loaded into a circ
 core, take turns executing one instruction each, and try to make each other crash.
 The same bots, seed and configuration always produce the same match.
 
+## Quick start
+
+Build `pit` (see [Build and test](#build-and-test)) and, from the repo root, run
+
+```sh
+.cache/bin/pit play bots/imp.s bots/dwarf.s
+```
+
+It runs the match, serves the web viewer on 127.0.0.1 with the match loaded, opens your
+browser on it and plays it; press Ctrl-C to stop. The seed is random and printed, so
+`--seed N` repeats a match; `--terminal` plays it in the terminal instead (the seed is then printed when the
+viewer ends with `q`, so pass `--seed N` for a match you may stop with Ctrl-C),
+`--no-open` only prints the address, and `--replay FILE` also saves the replay.
+
 ## Status
 
 Early development. What exists today:
@@ -42,7 +56,8 @@ Early development. What exists today:
   and prints its hash; `pit run` with no files lists the flags), and `pit view
   replay.jsonl`, which plays a replay in the terminal (commands typed as lines:
   `s` step, `b` back, `g N` seek, `p` play/pause, `p N` play N cycles, `q` quit;
-  `pit view --help` lists them).
+  `pit view --help` lists them), and `pit play a.s b.s`, which runs a match and shows
+  it in the browser (or with `--terminal` in the terminal viewer) in one command.
 - `bots/`: four original starter bots (`imp.s`, `dwarf.s`, `replicator.s`,
   `scanner.s`); golden tests in `internal/arena` pin their match results. Try
   `pit run bots/imp.s bots/dwarf.s --seed 1`.

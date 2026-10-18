@@ -222,7 +222,8 @@ fightForm.addEventListener('submit', async (e) => {
 });
 
 /**
- * Fetches a replay from the server and plays it or, for ?replay=, shows it paused.
+ * Fetches a replay from the server and plays it or, for ?replay= without &autoplay=1,
+ * shows it paused.
  * @param {string} url
  * @param {string} name
  * @param {boolean} autoplay
@@ -322,7 +323,9 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ?replay=URL loads a replay from a URL, for example one served by "pit serve
-// --replays DIR" at /replays/NAME.
-const wanted = new URLSearchParams(location.search).get('replay');
-if (wanted) fetchReplay(wanted, wanted, false);
+// --replays DIR" at /replays/NAME, and shows it paused; with &autoplay=1 (the address
+// that "pit play" opens) it starts playing.
+const params = new URLSearchParams(location.search);
+const wanted = params.get('replay');
+if (wanted) fetchReplay(wanted, wanted, params.get('autoplay') === '1');
 showListing();

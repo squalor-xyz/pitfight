@@ -27,7 +27,8 @@ let a page read files from file://. Open the printed address. The start page lis
 the bots (*.s) of the --bots directory and the replays (*.jsonl) of the --replays
 directory: pick two bots and press Fight to run a match with a seed and watch it,
 or click a replay. A replay file can still be chosen with the file picker, and
-?replay=/replays/NAME in the address loads a file from the --replays directory.
+?replay=/replays/NAME in the address loads a file from the --replays directory
+(add &autoplay=1 to play it at once).
 
 Flags:
   --port N        port to listen on (default 8080; 0 picks a free port)
@@ -105,13 +106,23 @@ func serve(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stdout, "pit serve: files of %s are at %sreplays/\n", replayDir, url)
 	}
 
+	if err := serveUntil(ctx, ln, h); err != nil {
+		fmt.Fprintf(stderr, "pit serve: %v\n", err)
+		return 1
+	}
+	return 0
+}
+
+// serveUntil serves h on ln until ctx ends, then shuts the server down (closing it
+// if the connections do not finish within two seconds). It returns the error that
+// stopped the server, or nil when ctx ended.
+func serveUntil(ctx context.Context, ln net.Listener, h http.Handler) error {
 	srv := &http.Server{Handler: h, ReadHeaderTimeout: 10 * time.Second}
 	errc := make(chan error, 1)
 	go func() { errc <- srv.Serve(ln) }()
 	select {
 	case err := <-errc:
-		fmt.Fprintf(stderr, "pit serve: %v\n", err)
-		return 1
+		return err
 	case <-ctx.Done():
 	}
 	shutdown, cancel := context.WithTimeout(context.Background(), 2*time.Second)
@@ -119,7 +130,7 @@ func serve(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	if err := srv.Shutdown(shutdown); err != nil {
 		srv.Close()
 	}
-	return 0
+	return nil
 }
 
 // newServeHandler returns the handler of "pit serve": the viewer at / (from webDir,
