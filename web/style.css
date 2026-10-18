@@ -1,0 +1,102 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+:root {
+  color-scheme: dark;
+  --bg: #14161a;
+  --panel: #1c1f25;
+  --fg: #e6e8eb;
+  --muted: #9aa1ab;
+  --line: #333943;
+  --accent: #6aa9ff;
+  --danger: #ff7b72;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0 16px 24px;
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.4 system-ui, sans-serif;
+}
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 0;
+}
+
+h1 { margin: 0; font-size: 20px; letter-spacing: 0.04em; }
+#source, .hint, #intro { color: var(--muted); }
+code { font-family: ui-monospace, monospace; }
+
+#error {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--danger);
+  border-radius: 4px;
+  color: var(--danger);
+  white-space: pre-wrap;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+button, select, input[type="file"] {
+  font: inherit;
+  color: var(--fg);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 4px 10px;
+}
+button { min-width: 44px; min-height: 36px; cursor: pointer; }
+button:hover { border-color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+output {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, monospace;
+}
+
+#seek { width: 100%; margin: 12px 0; }
+
+.stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 16px;
+  align-items: start;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: min(70vh, 640px);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+aside { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 12px; }
+#bots { list-style: none; margin: 0 0 12px; padding: 0; }
+#bots li { display: flex; align-items: center; gap: 8px; padding: 2px 0; font-variant-numeric: tabular-nums; }
+.swatch { width: 14px; height: 14px; border-radius: 3px; flex: none; }
+.pc { margin-left: auto; color: var(--muted); font-family: ui-monospace, monospace; }
+#result { margin: 0 0 12px; }
+.hint { margin: 0; font-size: 13px; }
+
+[hidden] { display: none !important; }
+
+@media (max-width: 720px) {
+  .stage { grid-template-columns: minmax(0, 1fr); }
+  canvas { height: min(60vh, 480px); }
+  output { margin-left: 0; }
+}

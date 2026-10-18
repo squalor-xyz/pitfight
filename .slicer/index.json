@@ -886,7 +886,7 @@
       "id": "S15",
       "title": "Build the web viewer",
       "short_title": "Build the web viewer",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [
         "S11",
@@ -954,7 +954,7 @@
         "importance": 2,
         "urgency": 1,
         "effort": 3,
-        "attempts": 0
+        "attempts": 1
       }
     },
     {
@@ -1247,7 +1247,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 103,
+    "next_id": 107,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -2165,6 +2165,42 @@
         "kind": "decision",
         "title": "Viewer fixture: imp vs dwarf, seed 24, core 24, 12 cycles",
         "body": "S12 (C35). testdata/viewer/fixture.jsonl = pit run bots/imp.s bots/dwarf.s --seed 24 --core-size 24 --min-separation 3 --cycle-limit 40 --replay FILE (a test regenerates it byte for byte); the imp starts at 3, the dwarf at 19, the imp wraps no edge but dies at cycle 12 on the dwarf's bomb. Reason: small enough to derive every frame by hand, with writes by both bots, a bomb overwriting an imp copy, and a death.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C103",
+        "kind": "decision",
+        "title": "S15 (C35): pit serve command shape",
+        "body": "S15 (C35). 'pit serve [--port N] [--replays DIR] [--web DIR]' (net/http, stdlib) always binds 127.0.0.1 (default port 8080, 0 = free port), serves the viewer at / and the --replays directory at /replays/. Directories are opened as os.Root, so .. and symlinks cannot leave them (a refused path is 404). Only GET and HEAD are served (405 with Allow otherwise), and a request whose Host is not loopback or localhost gets 403 with no body (DNS-rebinding guard). Ctrl-C stops it. Reason: the smallest stdlib option that works around browsers blocking fetch from file://; loopback only means no flag can expose files to the network; S14 reuses newServeHandler.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C104",
+        "kind": "decision",
+        "title": "S15 (C35): web viewer embedded into pit, not shipped beside it",
+        "body": "S15 (C35). web/embed.go (package web, go:embed index.html style.css js) embeds the viewer files into the pit binary, excluding web/test; 'pit serve --web DIR' serves from disk instead for development. Reason: release archives hold one binary with no path to find web/ from, and embedding needs no change to scripts/build-release.sh.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C105",
+        "kind": "decision",
+        "title": "S15 (C35): web viewer layout, colors, replay loading and test run",
+        "body": "S15 (C35). Canvas: the core as square tiles in address order, tile colour per bot from last-writer id (golden-angle hues, hsl), empty cells dark grey, cells executed this cycle outlined in white (white tile if tiles are under 5 px); a core with more cells than pixels shows one tile per block of cells with the owner holding most cells, lowest id on a tie (as the terminal viewer). Side panel: per-bot live count and executed pc. Controls: first/back/play-pause/forward/last, speed (cycles per second), seek slider, keys Space/arrows/Home/End. Replay chosen with a file input, or '?replay=URL'. JS tests: 'node --test web/test/*.test.js' (node:test, shell glob). There is no package.json, so the Node must run .js files with ES module syntax by module-syntax detection: Node 26.12.0 is verified, older versions are not; CI runs the tests with the runner's Node and prints node --version. Reason: spec leaves layout open; the Go terminal viewer's block rule and frame model are the reference.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C106",
+        "kind": "decision",
+        "title": "S15 (C35): JS replay parser strictness",
+        "body": "S15 (C35). web/js/replay.js checks the line grammar and order, bot ids, address ranges, consecutive cycles, load cell counts and the end line against the cycles, and rejects other versions with 'replay: unsupported version N (this reader reads version 1)'. Config and bot-length ranges follow docs/spec/match.md section 1: core_size 1..1048576, max_processes 1..1048576, min_separation 0..1048576, cycle_limit 1..2^31-1, bot length 1..1048576, so a file cannot make the model allocate a huge core. It does not check exact writer bytes, placement consistency or that a bot steps only while live (the note from S11), so the model shows what is recorded. Live count = 1 + spawns - deaths, unclamped internally, shown as max(0, n) (as internal/tui). Reason: the viewer must not refuse files the Go reader accepts but should not trust ranges it indexes or allocates with.",
         "status": "active",
         "reason": "",
         "successor": ""

@@ -9,8 +9,10 @@ This page summarizes them.
 - Every new dependency needs owner approval first: Go modules, toolchains, wasm
   toolchains, JS packages. A proposal states why the standard library is not enough
   and confirms a FLOSS license.
-- The web viewer (planned) is plain JavaScript ES modules with canvas, no framework
-  and no build step. Its tests use `node:test`.
+- The web viewer (`web/`) is plain JavaScript ES modules with canvas, no framework
+  and no build step. Its tests use `node:test` (`node --test web/test/*.test.js`,
+  a Node that runs `.js` ES modules without a `package.json`; 26.12.0 is verified,
+  older versions are not). `pit serve` serves it on 127.0.0.1.
 - Do not run `go env -w`, and do not add a Makefile.
 
 ## Checks
@@ -21,7 +23,8 @@ Run from the repo root, in bash or zsh, with `scripts/env.sh` sourced:
 . scripts/env.sh
 go test ./...
 go vet ./...
-gofmt -l cmd internal              # must print nothing
+gofmt -l cmd internal web          # must print nothing
+node --test web/test/*.test.js     # the web viewer's tests
 go build -o .cache/bin/pit ./cmd/pit
 ```
 
