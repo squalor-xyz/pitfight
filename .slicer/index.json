@@ -398,7 +398,7 @@
       "id": "S08",
       "title": "Add the disassembler and round-trip tests",
       "short_title": "Add the disassembler and round-trip tests",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [
         "S07"
@@ -451,7 +451,7 @@
         "importance": 2,
         "urgency": 2,
         "effort": 1,
-        "attempts": 0
+        "attempts": 1
       }
     },
     {
@@ -1080,7 +1080,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 73,
+    "next_id": 75,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -1728,6 +1728,24 @@
         "kind": "decision",
         "title": "pit asm <file>: prints a re-assemblable listing (ORG line, one canonical instruction per line); exit 1 on error, 2 on usage",
         "body": "Implementer decision under C35 (S07, asm.md section 9). On success stdout gets 'ORG e' then 'OPCODE.MODIFIER <mode><value>, <mode><value>' per cell with signed decimal values and explicit modifiers, nothing else; an assembly error or unreadable file prints file:line:col: message (or 'pit asm: <os error>') on stderr and exits 1 with empty stdout; a wrong argument count or an argument starting with '-' prints 'usage: pit asm <file>' and exits 2. The file name is printed exactly as given. The usage text now lists asm as implemented, marks the other commands 'not implemented yet' and adds exit code 1. Reason: a listing is both human-readable and valid source, which the S08 round trip needs; the exit codes extend C40.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C73",
+        "kind": "decision",
+        "title": "Disassembly is asm.Disassemble(Program) []byte; pit asm is its CLI entry point",
+        "body": "Disassemble takes the Program (cells and entry) so the ORG line survives the round trip, and is the only listing formatter (moved from cmd/pit per C72); Writer is ignored. Reason: no binary cell format or cell source other than assembled source exists, so a separate pit disasm subcommand would print the same bytes as pit asm; documented in docs/spec/asm.md sections 8 and 9.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C74",
+        "kind": "decision",
+        "title": "isa.md section 8 listings are asm blocks without the N: prefix",
+        "body": "The three starter-bot listings in docs/spec/isa.md are tagged asm and the N: prefix moved into the trailing comment (; N: text), so TestRoundTripSpecExamples can extract and assemble them; the cells are unchanged.",
         "status": "active",
         "reason": "",
         "successor": ""

@@ -312,7 +312,8 @@ Different or absent:
 
 The ISA must express the starter bots (imp, bomber, replicator, scanner). Listings
 use the notation of section 2 with relative numeric offsets, one line per
-consecutive cell starting at offset 0. They are sketches to show the ISA reaches
+consecutive cell starting at offset 0; the number after each `;` is the cell's offset.
+They are programs in the assembly syntax of `docs/spec/asm.md`. They are sketches to show the ISA reaches
 each strategy; they are not balance results.
 
 **Imp.** One cell, a moving process: `MOV.I $0, $1` copies itself onto the next cell
@@ -320,36 +321,36 @@ each step, then continues into the copy.
 
 **Bomber** (stepping pointer in cell 3's B field, bomb is cell 3 itself):
 
-```
-0: ADD.AB #4, $3     ; step the pointer in cell 3
-1: MOV.I  $2, @2     ; copy cell 3 to cell 3 + (its B field)
-2: JMP.B  $-2, $0    ; loop to 0
-3: DAT.F  $0, $0     ; pointer and bomb
+```asm
+ADD.AB #4, $3        ; 0: step the pointer in cell 3
+MOV.I  $2, @2        ; 1: copy cell 3 to cell 3 + (its B field)
+JMP.B  $-2, $0       ; 2: loop to 0
+DAT.F  $0, $0        ; 3: pointer and bomb
 ```
 
 **Replicator** (copies cells 0..4 to offset 100, spawns the copy, then the original
 falls into cell 5 and dies; the copy re-initialises its own pointers):
 
-```
-0: MOV.A  #-5, $5    ; pointer cell 5: A = source offset (cell 0)
-1: MOV.AB #95, $4    ; pointer cell 5: B = destination offset (cell 100)
-2: MOV.I  }3, >3     ; copy one cell, then step both pointers
-3: JMN.A  $-1, $2    ; loop to 2 until the source pointer reaches 0
-4: SPL.B  $96, $0    ; spawn the copy at offset 100
-5: DAT.F  $0, $0     ; pointer cell; the original dies here
+```asm
+MOV.A  #-5, $5       ; 0: pointer cell 5: A = source offset (cell 0)
+MOV.AB #95, $4       ; 1: pointer cell 5: B = destination offset (cell 100)
+MOV.I  }3, >3        ; 2: copy one cell, then step both pointers
+JMN.A  $-1, $2       ; 3: loop to 2 until the source pointer reaches 0
+SPL.B  $96, $0       ; 4: spawn the copy at offset 100
+DAT.F  $0, $0        ; 5: pointer cell; the original dies here
 ```
 
 **Scanner** (steps a pointer by 7, compares the scanned cell with the empty
 reference, bombs the first different cell):
 
-```
-0: ADD.AB #7, $5     ; step the pointer in cell 5
-1: SNE.I  @4, $5     ; scanned cell (via cell 5) vs reference cell 6: skip if different
-2: JMP.B  $-2, $0    ; nothing found: loop to 0
-3: MOV.I  $3, @2     ; found: copy the bomb (cell 6) onto the scanned cell
-4: JMP.B  $-4, $0    ; loop to 0
-5: DAT.F  $0, $0     ; pointer: B = scan offset from this cell
-6: DAT.F  $0, $0     ; reference and bomb
+```asm
+ADD.AB #7, $5        ; 0: step the pointer in cell 5
+SNE.I  @4, $5        ; 1: scanned cell (via cell 5) vs reference cell 6: skip if different
+JMP.B  $-2, $0       ; 2: nothing found: loop to 0
+MOV.I  $3, @2        ; 3: found: copy the bomb (cell 6) onto the scanned cell
+JMP.B  $-4, $0       ; 4: loop to 0
+DAT.F  $0, $0        ; 5: pointer: B = scan offset from this cell
+DAT.F  $0, $0        ; 6: reference and bomb
 ```
 
 Known limit of these sketches: the scanner and bomber can reach their own cells after
