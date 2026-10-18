@@ -853,6 +853,17 @@
           "verified_by": "",
           "verified_at": "",
           "stale_after": ""
+        },
+        {
+          "id": "fef4f53b-dd03-4209-a0e7-09bbd7b9e31e",
+          "kind": "",
+          "text": "**2026-10-18** — From S15: pit serve takes two positional dirs and embeds an explicit file list (web/embed.go, C104); a WASM build needs its own mount or an options struct.",
+          "created_at": "2026-10-18T16:17:42Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
         }
       ],
       "claim": null,
@@ -1060,6 +1071,17 @@
           "verified_by": "",
           "verified_at": "",
           "stale_after": ""
+        },
+        {
+          "id": "b5273901-ea4d-42af-8122-e7b0a6e860a7",
+          "kind": "",
+          "text": "**2026-10-18** — From S15: web/terminal viewer parity (C19) rests on one fixture without SPL; add a shared SPL fixture in testdata/viewer read by both Go TestFrames and web/test/model.test.js. Minor: AGENTS.md:83 one long line, serveUsage symlink wording, a Host of 'localhost.' gets 403. Seek-from-0 costs 4-10 ms per back step on an 80000-cycle replay (add checkpoints only if longer limits matter).",
+          "created_at": "2026-10-18T16:17:42Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
         }
       ],
       "claim": null,
@@ -1183,7 +1205,19 @@
       "depends_on": [
         "S15"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "f6cb4772-ff8a-4b85-97cc-c57ccb192bc5",
+          "kind": "",
+          "text": "**2026-10-18** — From S15: hosted viewer needs an AGPL section 13 source link; decide whether ?replay= may fetch cross-origin.",
+          "created_at": "2026-10-18T16:17:42Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "S",

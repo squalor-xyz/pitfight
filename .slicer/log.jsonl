@@ -381,3 +381,6 @@
 {"when": "2026-10-18T16:15:03Z", "item": "C106", "action": "catalog", "from": "", "to": "body", "note": "edit"}
 {"when": "2026-10-18T16:15:03Z", "item": "C103", "action": "catalog", "from": "", "to": "body", "note": "edit"}
 {"when": "2026-10-18T16:17:07Z", "item": "S15", "action": "status", "from": "started", "to": "done", "note": "Verified: web viewer in web/ (replay, model, player, render, main); pit serve on 127.0.0.1 with loopback Host guard, GET/HEAD only, os.Root confinement; 71 node tests and Go tests green; frame model matches testdata/viewer/frames.json; canvas rendering manual check left to the owner.", "by": "Jon R"}
+{"when": "2026-10-18T16:17:42Z", "item": "S17", "action": "note", "from": "", "to": "", "note": "From S15: web/terminal viewer parity (C19) rests on one fixt", "by": "Jon R"}
+{"when": "2026-10-18T16:17:42Z", "item": "S14", "action": "note", "from": "", "to": "", "note": "From S15: pit serve takes two positional dirs and embeds an ", "by": "Jon R"}
+{"when": "2026-10-18T16:17:42Z", "item": "S20", "action": "note", "from": "", "to": "", "note": "From S15: hosted viewer needs an AGPL section 13 source link", "by": "Jon R"}
