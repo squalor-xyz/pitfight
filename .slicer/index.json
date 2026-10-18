@@ -714,7 +714,7 @@
       "id": "S13",
       "title": "Run tournaments with a scoreboard",
       "short_title": "Run tournaments with a scoreboard",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [
         "S09",
@@ -793,7 +793,7 @@
         "importance": 2,
         "urgency": 2,
         "effort": 2,
-        "attempts": 0
+        "attempts": 1
       }
     },
     {
@@ -1158,7 +1158,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 91,
+    "next_id": 97,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -1905,6 +1905,60 @@
         "kind": "decision",
         "title": "Starter scanner lap blind spot (S10)",
         "body": "The scanner's 2600-pass lap examines relative cells 10..7807, leaving 7808..7899 (inside placement's guaranteed-empty gap of 7900..7999) a ~92 cell blind spot for enemy code lying wholly there; accepted for the starter bot to keep it from examining its own cells; refines C81.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C91",
+        "kind": "decision",
+        "title": "Tournament scoring: win 3, tie 1 each, loss 0; rank by points, wins, name (S13)",
+        "body": "Implementer decision under C35 and C38 (S13). A won match scores 3 points, each bot of a tied match 1, a lost match 0; the scoreboard ranks by more points, then more wins, then the bot name in byte order, so no two bots share a rank. Reason: 3/1/0 is the usual Core War hill convention, keeps a tie worth less than half a win-and-loss pair so decisive bots rank above bots that only draw (the imp ties most matches), and the wins and name tiebreaks make the order total and independent of file order. docs/spec/tourney.md section 3.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C92",
+        "kind": "decision",
+        "title": "Tournament pairings: every pair in both orders each round, one seed per round (S13)",
+        "body": "Implementer decision under C35 (S13), answering the S04 note. Pairs are the unordered pairs of the name-sorted bots; each round plays every pair twice, as (a,b) then (b,a), so each bot is id 1 (first mover, match.md section 7) as often as id 2; all matches of a round use that round's seed. Reason: match ids are not rotated, so playing both orders is the simplest neutraliser and needs no change to the arena; a shared round seed keeps the two orders of a pair comparable. Matches are numbered along this fixed list, which is also the order results are scored and printed in (C36). docs/spec/tourney.md section 2.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C93",
+        "kind": "decision",
+        "title": "Tournament seeds: Seed(round) = first SplitMix64 output seeded with the round number, rounds from 1 (S13)",
+        "body": "Implementer decision under C35 and C36 (S13). Seed(r) is Next() of the match.md section 4 generator seeded with r, for r = 1..R; Seed(1)=10451216379200822465, Seed(2)=10905525725756348110. Reason: a pure function of the round with no clock and no math/rand, reusing the in-repo generator so it survives Go upgrades, and mixing spreads consecutive rounds over the whole 64-bit range instead of handing the placement small adjacent seeds. docs/spec/tourney.md section 2.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C94",
+        "kind": "decision",
+        "title": "pit tourney flags and exit codes (S13)",
+        "body": "Implementer decision under C35 (S13). pit tourney [flags] <dir>: --rounds N (default 100, the C18 acceptance count), --jobs N (default runtime.NumCPU; changes speed, never output), the four match config flags of pit run (--core-size, --cycle-limit, --max-processes, --min-separation; no --seed, rounds supply seeds), --json and --matches FILE; flags and the directory in any order. Bots are the *.s files directly in the directory, sorted by name and named without .s. Exit 0 ran, 1 directory, bot, config or file error, 2 usage (including rounds or jobs below 1). Reason: mirrors pit run (C75, C78) so one set of habits works for both, and the default 100 makes the C18 command short. docs/spec/tourney.md sections 1, 5 and 6.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C95",
+        "kind": "decision",
+        "title": "pit tourney output: text scoreboard; --json scoreboard lines; --matches per-match JSON lines with decimal-string seeds (S13)",
+        "body": "Implementer decision under C35 and C39 (S13). Default output is a config line, a scoring line and a right-aligned table (rank, bot, points, played, wins, ties, losses, mean_cycles); --json prints one object per bot (rank, bot, points, played, wins, ties, losses, cycles, mean_cycles); --matches FILE writes one object per match (index, round, seed, first, second, outcome, winner or null, cycles). Seeds are decimal strings (owner decision on C77). Both JSON forms are JSON lines with the same keys on every line. Reason: results stay as files with no database (C39) and uniform lines load straight into DuckDB read_json; the worker count is not printed so the bytes are the same for any --jobs. docs/spec/tourney.md section 5.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C96",
+        "kind": "decision",
+        "title": "tourney package API: Pairings, Matches, Seed, Run(cfg, bots, rounds, jobs), Score, Format* (S13)",
+        "body": "Implementer decision under C35 (S13). internal/tourney exports Pair/Pairings(n), Match/Matches(n, rounds), Seed(round), Bot{Name, Bot}, MatchResult{Match, Cycles, Winner (bot index, -1 for a tie)}, Run(arena.Config, []Bot, rounds, jobs) ([]MatchResult, error), Standing, Score(bots, results), and FormatText, FormatJSON and FormatMatches. Run uses a fixed-size goroutine pool fed match indexes over a channel; each worker writes only its own result slot, and an error is the one of the lowest failing match index. Reason: results are kept by match index, never by completion order or map iteration (C36), and the formatters live next to Score so a test can compare the exact scoreboard bytes across worker counts without the CLI.",
         "status": "active",
         "reason": "",
         "successor": ""

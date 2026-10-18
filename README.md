@@ -30,8 +30,11 @@ Early development. What exists today:
   `scanner.s`); golden tests in `internal/arena` pin their match results. Try
   `pit run bots/imp.s bots/dwarf.s --seed 1`.
 
-Planned: round-robin tournaments
-(`pit tourney`), a replay format, and terminal and web replay viewers (`pit view`).
+- `internal/tourney`: round-robin tournaments over many seeds on parallel workers, with
+  a reproducible scoreboard ([docs/spec/tourney.md](docs/spec/tourney.md)). Try
+  `pit tourney bots/ --rounds 100`.
+
+Planned: a replay format, and terminal and web replay viewers (`pit view`).
 
 ## Build and test
 
@@ -56,9 +59,9 @@ locally, run `scripts/build-release.sh v0.1.0 dist`.
 ## Layout
 
 - `cmd/pit/`: the `pit` command.
-- `internal/`: the packages (`isa`, `asm`, `vm` and `arena` so far).
+- `internal/`: the packages (`isa`, `asm`, `vm`, `arena` and `tourney` so far).
 - `bots/`: the starter bots.
-- `docs/spec/`: the ISA, assembly and match specs.
+- `docs/spec/`: the ISA, assembly, match and tournament specs.
 - `scripts/env.sh`: Go cache and temp setup. `scripts/build-release.sh`: release
   archives.
 - `.github/workflows/`: CI and tagged releases.

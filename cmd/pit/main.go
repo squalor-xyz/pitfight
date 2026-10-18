@@ -18,7 +18,7 @@ pit assembles pitfight bots, runs matches and tournaments, and views replays.
 Commands:
   asm      assemble a bot source file
   run      run a match between bots
-  tourney  run a round-robin tournament (not implemented yet)
+  tourney  run a round-robin tournament
   view     play back a recorded replay (not implemented yet)
   help     print this text
 
@@ -41,6 +41,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return runAsm(args[1:], stdout, stderr)
 	case "run":
 		return runRun(args[1:], stdout, stderr)
+	case "tourney":
+		return runTourney(args[1:], stdout, stderr)
 	case "help":
 		fmt.Fprint(stdout, usage)
 		return 0
