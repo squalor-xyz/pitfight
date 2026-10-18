@@ -27,10 +27,17 @@ Early development. What exists today:
 - `internal/replay`: the replay file (`docs/spec/replay.md`): versioned JSON lines with
   a stable SHA-256 hash, a strict reader, and a player that rebuilds the core and the
   executed addresses from the file without running the match.
+- `internal/tui`: the terminal viewer: a frame model of a replay (cell owners, executed
+  addresses, live processes per cycle), a step/play/pause/seek player and an ANSI
+  renderer, standard library only. `testdata/viewer/` holds the shared viewer fixture
+  and the frames every viewer must produce from it.
 - `pit`: the CLI. Today it prints usage and has `pit asm bot.s`, which assembles a bot
-  and prints the cells, and `pit run a.s b.s --seed 1`, which runs a match and prints
+  and prints the cells, `pit run a.s b.s --seed 1`, which runs a match and prints
   the result (`--json` for one line of JSON; `--replay FILE` also writes the replay
-  and prints its hash; `pit run` with no files lists the flags).
+  and prints its hash; `pit run` with no files lists the flags), and `pit view
+  replay.jsonl`, which plays a replay in the terminal (commands typed as lines:
+  `s` step, `b` back, `g N` seek, `p` play/pause, `p N` play N cycles, `q` quit;
+  `pit view --help` lists them).
 - `bots/`: four original starter bots (`imp.s`, `dwarf.s`, `replicator.s`,
   `scanner.s`); golden tests in `internal/arena` pin their match results. Try
   `pit run bots/imp.s bots/dwarf.s --seed 1`.
@@ -38,7 +45,7 @@ Early development. What exists today:
   a reproducible scoreboard ([docs/spec/tourney.md](docs/spec/tourney.md)). Try
   `pit tourney bots/ --rounds 100`.
 
-Planned: terminal and web replay viewers (`pit view`).
+Planned: the web replay viewer.
 
 ## Build and test
 
@@ -63,7 +70,8 @@ locally, run `scripts/build-release.sh v0.1.0 dist`.
 ## Layout
 
 - `cmd/pit/`: the `pit` command.
-- `internal/`: the packages (`isa`, `asm`, `vm`, `arena`, `replay` and `tourney` so far).
+- `internal/`: the packages (`isa`, `asm`, `vm`, `arena`, `replay`, `tourney` and `tui` so far).
+- `testdata/viewer/`: the shared viewer fixture (a replay) and its expected frames.
 - `bots/`: the starter bots.
 - `docs/spec/`: the ISA, assembly, match, replay and tournament specs.
 - `scripts/env.sh`: Go cache and temp setup. `scripts/build-release.sh`: release

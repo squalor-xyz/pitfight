@@ -1,0 +1,21 @@
+{
+  "description": "Expected frame model of fixture.jsonl (written by: pit run bots/imp.s bots/dwarf.s --seed 24 --core-size 24 --min-separation 3 --cycle-limit 40 --replay testdata/viewer/fixture.jsonl) after each cycle 0..12, derived by hand from the bot sources and docs/spec/isa.md and match.md. Every viewer must produce these frames. Frame fields: cycle = 0 for the loaded core, c for the core after cycle c; owners = per core address, the id of the bot that last wrote the cell (0 = never written; bot cells count as written by their bot); executed = the steps of that cycle in execution order (ascending bot id), each the bot and the address it executed (empty at cycle 0); live = live process count per bot, index i for bot i+1: 1 at the start plus spawns minus deaths, with the final count shown as 0 if it is negative (only the final value is clamped, not the count after each event).",
+  "fixture": "fixture.jsonl",
+  "core_size": 24,
+  "cycles": 12,
+  "frames": [
+    {"cycle":0,"owners":[0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2],"executed":[],"live":[1,1]},
+    {"cycle":1,"owners":[0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2],"executed":[{"bot":1,"pc":3},{"bot":2,"pc":19}],"live":[1,1]},
+    {"cycle":2,"owners":[0,0,2,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2],"executed":[{"bot":1,"pc":4},{"bot":2,"pc":20}],"live":[1,1]},
+    {"cycle":3,"owners":[0,0,2,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2],"executed":[{"bot":1,"pc":5},{"bot":2,"pc":21}],"live":[1,1]},
+    {"cycle":4,"owners":[0,0,2,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2],"executed":[{"bot":1,"pc":6},{"bot":2,"pc":19}],"live":[1,1]},
+    {"cycle":5,"owners":[0,0,2,1,1,1,2,1,1,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2],"executed":[{"bot":1,"pc":7},{"bot":2,"pc":20}],"live":[1,1]},
+    {"cycle":6,"owners":[0,0,2,1,1,1,2,1,1,1,0,0,0,0,0,0,0,0,0,2,2,2,2,2],"executed":[{"bot":1,"pc":8},{"bot":2,"pc":21}],"live":[1,1]},
+    {"cycle":7,"owners":[0,0,2,1,1,1,2,1,1,1,1,0,0,0,0,0,0,0,0,2,2,2,2,2],"executed":[{"bot":1,"pc":9},{"bot":2,"pc":19}],"live":[1,1]},
+    {"cycle":8,"owners":[0,0,2,1,1,1,2,1,1,1,2,1,0,0,0,0,0,0,0,2,2,2,2,2],"executed":[{"bot":1,"pc":10},{"bot":2,"pc":20}],"live":[1,1]},
+    {"cycle":9,"owners":[0,0,2,1,1,1,2,1,1,1,2,1,1,0,0,0,0,0,0,2,2,2,2,2],"executed":[{"bot":1,"pc":11},{"bot":2,"pc":21}],"live":[1,1]},
+    {"cycle":10,"owners":[0,0,2,1,1,1,2,1,1,1,2,1,1,1,0,0,0,0,0,2,2,2,2,2],"executed":[{"bot":1,"pc":12},{"bot":2,"pc":19}],"live":[1,1]},
+    {"cycle":11,"owners":[0,0,2,1,1,1,2,1,1,1,2,1,1,1,2,0,0,0,0,2,2,2,2,2],"executed":[{"bot":1,"pc":13},{"bot":2,"pc":20}],"live":[1,1]},
+    {"cycle":12,"owners":[0,0,2,1,1,1,2,1,1,1,2,1,1,1,2,0,0,0,0,2,2,2,2,2],"executed":[{"bot":1,"pc":14},{"bot":2,"pc":21}],"live":[0,1]}
+  ]
+}
