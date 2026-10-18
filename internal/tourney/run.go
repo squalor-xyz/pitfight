@@ -41,7 +41,7 @@ func Run(cfg arena.Config, bots []Bot, rounds, jobs int) ([]MatchResult, error) 
 		go func() {
 			defer wg.Done()
 			for i := range next {
-				results[i], errs[i] = play(cfg, bots, matches[i])
+				results[i], errs[i] = playMatch(cfg, bots, matches[i])
 			}
 		}()
 	}
@@ -59,10 +59,15 @@ func Run(cfg arena.Config, bots []Bot, rounds, jobs int) ([]MatchResult, error) 
 	return results, nil
 }
 
+// playMatch plays one match; a test replaces it to observe the workers.
+var playMatch = play
+
 // play runs one match.
 func play(cfg arena.Config, bots []Bot, m Match) (MatchResult, error) {
 	cfg.Seed = m.Seed
-	res, _, err := arena.Run(cfg, []arena.Bot{bots[m.First].Bot, bots[m.Second].Bot})
+	// A tournament scores the match and needs none of its events: with no observer
+	// the arena keeps only the events of one cycle, not those of the whole match.
+	res, err := arena.RunObserved(cfg, []arena.Bot{bots[m.First].Bot, bots[m.Second].Bot}, nil)
 	if err != nil {
 		return MatchResult{}, err
 	}

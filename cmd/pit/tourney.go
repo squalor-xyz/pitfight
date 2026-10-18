@@ -24,7 +24,9 @@ Runs a round-robin tournament of the bots in a directory (every *.s file, sorted
 name) and prints a scoreboard. In every round each pair of bots plays twice, once in
 each order, on a seed derived from the round number. A win scores 3 points, each bot
 of a tied match 1 and a loss 0. The scoreboard is the same for the same bots, rounds
-and configuration, whatever --jobs is. Flags and the directory may come in any order.
+and configuration, whatever --jobs is. Flags and the directory may come in any order;
+every argument after -- is the directory, and a flag that takes a value takes the next
+argument as it, even if that is --.
 
 Flags:
   --rounds N          number of rounds, at least 1 (default 100)
@@ -58,30 +60,15 @@ func runTourney(args []string, stdout, stderr io.Writer) int {
 	fs.BoolVar(&asJSON, "json", false, "")
 	fs.StringVar(&matchesPath, "matches", "", "")
 
-	// The flag package stops at the first non-flag argument; parse again after each
-	// one so that "pit tourney bots/ --rounds 10" works.
-	var dirs []string
-	for {
-		if err := fs.Parse(args); err != nil {
-			if errors.Is(err, flag.ErrHelp) {
-				fmt.Fprint(stdout, tourneyUsage)
-				return 0
-			}
-			fmt.Fprintf(stderr, "pit tourney: %v\n\n%s", err, tourneyUsage)
-			return 2
+	// Flags and the directory may come in any order, and "--" ends the flags.
+	dirs, err := parseInterleaved(fs, args)
+	if err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			fmt.Fprint(stdout, tourneyUsage)
+			return 0
 		}
-		rest := fs.Args()
-		// Parse consumed a "--" if the last argument it took is one; everything after
-		// it is a directory.
-		if used := len(args) - len(rest); used > 0 && args[used-1] == "--" {
-			dirs = append(dirs, rest...)
-			break
-		}
-		if len(rest) == 0 {
-			break
-		}
-		dirs = append(dirs, rest[0])
-		args = rest[1:]
+		fmt.Fprintf(stderr, "pit tourney: %v\n\n%s", err, tourneyUsage)
+		return 2
 	}
 	if len(dirs) != 1 {
 		fmt.Fprint(stderr, tourneyUsage)

@@ -354,3 +354,28 @@ func TestServeInUsage(t *testing.T) {
 		t.Errorf("serve --help via run = %d, stdout %q", code, out.String())
 	}
 }
+
+// TestLocalHostTrailingDot: the Host "localhost." (the root-dot form of the same
+// name) is accepted like "localhost"; other dotted or look-alike names are not.
+func TestLocalHostTrailingDot(t *testing.T) {
+	for host, want := range map[string]bool{
+		"localhost":        true,
+		"localhost.":       true,
+		"localhost.:8080":  true,
+		"LocalHost.:80":    true,
+		"localhost..":      false,
+		".localhost":       false,
+		"localhost.evil.":  false,
+		"evil.localhost.":  false,
+		".":                false,
+		"127.0.0.1.":       false,
+		"[::1]:8080":       true,
+		"127.0.0.1:8080":   true,
+		"example.com.:80":  false,
+		"xlocalhost.:8080": false,
+	} {
+		if got := isLocalHost(host); got != want {
+			t.Errorf("isLocalHost(%q) = %v, want %v", host, got, want)
+		}
+	}
+}

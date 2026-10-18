@@ -35,9 +35,12 @@ type Result struct {
 }
 
 // Run runs one match (match.md sections 5 to 8) and returns its result and the
-// VM events of every step, in execution order. The events do not include the
-// loading of the bots. Run has no I/O, no clock and no map; the same bots and
-// config always give the same result and events. It does not change bots.
+// VM events of every step, in execution order. All the events of the match are kept
+// in memory (tens of MB for a long match); a caller that only needs the result calls
+// RunObserved with a nil observe, which keeps the events of one cycle at a time. The
+// events do not include the loading of the bots. Run has no I/O, no clock and no
+// map; the same bots and config always give the same result and events. It does not
+// change bots.
 func Run(cfg Config, bots []Bot) (Result, []vm.Event, error) {
 	var events []vm.Event
 	res, err := RunObserved(cfg, bots, func(_ int, _ *vm.Core, steps []Step) {
@@ -65,8 +68,10 @@ type Step struct {
 // the bots are loaded, and then after each cycle c = 1, 2, ... with that cycle's
 // steps in execution order (ascending bot id), silent steps included. core is the
 // live core; observe must not modify it, and must not keep it, the steps or their
-// events past the call (the buffers are reused). observe may be nil. A refused match
-// returns the error before observe is called.
+// events past the call (the buffers are reused). observe may be nil, and then no event
+// outlives its cycle: this is the events-off path of a caller that only needs the
+// result, as the tournament runner is. A refused match returns the error before
+// observe is called.
 func RunObserved(cfg Config, bots []Bot, observe func(cycle int, core *vm.Core, steps []Step)) (Result, error) {
 	if err := Validate(cfg, bots); err != nil {
 		return Result{}, err

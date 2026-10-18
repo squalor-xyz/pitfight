@@ -151,10 +151,10 @@ func newServeHandler(webDir, replayDir string) (h http.Handler, closeRoots func(
 }
 
 // localOnly answers 403 to a request whose Host is not this machine (127.0.0.0/8,
-// ::1 or localhost, any port) and 405 to any method but GET and HEAD, both with an
-// empty body. The listener is on 127.0.0.1 already; the Host check stops a web page
-// on another site from reading replays through a DNS name that it points at
-// 127.0.0.1 (DNS rebinding).
+// ::1 or localhost or localhost., any port) and 405 to any method but GET and HEAD,
+// both with an empty body. The listener is on 127.0.0.1 already; the Host check stops
+// a web page on another site from reading replays through a DNS name that it points
+// at 127.0.0.1 (DNS rebinding).
 func localOnly(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !isLocalHost(r.Host) {
@@ -171,14 +171,15 @@ func localOnly(next http.Handler) http.Handler {
 }
 
 // isLocalHost reports whether a Host header (host with an optional port) names a
-// loopback address or localhost.
+// loopback address or localhost (also as "localhost.", with the root dot).
 func isLocalHost(hostport string) bool {
 	host := hostport
 	if h, _, err := net.SplitHostPort(hostport); err == nil {
 		host = h
 	}
 	host = strings.TrimSuffix(strings.TrimPrefix(host, "["), "]")
-	if strings.EqualFold(host, "localhost") {
+	// "localhost." with the root dot is the same name as "localhost" (RFC 1034).
+	if strings.EqualFold(strings.TrimSuffix(host, "."), "localhost") {
 		return true
 	}
 	ip := net.ParseIP(host)

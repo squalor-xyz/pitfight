@@ -6,16 +6,19 @@ import (
 	"fmt"
 
 	"github.com/squalor-xyz/pitfight/internal/isa"
+	"github.com/squalor-xyz/pitfight/internal/vm"
 )
 
-// Limits of match.md section 1.
+// Limits of match.md section 1. They are exported so that internal/replay holds a
+// replay header to the same limits (docs/spec/replay.md section 3) instead of keeping
+// copies; MaxCoreSize is the limit of the VM core.
 const (
-	maxCoreSize      = 1 << 20
-	maxCycleLimit    = 1<<31 - 1
-	maxMaxProcesses  = 1 << 20
-	maxMinSeparation = 1 << 20
-	maxBots          = 1 << 20
-	maxBotLength     = 1 << 20
+	MaxCoreSize      = vm.MaxCoreSize
+	MaxCycleLimit    = 1<<31 - 1
+	MaxMaxProcesses  = 1 << 20
+	MaxMinSeparation = 1 << 20
+	MaxBots          = 1 << 20
+	MaxBotLength     = 1 << 20
 )
 
 // Config is a match configuration (docs/spec/match.md section 1).
@@ -79,10 +82,10 @@ func validateConfig(cfg Config) *Error {
 		v        int
 		min, max int
 	}{
-		{"CORESIZE", cfg.CoreSize, 1, maxCoreSize},
-		{"CYCLELIMIT", cfg.CycleLimit, 1, maxCycleLimit},
-		{"MAXPROCESSES", cfg.MaxProcesses, 1, maxMaxProcesses},
-		{"MINSEPARATION", cfg.MinSeparation, 0, maxMinSeparation},
+		{"CORESIZE", cfg.CoreSize, 1, MaxCoreSize},
+		{"CYCLELIMIT", cfg.CycleLimit, 1, MaxCycleLimit},
+		{"MAXPROCESSES", cfg.MaxProcesses, 1, MaxMaxProcesses},
+		{"MINSEPARATION", cfg.MinSeparation, 0, MaxMinSeparation},
 	}
 	for _, c := range checks {
 		if c.v < c.min || c.v > c.max {
@@ -93,13 +96,13 @@ func validateConfig(cfg Config) *Error {
 }
 
 func validateBots(bots []Bot) *Error {
-	if len(bots) < 2 || len(bots) > maxBots {
-		return &Error{InvalidBots, fmt.Sprintf("invalid bots: need 2..%d bots, got %d", maxBots, len(bots))}
+	if len(bots) < 2 || len(bots) > MaxBots {
+		return &Error{InvalidBots, fmt.Sprintf("invalid bots: need 2..%d bots, got %d", MaxBots, len(bots))}
 	}
 	for i, b := range bots {
 		l := len(b.Cells)
-		if l < 1 || l > maxBotLength {
-			return &Error{InvalidBots, fmt.Sprintf("invalid bots: bot %d length %d out of range 1..%d", i+1, l, maxBotLength)}
+		if l < 1 || l > MaxBotLength {
+			return &Error{InvalidBots, fmt.Sprintf("invalid bots: bot %d length %d out of range 1..%d", i+1, l, MaxBotLength)}
 		}
 		if b.Entry < 0 || b.Entry >= l {
 			return &Error{InvalidBots, fmt.Sprintf("invalid bots: bot %d entry offset %d outside 0..%d", i+1, b.Entry, l-1)}
