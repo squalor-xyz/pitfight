@@ -1392,7 +1392,19 @@
         "S23",
         "S26"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "d8cf6782-857f-41a7-b221-108b75d8fd1a",
+          "kind": "",
+          "text": "**2026-10-18** — Later notes from the S24 relay: busybox wget lacks --https-only, so bare Alpine without curl cannot use the default URL (fails closed; README says curl or GNU wget); SHA256SUMS comes from the same origin as the archive, so it guards integrity, not a compromised release (C126); the real GitHub releases/latest redirect is untested (tests use an httptest redirect of the same shape).",
+          "created_at": "2026-10-18T23:53:29Z",
+          "attempt": 1,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "M",
