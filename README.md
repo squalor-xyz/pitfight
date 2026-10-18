@@ -29,8 +29,11 @@ Early development. What exists today:
   executed addresses from the file without running the match.
 - `internal/tui`: the terminal viewer: a frame model of a replay (cell owners, executed
   addresses, live processes per cycle), a step/play/pause/seek player and an ANSI
-  renderer, standard library only. `testdata/viewer/` holds the shared viewer fixture
-  and the frames every viewer must produce from it.
+  renderer, standard library only. `testdata/viewer/` holds the shared viewer fixtures
+  and the frames every viewer must produce from them.
+- `internal/acceptance`: test-only. It builds `pit` and checks the five v1 acceptance
+  criteria (spec coverage, the imp against dwarf result and replay hash, assembler
+  errors and round trips, a stable 100-round tournament scoreboard, viewer parity).
 - `pit`: the CLI. Today it prints usage and has `pit asm bot.s`, which assembles a bot
   and prints the cells, `pit run a.s b.s --seed 1`, which runs a match and prints
   the result (`--json` for one line of JSON; `--replay FILE` also writes the replay
@@ -76,8 +79,9 @@ locally, run `scripts/build-release.sh v0.1.0 dist`.
 ## Layout
 
 - `cmd/pit/`: the `pit` command.
-- `internal/`: the packages (`isa`, `asm`, `vm`, `arena`, `replay`, `tourney` and `tui` so far).
-- `testdata/viewer/`: the shared viewer fixture (a replay) and its expected frames.
+- `internal/`: the packages (`isa`, `asm`, `vm`, `arena`, `replay`, `tourney` and `tui` so far), and
+  `acceptance`, the test-only v1 acceptance checks that run the built `pit`.
+- `testdata/viewer/`: the shared viewer fixtures (replays) and their expected frames.
 - `bots/`: the starter bots.
 - `docs/spec/`: the ISA, assembly, match, replay and tournament specs.
 - `scripts/env.sh`: Go cache and temp setup. `scripts/build-release.sh`: release

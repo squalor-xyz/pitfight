@@ -23,6 +23,12 @@ export const fixtureText = () => readText('testdata/viewer/fixture.jsonl');
 /** The expected frames of the fixture (testdata/viewer/frames.json). */
 export const framesJSON = () => JSON.parse(readText('testdata/viewer/frames.json'));
 
+/** The SPL fixture (testdata/viewer/spl_fixture.jsonl): spawns and deaths. */
+export const splFixtureText = () => readText('testdata/viewer/spl_fixture.jsonl');
+
+/** The expected frames of the SPL fixture (testdata/viewer/spl_frames.json). */
+export const splFramesJSON = () => JSON.parse(readText('testdata/viewer/spl_frames.json'));
+
 /** The real replay of imp against dwarf (internal/replay/testdata). */
 export const impDwarfText = () => readText('internal/replay/testdata/imp_dwarf_seed1.jsonl');
 

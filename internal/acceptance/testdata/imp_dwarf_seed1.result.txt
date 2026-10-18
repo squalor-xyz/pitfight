@@ -1,0 +1,6 @@
+match: 2 bots, seed 1, core size 8000, cycle limit 80000, max processes 8000, min separation 100
+bot 1: bots/imp.s (length 1, start 4519, entry_address 4519)
+bot 2: bots/dwarf.s (length 5, start 2555, entry_address 2555)
+cycles: 5880
+survivors: 2
+result: win bot 2

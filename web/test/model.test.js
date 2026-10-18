@@ -5,7 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseReplay } from '../js/replay.js';
 import { Model } from '../js/model.js';
-import { buildReplay, fixtureText, framesJSON, impDwarfText, DAT } from './support.js';
+import { buildReplay, fixtureText, framesJSON, impDwarfText, splFixtureText, splFramesJSON, DAT } from './support.js';
 
 /** @param {string} text */
 const modelOf = (text) => new Model(parseReplay(text));
@@ -14,17 +14,24 @@ const w = (a, c = DAT) => ({ t: 'w', a, c });
 const s = (a) => ({ t: 's', a });
 const d = { t: 'd' };
 
-test('the frame model at each cycle equals testdata/viewer/frames.json', () => {
-  const ff = framesJSON();
-  assert.equal(ff.fixture, 'fixture.jsonl');
-  assert.equal(ff.frames.length, 13);
-  const m = modelOf(fixtureText());
-  assert.equal(m.cycles, ff.cycles);
-  for (const want of ff.frames) {
-    m.seek(want.cycle);
-    assert.deepEqual(m.frame(), want, `cycle ${want.cycle}`);
-  }
-});
+// The Go terminal viewer (internal/tui TestFrames) checks the same two pairs, so a
+// frame that differs between the viewers fails one of the two suites.
+for (const [label, fixture, frames, fixtureName] of [
+  ['testdata/viewer/frames.json', fixtureText, framesJSON, 'fixture.jsonl'],
+  ['testdata/viewer/spl_frames.json (spawns and deaths)', splFixtureText, splFramesJSON, 'spl_fixture.jsonl'],
+]) {
+  test(`the frame model at each cycle equals ${label}`, () => {
+    const ff = frames();
+    assert.equal(ff.fixture, fixtureName);
+    assert.equal(ff.frames.length, 13);
+    const m = modelOf(fixture());
+    assert.equal(m.cycles, ff.cycles);
+    for (const want of ff.frames) {
+      m.seek(want.cycle);
+      assert.deepEqual(m.frame(), want, `cycle ${want.cycle}`);
+    }
+  });
+}
 
 test('frames.json matches when visiting cycles in reverse (backward seeks)', () => {
   const ff = framesJSON();

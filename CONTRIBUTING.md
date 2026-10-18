@@ -28,6 +28,10 @@ node --test web/test/*.test.js     # the web viewer's tests
 go build -o .cache/bin/pit ./cmd/pit
 ```
 
+`go test ./...` includes `internal/acceptance`, which builds `pit` and runs the
+v1 acceptance criteria, among them a 100-round tournament of the starter bots; add
+`-short` to skip that one while iterating.
+
 GitHub Actions runs the same checks on pushes to `main` and on pull requests
 (`.github/workflows/ci.yml`). Run them locally before handing off a change anyway.
 

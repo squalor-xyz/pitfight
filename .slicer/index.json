@@ -1007,7 +1007,7 @@
       "id": "S17",
       "title": "Verify v1 acceptance criteria",
       "short_title": "Verify v1 acceptance criteria",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [
         "S08",
@@ -1082,6 +1082,17 @@
           "verified_by": "",
           "verified_at": "",
           "stale_after": ""
+        },
+        {
+          "id": "b635691d-6c9a-4d4b-898f-e2bf350c1610",
+          "kind": "",
+          "text": "**2026-10-18** — Later notes from the S17 relay: README.md:34-36 'checks the five v1 acceptance criteria' overstates C19 (canvas check is manual); web/test/model.test.js:25 hard-codes 13 frames for both fixture pairs (Go uses cycles+1); C17/C18 assert exactly the 4 starter bots; TestC19's web half only checks the web tests reference the fixture files. Earlier cleanup notes on this item remain open as later work.",
+          "created_at": "2026-10-18T16:37:47Z",
+          "attempt": 1,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
         }
       ],
       "claim": null,
@@ -1112,7 +1123,7 @@
         "importance": 3,
         "urgency": 1,
         "effort": 1,
-        "attempts": 0
+        "attempts": 1
       }
     },
     {
@@ -1281,7 +1292,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 107,
+    "next_id": 109,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -2235,6 +2246,24 @@
         "kind": "decision",
         "title": "S15 (C35): JS replay parser strictness",
         "body": "S15 (C35). web/js/replay.js checks the line grammar and order, bot ids, address ranges, consecutive cycles, load cell counts and the end line against the cycles, and rejects other versions with 'replay: unsupported version N (this reader reads version 1)'. Config and bot-length ranges follow docs/spec/match.md section 1: core_size 1..1048576, max_processes 1..1048576, min_separation 0..1048576, cycle_limit 1..2^31-1, bot length 1..1048576, so a file cannot make the model allocate a huge core. It does not check exact writer bytes, placement consistency or that a bot steps only while live (the note from S11), so the model shows what is recorded. Live count = 1 + spawns - deaths, unclamped internally, shown as max(0, n) (as internal/tui). Reason: the viewer must not refuse files the Go reader accepts but should not trust ranges it indexes or allocates with.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C107",
+        "kind": "decision",
+        "title": "Acceptance tests (internal/acceptance) build and run the real pit binary",
+        "body": "TestMain builds ./cmd/pit with go build and the tests exec it from the repo root, because package main cannot be imported and the criteria name the command; goldens are internal/acceptance/testdata/imp_dwarf_seed1.result.txt and .hash.txt, and the golden hash is also compared with fullHash in internal/replay/replay_test.go.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C108",
+        "kind": "decision",
+        "title": "Second shared viewer fixture with SPL: testdata/viewer/spl_fixture.jsonl and spl_frames.json",
+        "body": "frames.json had no spawn or death, so live-process parity of the Go and web viewers was unchecked; the pair is written by pit run from testdata/viewer/spl_splitter.s and spl_sitter.s (seed 1, core 24), its frames derived by hand, and read by internal/tui TestFrames and web/test/model.test.js.",
         "status": "active",
         "reason": "",
         "successor": ""
