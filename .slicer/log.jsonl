@@ -370,3 +370,5 @@
 {"when": "2026-10-18T15:40:26Z", "item": "C101", "action": "catalog", "from": "", "to": "pit view plumbing: runIn(args, stdin, stdout, stderr)", "note": "add"}
 {"when": "2026-10-18T15:40:26Z", "item": "C102", "action": "catalog", "from": "", "to": "Viewer fixture: imp vs dwarf, seed 24, core 24, 12 cycles", "note": "add"}
 {"when": "2026-10-18T15:50:44Z", "item": "S12", "action": "status", "from": "started", "to": "done", "note": "pit view with internal/tui model, player and ANSI renderer; shared testdata/viewer fixture.jsonl and frames.json (hand-derived); decisions C97-C102; go test, vet, gofmt and build green; 58 mutations red; reviewer and gate PASS. Interactive manual check in a real terminal remains with the owner.", "by": "Jon R"}
+{"when": "2026-10-18T15:51:13Z", "item": "S15", "action": "note", "from": "", "to": "", "note": "From S12: the viewer fixture has no SPL step, so frames.json", "by": "Jon R"}
+{"when": "2026-10-18T15:51:13Z", "item": "S17", "action": "note", "from": "", "to": "", "note": "From S12 (later): Frame doc comment at internal/tui/model.go", "by": "Jon R"}

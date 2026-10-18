@@ -915,6 +915,17 @@
           "verified_by": "",
           "verified_at": "",
           "stale_after": ""
+        },
+        {
+          "id": "d3d657e1-9fa0-4d5a-9837-78a595593ee4",
+          "kind": "",
+          "text": "**2026-10-18** — From S12: the viewer fixture has no SPL step, so frames.json never shows live > 1. Count live as 1 + spawns - deaths and show a final value below 0 as 0 (Go clamps only the final value). Seeking back rebuilds from cycle 0 because replay v1 has no snapshots.",
+          "created_at": "2026-10-18T15:51:13Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
         }
       ],
       "claim": null,
@@ -1033,6 +1044,17 @@
           "kind": "",
           "text": "**2026-10-18** — From S11 (later): replay read.go:20-25 duplicates arena's private limits (arena/config.go:13-18); os.WriteFile in cmd/pit/run.go may leave a partial replay file on a write error; the golden fixture hand-check used a Python stepper that is not in the repo (replay.md section 9 says so).",
           "created_at": "2026-10-18T15:27:58Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        },
+        {
+          "id": "bc32a2e1-c943-4ed4-aa76-7125fe1775ad",
+          "kind": "",
+          "text": "**2026-10-18** — From S12 (later): Frame doc comment at internal/tui/model.go:35 and C97 do not say the live clamp applies only to the final value; C102 fixture wording is clumsy; a stdin line over 64 KB ends pit view input with exit 1 (bufio.Scanner limit). pit view is line-mode (raw single-key input would need terminal handling beyond v1); interactive check in a real terminal is the owner's.",
+          "created_at": "2026-10-18T15:51:13Z",
           "attempt": 0,
           "by": "Jon R",
           "verified_by": "",
