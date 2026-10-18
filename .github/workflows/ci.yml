@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Runs the project checks from AGENTS.md. release.yml also calls it before a release.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: test
+        run: . scripts/env.sh && go test ./...
+      - name: vet
+        run: . scripts/env.sh && go vet ./...
+      - name: gofmt
+        run: |
+          . scripts/env.sh
+          out=$(gofmt -l cmd internal)
+          if [ -n "$out" ]; then
+            echo "gofmt needed on:"
+            echo "$out"
+            exit 1
+          fi
+      - name: build
+        run: . scripts/env.sh && go build -o .cache/bin/pit ./cmd/pit

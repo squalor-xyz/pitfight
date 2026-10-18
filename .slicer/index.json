@@ -1035,7 +1035,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 63,
+    "next_id": 64,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -1332,9 +1332,9 @@
         "kind": "decision",
         "title": "CI deferred",
         "body": "Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run locally (see the in-repo Go cache and checks constraint).",
-        "status": "active",
-        "reason": "",
-        "successor": ""
+        "status": "retired",
+        "reason": "Owner lifted the CI deferral 2026-10-17; GitHub Actions chosen",
+        "successor": "C63"
       },
       {
         "id": "C34",
@@ -1593,6 +1593,15 @@
         "kind": "decision",
         "title": "LICENSE present; README.md and CONTRIBUTING.md added; SPDX header on Go and shell files",
         "body": "Implementer decision under C35 and C32 (2026-10-17, owner-requested docs setup). LICENSE holds the AGPL-3.0 text per C32; NOTICE's last line points to it and AGENTS.md records its source and that it is never edited. README.md gives the overview, status, checks and license; CONTRIBUTING.md summarizes AGENTS.md rules and slicer use; PROJECT.md gets a background-only note at the top, body unchanged. Every Go file and scripts/env.sh start with SPDX-License-Identifier: AGPL-3.0-or-later. Reason: the owner asked for the license and contributor docs; AGENTS.md stays the source of truth for agents.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C63",
+        "kind": "decision",
+        "title": "CI and releases on GitHub Actions",
+        "body": "Owner decision 2026-10-17, lifting C33. .github/workflows/ci.yml runs go test, go vet, gofmt -l cmd internal and go build with scripts/env.sh sourced, on ubuntu-latest, on pushes to main and on pull requests. release.yml runs on tags v*: it calls ci.yml, then scripts/build-release.sh VERSION dist builds pit with CGO_ENABLED=0, -trimpath and -ldflags=-s -w for linux, darwin and windows on amd64 and arm64, archives (tar.gz; zip for windows) holding pit, LICENSE, NOTICE and README.md, writes SHA256SUMS, and publishes them with gh release create --generate-notes. Approved dependencies (C13): actions/checkout v7.0.1 and actions/setup-go v7.0.0 (GitHub, MIT), pinned by commit SHA, with the go-version-file from go.mod and no cache. GitHub Actions is a proprietary service, approved by the owner. pit has no version output yet; that is left to a future slice.",
         "status": "active",
         "reason": "",
         "successor": ""

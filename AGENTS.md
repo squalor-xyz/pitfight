@@ -33,6 +33,8 @@ a shared circular memory arena. Go, standard library only.
 - `web/`: the web viewer. `docs/spec/`: the ISA and format specs (`isa.md`,
   `match.md`). `bots/`: the starter bots. `web/` and `bots/` do not exist yet.
 - `scripts/env.sh`: Go cache and temp setup (see below).
+  `scripts/build-release.sh`: release archives. `.github/workflows/`: CI and
+  release.
 - `README.md`: project overview for readers. `CONTRIBUTING.md`: contributor
   summary of these rules, including slicer use. Keep both in step with this file.
 
@@ -54,7 +56,12 @@ and creating nothing. It also refuses to run unless its repo root holds `go.mod`
 and `scripts/env.sh`. Run every Go command with it sourced. Never run
 `go env -w`; it writes outside the repo. Do not add a Makefile.
 
-CI is deferred and no CI host is chosen (C33); the checks above run locally.
+CI runs on GitHub Actions (C63): `.github/workflows/ci.yml` runs the checks above
+on pushes to `main` and on pull requests; still run them locally before handoff.
+Pushing a tag `v*` runs `release.yml`, which reruns the checks, builds archives
+with `scripts/build-release.sh VERSION OUTDIR` and publishes a GitHub Release.
+Workflows use only `actions/checkout` and `actions/setup-go`, pinned by commit
+SHA, plus the runner's `gh`; any other action needs owner approval (C13).
 
 ## Rules
 

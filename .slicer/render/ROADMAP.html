@@ -97,8 +97,6 @@
 <div class="prose"><p>Owner decision 2026-10-15. Accepted: terminal viewer first, web viewer second. Replaces assumption C25.</p></div>
 <h3>C32 License: AGPL-3.0-or-later, copyright Squalor LLC</h3>
 <div class="prose"><p>Owner decision 2026-10-15. The project license is AGPL-3.0-or-later, copyright Squalor LLC. LICENSE must be the verbatim AGPL-3.0 text and must not be modified. The copyright line and the or-later notice go in a NOTICE file. Owner override 2026-10-17: the agent fetches the text instead of the owner supplying it; www.gnu.org refused TLS from the owner&#x27;s network, so it was taken from github/choosealicense.com _licenses/agpl-3.0.txt (last changed in commit 088a44d), YAML front matter and the separating blank line removed, otherwise byte for byte (661 lines, sha256 8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef). Rejected: licenses/license-templates (template placeholders, old http URLs) and SPDX license-list-data (rewrapped).</p></div>
-<h3>C33 CI deferred</h3>
-<div class="prose"><p>Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run locally (see the in-repo Go cache and checks constraint).</p></div>
 <h3>C38 Game rules are the implementer&#x27;s call</h3>
 <div class="prose"><p>Owner decision 2026-10-15: the tie rule, minimum starting separation and tournament scoring rule are decided by the implementing slice under C35 (record each with a one-line reason; reviewer checks). The ISA spec (S03) still needs owner sign-off.</p></div>
 <h3>C39 No database in v1; SQLite proposed for the hill</h3>
@@ -147,6 +145,11 @@
 <div class="prose"><p>S06 implementer decision under C35: Event contains Kind (uint8 EventKind: CellWrite=0, ProcessSpawn=1, ProcessDeath=2), Bot uint32, PC int32, Address int32 and Cell isa.Cell. CellWrite holds the complete post-write cell including writer; process events have zero Cell. PC identifies the executed instruction, Address the written cell, child PC or dead PC. Only actual SPL child creation emits spawn; continuations and denied spawns emit nothing. All cell writes, including equal-value writes, appear in spec phase order; process events follow A/B post-increments. Reason: plain integer values retain intermediate writes for replay without I/O or clocks; caller-owned buffers avoid imposing event storage on the VM.</p></div>
 <h3>C62 LICENSE present; README.md and CONTRIBUTING.md added; SPDX header on Go and shell files</h3>
 <div class="prose"><p>Implementer decision under C35 and C32 (2026-10-17, owner-requested docs setup). LICENSE holds the AGPL-3.0 text per C32; NOTICE&#x27;s last line points to it and AGENTS.md records its source and that it is never edited. README.md gives the overview, status, checks and license; CONTRIBUTING.md summarizes AGENTS.md rules and slicer use; PROJECT.md gets a background-only note at the top, body unchanged. Every Go file and scripts/env.sh start with SPDX-License-Identifier: AGPL-3.0-or-later. Reason: the owner asked for the license and contributor docs; AGENTS.md stays the source of truth for agents.</p></div>
+<h3>C63 CI and releases on GitHub Actions</h3>
+<div class="prose"><p>Owner decision 2026-10-17, lifting C33. .github/workflows/ci.yml runs go test, go vet, gofmt -l cmd internal and go build with scripts/env.sh sourced, on ubuntu-latest, on pushes to main and on pull requests. release.yml runs on tags v*: it calls ci.yml, then scripts/build-release.sh VERSION dist builds pit with CGO_ENABLED=0, -trimpath and -ldflags=-s -w for linux, darwin and windows on amd64 and arm64, archives (tar.gz; zip for windows) holding pit, LICENSE, NOTICE and README.md, writes SHA256SUMS, and publishes them with gh release create --generate-notes. Approved dependencies (C13): actions/checkout v7.0.1 and actions/setup-go v7.0.0 (GitHub, MIT), pinned by commit SHA, with the go-version-file from go.mod and no cache. GitHub Actions is a proprietary service, approved by the owner. pit has no version output yet; that is left to a future slice.</p></div>
+<h3>C33 CI deferred</h3>
+<div class="prose"><p>Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run locally (see the in-repo Go cache and checks constraint).</p></div>
+<p><em>Retired: Owner lifted the CI deferral 2026-10-17; GitHub Actions chosen. Successor: C63.</em></p>
 <h3>C42 LICENSE left absent; pending state recorded in AGENTS.md and NOTICE; SPDX header on Go and shell files</h3>
 <div class="prose"><p>Implementer decision under C35 and C32 (S02). LICENSE is not created because the owner has not supplied the AGPL-3.0 text; AGENTS.md has a License section stating it is PENDING and that the text must not be written, fetched or edited, and NOTICE&#x27;s last line points to it. Every Go file and scripts/env.sh start with SPDX-License-Identifier: AGPL-3.0-or-later. Reason: slice step 5 allows either outcome; the flag in both files keeps a missing LICENSE from reading as an oversight.</p></div>
 <p><em>Retired: LICENSE now exists (C32 override 2026-10-17); superseded by C62. Successor: C62.</em></p>
@@ -184,7 +187,7 @@
 <tr class="open"><td>8</td><td>S14</td><td>Optional Go WASM build for live matches</td><td>S</td><td>1</td><td>vm, web</td><td>PROJECT.md Milestone 7, Stack recommendation</td><td class="status">—</td></tr>
 <tr class="open"><td>9</td><td>S15</td><td>Build the web viewer</td><td>L</td><td>3</td><td>web</td><td>PROJECT.md Milestone 7, Goals 6</td><td class="status">—</td></tr>
 <tr class="open"><td>10</td><td>S16</td><td>Check licensing of Redcode standards and warriors</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Dependency / licensing notes</td><td class="status">—</td></tr>
-<tr class="open"><td>11</td><td>S17</td><td>Verify v1 acceptance criteria</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md v1 acceptance criteria</td><td class="status">—</td></tr>
+<tr class="open"><td>11</td><td>S17</td><td>Verify v1 acceptance criteria</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md v1 acceptance criteria · retired decision C33</td><td class="status">—</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>Later tier</strong></td></tr>
 <tr class="other"><td>12</td><td>S18</td><td>LLM agent harness</td><td>L</td><td>3</td><td>harness</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
 <tr class="other"><td>13</td><td>S19</td><td>Persistent hill of ranked bots</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
@@ -193,9 +196,9 @@
 </tbody></table>
 <table><thead><tr><th>#</th><th>ID</th><th>Title</th><th>Size</th><th>Effort</th><th>Trees</th><th>Findings</th><th>Status</th></tr></thead><tbody>
 <tr class="group"><td></td><td colspan="7"><strong>Decisions</strong></td></tr>
-<tr class="done"><td>16</td><td>S01</td><td>Confirm open decisions</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Open decisions</td><td class="status">done</td></tr>
+<tr class="done"><td>16</td><td>S01</td><td>Confirm open decisions</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Open decisions · retired decision C33</td><td class="status">done</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v1 foundation</strong></td></tr>
-<tr class="done"><td>17</td><td>S02</td><td>Set up project scaffolding</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md Stack recommendation, Risks</td><td class="status">done</td></tr>
+<tr class="done"><td>17</td><td>S02</td><td>Set up project scaffolding</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md Stack recommendation, Risks · retired decision C33</td><td class="status">done</td></tr>
 <tr class="done"><td>18</td><td>S03</td><td>Write the ISA spec</td><td>M</td><td>2</td><td>docs</td><td>PROJECT.md Milestone 1, Goals 1</td><td class="status">done</td></tr>
 <tr class="done"><td>19</td><td>S04</td><td>Specify match rules and verify default parameters</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Goals 3-4, Open decisions 5</td><td class="status">done</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v1 core</strong></td></tr>

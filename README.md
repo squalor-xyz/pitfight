@@ -34,12 +34,21 @@ gofmt -l cmd internal              # must print nothing
 go build -o .cache/bin/pit ./cmd/pit
 ```
 
+## Releases
+
+Pushing a tag such as `v0.1.0` runs the checks and publishes a GitHub Release with
+`pit` built for Linux, macOS and Windows on amd64 and arm64, plus a `SHA256SUMS`
+file. To build the same archives locally, run
+`scripts/build-release.sh v0.1.0 dist`.
+
 ## Layout
 
 - `cmd/pit/`: the `pit` command.
 - `internal/`: the packages (`isa` and `vm` so far).
 - `docs/spec/`: the ISA and match specs.
-- `scripts/env.sh`: Go cache and temp setup.
+- `scripts/env.sh`: Go cache and temp setup. `scripts/build-release.sh`: release
+  archives.
+- `.github/workflows/`: CI and tagged releases.
 
 ## Contributing
 

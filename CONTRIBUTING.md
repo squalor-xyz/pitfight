@@ -25,7 +25,8 @@ gofmt -l cmd internal              # must print nothing
 go build -o .cache/bin/pit ./cmd/pit
 ```
 
-There is no CI yet, so run these locally before handing off a change.
+GitHub Actions runs the same checks on pushes to `main` and on pull requests
+(`.github/workflows/ci.yml`). Run them locally before handing off a change anyway.
 
 ## Rules
 

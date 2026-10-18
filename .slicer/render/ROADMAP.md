@@ -138,10 +138,6 @@ Owner decision 2026-10-15. Accepted: terminal viewer first, web viewer second. R
 
 Owner decision 2026-10-15. The project license is AGPL-3.0-or-later, copyright Squalor LLC. LICENSE must be the verbatim AGPL-3.0 text and must not be modified. The copyright line and the or-later notice go in a NOTICE file. Owner override 2026-10-17: the agent fetches the text instead of the owner supplying it; www.gnu.org refused TLS from the owner's network, so it was taken from github/choosealicense.com _licenses/agpl-3.0.txt (last changed in commit 088a44d), YAML front matter and the separating blank line removed, otherwise byte for byte (661 lines, sha256 8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef). Rejected: licenses/license-templates (template placeholders, old http URLs) and SPDX license-list-data (rewrapped).
 
-### C33 CI deferred
-
-Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run locally (see the in-repo Go cache and checks constraint).
-
 ### C38 Game rules are the implementer's call
 
 Owner decision 2026-10-15: the tie rule, minimum starting separation and tournament scoring rule are decided by the implementing slice under C35 (record each with a one-line reason; reviewer checks). The ISA spec (S03) still needs owner sign-off.
@@ -238,6 +234,16 @@ S06 implementer decision under C35: Event contains Kind (uint8 EventKind: CellWr
 
 Implementer decision under C35 and C32 (2026-10-17, owner-requested docs setup). LICENSE holds the AGPL-3.0 text per C32; NOTICE's last line points to it and AGENTS.md records its source and that it is never edited. README.md gives the overview, status, checks and license; CONTRIBUTING.md summarizes AGENTS.md rules and slicer use; PROJECT.md gets a background-only note at the top, body unchanged. Every Go file and scripts/env.sh start with SPDX-License-Identifier: AGPL-3.0-or-later. Reason: the owner asked for the license and contributor docs; AGENTS.md stays the source of truth for agents.
 
+### C63 CI and releases on GitHub Actions
+
+Owner decision 2026-10-17, lifting C33. .github/workflows/ci.yml runs go test, go vet, gofmt -l cmd internal and go build with scripts/env.sh sourced, on ubuntu-latest, on pushes to main and on pull requests. release.yml runs on tags v*: it calls ci.yml, then scripts/build-release.sh VERSION dist builds pit with CGO_ENABLED=0, -trimpath and -ldflags=-s -w for linux, darwin and windows on amd64 and arm64, archives (tar.gz; zip for windows) holding pit, LICENSE, NOTICE and README.md, writes SHA256SUMS, and publishes them with gh release create --generate-notes. Approved dependencies (C13): actions/checkout v7.0.1 and actions/setup-go v7.0.0 (GitHub, MIT), pinned by commit SHA, with the go-version-file from go.mod and no cache. GitHub Actions is a proprietary service, approved by the owner. pit has no version output yet; that is left to a future slice.
+
+### C33 CI deferred
+
+Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run locally (see the in-repo Go cache and checks constraint).
+
+*Retired: Owner lifted the CI deferral 2026-10-17; GitHub Actions chosen. Successor: C63.*
+
 ### C42 LICENSE left absent; pending state recorded in AGENTS.md and NOTICE; SPDX header on Go and shell files
 
 Implementer decision under C35 and C32 (S02). LICENSE is not created because the owner has not supplied the AGPL-3.0 text; AGENTS.md has a License section stating it is PENDING and that the text must not be written, fetched or edited, and NOTICE's last line points to it. Every Go file and scripts/env.sh start with SPDX-License-Identifier: AGPL-3.0-or-later. Reason: slice step 5 allows either outcome; the flag in both files keeps a missing LICENSE from reading as an oversight.
@@ -297,7 +303,7 @@ PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first 
 | 8 | [S14](slices/S14.md) | Optional Go WASM build for live matches | S | 1 | vm, web | PROJECT.md Milestone 7, Stack recommendation | — |
 | 9 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | — |
 | 10 | [S16](slices/S16.md) | Check licensing of Redcode standards and warriors | S | 1 | docs | PROJECT.md Dependency / licensing notes | — |
-| 11 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria | — |
+| 11 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria · retired decision C33 | — |
 | Later tier | | | | | | | |
 | 12 | [S18](slices/S18.md) | LLM agent harness | L | 3 | harness | PROJECT.md Feature tiers: Later | later |
 | 13 | [S19](slices/S19.md) | Persistent hill of ranked bots | M | 2 | tourney | PROJECT.md Feature tiers: Later | later |
@@ -309,9 +315,9 @@ PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
 | Decisions | | | | | | | |
-| 16 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions | done |
+| 16 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions · retired decision C33 | done |
 | v1 foundation | | | | | | | |
-| 17 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks | done |
+| 17 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks · retired decision C33 | done |
 | 18 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |
 | 19 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | done |
 | v1 core | | | | | | | |
