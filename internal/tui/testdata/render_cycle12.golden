@@ -1,0 +1,7 @@
+[H[2Jpitfight  cycle 12/12  core 24  paused
+[0;31m1[0m bot 1  live 0  pc 14
+[0;32m2[0m bot 2  live 1  pc 21
+ 0 ..[0;32m2[0;31m111[0;32m2[0;31m1[0m
+ 8 [0;31m11[0;32m2[0;31m111[0;7;32m2[0m.
+16 ...[0;32m22[0;7;32m2[0;32m22[0m
+s [N] step  b [N] back  g N seek  p [N] play/pause  q quit

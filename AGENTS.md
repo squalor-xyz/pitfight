@@ -25,14 +25,18 @@ a shared circular memory arena. Go, standard library only.
 ## Layout
 
 - `cmd/pit/`: `main`. `run(args, stdout, stderr)` returns the exit code; today
-  it handles usage, `pit asm`, `pit run` and `pit tourney`.
+  it handles usage, `pit asm`, `pit run`, `pit tourney` and `pit view`
+  (`runIn` is `run` with a stdin for the commands of `pit view`).
 - `internal/isa`, `asm`, `vm`, `arena`, `replay`, `tourney`, `tui`: the
   packages, one slice at a time. Only `internal/isa` (instruction types),
   `internal/asm` (the assembler and disassembler), `internal/vm` (core memory, operand
   evaluation, opcode execution, process queues and events), `internal/arena`
   (the seeded generator, placement and the match loop), `internal/replay` (the
-  replay file: writer, strict reader, hashes and the player that rebuilds the core)
-  and `internal/tourney` (round-robin tournaments and the scoreboard) exist so far.
+  replay file: writer, strict reader, hashes and the player that rebuilds the core),
+  `internal/tourney` (round-robin tournaments and the scoreboard) and `internal/tui`
+  (the terminal viewer: frame model, player, ANSI renderer) exist so far.
+- `testdata/viewer/`: the shared viewer fixture (`fixture.jsonl`, written by `pit run`)
+  and `frames.json`, the frames every viewer (terminal and web) must produce from it.
 - `web/`: the web viewer. `docs/spec/`: the ISA, assembly and format specs
   (`isa.md`, `asm.md`, `match.md`, `replay.md`, `tourney.md`). `bots/`: the starter bots (`imp.s`, `dwarf.s`, `replicator.s`, `scanner.s`). `web/` does not exist yet.
 - `scripts/env.sh`: Go cache and temp setup (see below).
