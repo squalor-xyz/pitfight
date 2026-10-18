@@ -25,13 +25,13 @@ a shared circular memory arena. Go, standard library only.
 ## Layout
 
 - `cmd/pit/`: `main`. `run(args, stdout, stderr)` returns the exit code; today
-  it handles usage only.
+  it handles usage and `pit asm`.
 - `internal/isa`, `asm`, `vm`, `arena`, `replay`, `tourney`, `tui`: the
-  packages, one slice at a time. Only `internal/isa` (instruction types) and
-  `internal/vm` (core memory, operand evaluation, opcode execution, process queues and events)
-  exist so far.
-- `web/`: the web viewer. `docs/spec/`: the ISA and format specs (`isa.md`,
-  `match.md`). `bots/`: the starter bots. `web/` and `bots/` do not exist yet.
+  packages, one slice at a time. Only `internal/isa` (instruction types),
+  `internal/asm` (the assembler) and `internal/vm` (core memory, operand
+  evaluation, opcode execution, process queues and events) exist so far.
+- `web/`: the web viewer. `docs/spec/`: the ISA, assembly and format specs
+  (`isa.md`, `asm.md`, `match.md`). `bots/`: the starter bots. `web/` and `bots/` do not exist yet.
 - `scripts/env.sh`: Go cache and temp setup (see below).
   `scripts/build-release.sh`: release archives. `.github/workflows/`: CI and
   release.

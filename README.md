@@ -13,14 +13,18 @@ The same bots, seed and configuration always produce the same match.
 
 Early development. What exists today:
 
-- The instruction set spec, [docs/spec/isa.md](docs/spec/isa.md), and the match spec,
+- The instruction set spec, [docs/spec/isa.md](docs/spec/isa.md), the assembly
+  language spec, [docs/spec/asm.md](docs/spec/asm.md), and the match spec,
   [docs/spec/match.md](docs/spec/match.md).
 - `internal/isa`: instruction types.
+- `internal/asm`: the assembler, with labels, expressions and errors that carry a line
+  and column.
 - `internal/vm`: core memory, operand evaluation, opcode execution, process queues
   and events.
-- `pit`: the CLI. Today it only prints usage.
+- `pit`: the CLI. Today it prints usage and has `pit asm bot.s`, which assembles a bot
+  and prints the cells.
 
-Planned: the assembler (`pit asm`), matches (`pit run`), round-robin tournaments
+Planned: matches (`pit run`), round-robin tournaments
 (`pit tourney`), a replay format, and terminal and web replay viewers (`pit view`).
 
 ## Build and test
@@ -46,8 +50,8 @@ file. To build the same archives locally, run
 ## Layout
 
 - `cmd/pit/`: the `pit` command.
-- `internal/`: the packages (`isa` and `vm` so far).
-- `docs/spec/`: the ISA and match specs.
+- `internal/`: the packages (`isa`, `asm` and `vm` so far).
+- `docs/spec/`: the ISA, assembly and match specs.
 - `scripts/env.sh`: Go cache and temp setup. `scripts/build-release.sh`: release
   archives.
 - `.github/workflows/`: CI and tagged releases.
