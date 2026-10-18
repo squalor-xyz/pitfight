@@ -242,6 +242,38 @@ Owner decision 2026-10-17, lifting C33. .github/workflows/ci.yml runs go test, g
 
 Owner decision 2026-10-17. The pitfight mark (concept chosen by the owner) is a teal ring, the circular core, with a teal pointer and a cream pointer facing each other. The master and exports live in the private Squalor branding repo under generated/logos/pitfight/. This repo keeps only an unmodified copy, assets/pitfight-512.png, shown in README.md. The branding LICENSE grants that use, the GitHub social preview (pitfight-social.png, uploaded by the owner in repo Settings) and, for the future web viewer, its favicon-32.png, favicon-180.png and favicon.svg. The logo is Copyright Squalor LLC, all rights reserved, and is not covered by the AGPL; README.md says so. Never edit it here.
 
+### C65 asm API: Assemble(name, src) (Program{Cells, Entry}, error) with *asm.Error{File,Line,Col,Msg}
+
+Implementer decision under C35 (S07). Assemble returns a Program holding the isa.Cell slice and the entry offset, and the first error as *asm.Error whose text is file:line:col: message (line and col start at 1, col counts bytes); on error the Program is the zero value. Reason: match.md section 5 needs an entry offset next to the cells, so a bare []isa.Cell would lose it; one error is enough for a bot file and keeps the first-error order well defined.
+
+### C66 asm syntax: ';' comments, 'label:' definitions, case-insensitive opcodes/modifiers/ORG, case-sensitive labels, opcode[.mod] [A[, B]]
+
+Implementer decision under C35 (S07, docs/spec/asm.md sections 1-4). One statement per line; any number of 'name:' labels before it; a label names the next instruction (or the program length if none follows); label names may not be an opcode or ORG; modes # $ * @ { < } > precede the operand expression, default $; an omitted operand is $0. Reason: the colon removes the Redcode ambiguity between a label and an opcode and is easy to lex by hand; the rest follows common Redcode practice.
+
+### C67 asm default modifier: Redcode '94 table without MOD
+
+Implementer decision under C35 (S07, asm.md section 4). DAT and NOP: F; MOV, SEQ, SNE: AB if A is #, else B if B is #, else I; ADD, SUB, MUL, DIV: AB, B, else F; SLT: AB if A is #, else B; JMP, JMZ, JMN, DJN, SPL: B. Reason: isa.md leaves the default to the assembler (section 2) and the Redcode '94 table lets the starter bots be written without explicit modifiers.
+
+### C68 asm expressions: + - * / % and unary +/-, parentheses, labels relative to the instruction, int32 range
+
+Implementer decision under C35 (S07, asm.md section 6). Precedence: unary, then * / %, then binary + -, left-associative; decimal literals only; / and % truncate toward zero like Go; division by zero and any result outside int32 (a literal may be 2147483648 so the minimum can be written) is an error; a label's value is index(label) - index(instruction holding the operand), and in ORG it is the absolute index; expression height is limited to 256. Reason: the smallest set that writes offsets and label differences, with one documented range that makes int64 arithmetic overflow-free.
+
+### C69 asm output cells keep operand values as written (signed int32), not normalized to CORESIZE
+
+Implementer decision under C35 (S07, asm.md section 6). The assembler does not know CORESIZE, and match.md section 5 stores Norm(v) when the bot is loaded, so Cell.AValue and BValue from Assemble may be negative. Reason: keeps a program independent of the core size and keeps listings and the round trip exact.
+
+### C70 asm entry offset: the ORG expression directive, default 0, must lie in 0..L-1
+
+Implementer decision under C35 (S07, asm.md section 5), answering the S04 note. 'ORG expression' on any line, at most once, with labels as absolute indexes; Program.Entry carries the value; without ORG it is 0. Reason: match.md section 5 needs an entry offset e in [0, L) and isa.md has none; ORG is the Redcode name for it.
+
+### C71 asm errors: first error only, syntax errors before evaluation errors, fixed message texts and positions
+
+Implementer decision under C35 (S07, asm.md section 7). Assembly stops at the first error; syntax errors are found in source order while reading, then undefined labels, evaluation errors, the empty program and the ORG range in the order asm.md lists; each message text and its position is a documented table that TestErrors checks. Reason: C17 asks for line and column errors, and fixed texts make them testable; one error per run avoids cascades.
+
+### C72 pit asm <file>: prints a re-assemblable listing (ORG line, one canonical instruction per line); exit 1 on error, 2 on usage
+
+Implementer decision under C35 (S07, asm.md section 9). On success stdout gets 'ORG e' then 'OPCODE.MODIFIER <mode><value>, <mode><value>' per cell with signed decimal values and explicit modifiers, nothing else; an assembly error or unreadable file prints file:line:col: message (or 'pit asm: <os error>') on stderr and exits 1 with empty stdout; a wrong argument count or an argument starting with '-' prints 'usage: pit asm <file>' and exits 2. The file name is printed exactly as given. The usage text now lists asm as implemented, marks the other commands 'not implemented yet' and adds exit code 1. Reason: a listing is both human-readable and valid source, which the S08 round trip needs; the exit codes extend C40.
+
 ### C33 CI deferred
 
 Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run locally (see the in-repo Go cache and checks constraint).
@@ -292,38 +324,39 @@ PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first 
 
 *Retired: Settled by owner decision C31 (2026-10-15)..*
 
-21 items · — 11 · done 6 · later 4
+21 items · — 10 · done 7 · later 4
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
 | v0.1.0 | | | | | | | |
-| 1 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | — |
-| 2 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | — |
-| 3 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | — |
-| 4 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | — |
-| 5 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | — |
-| 6 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | — |
-| 7 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | — |
-| 8 | [S14](slices/S14.md) | Optional Go WASM build for live matches | S | 1 | vm, web | PROJECT.md Milestone 7, Stack recommendation | — |
-| 9 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | — |
-| 10 | [S16](slices/S16.md) | Check licensing of Redcode standards and warriors | S | 1 | docs | PROJECT.md Dependency / licensing notes | — |
-| 11 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria · retired decision C33 | — |
+| 1 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | — |
+| 2 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | — |
+| 3 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | — |
+| 4 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | — |
+| 5 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | — |
+| 6 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | — |
+| 7 | [S14](slices/S14.md) | Optional Go WASM build for live matches | S | 1 | vm, web | PROJECT.md Milestone 7, Stack recommendation | — |
+| 8 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | — |
+| 9 | [S16](slices/S16.md) | Check licensing of Redcode standards and warriors | S | 1 | docs | PROJECT.md Dependency / licensing notes | — |
+| 10 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria · retired decision C33 | — |
 | Later tier | | | | | | | |
-| 12 | [S18](slices/S18.md) | LLM agent harness | L | 3 | harness | PROJECT.md Feature tiers: Later | later |
-| 13 | [S19](slices/S19.md) | Persistent hill of ranked bots | M | 2 | tourney | PROJECT.md Feature tiers: Later | later |
-| 14 | [S20](slices/S20.md) | Host the web visualizer on squalor.xyz | S | 2 | web | PROJECT.md Feature tiers: Later | later |
-| 15 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
+| 11 | [S18](slices/S18.md) | LLM agent harness | L | 3 | harness | PROJECT.md Feature tiers: Later | later |
+| 12 | [S19](slices/S19.md) | Persistent hill of ranked bots | M | 2 | tourney | PROJECT.md Feature tiers: Later | later |
+| 13 | [S20](slices/S20.md) | Host the web visualizer on squalor.xyz | S | 2 | web | PROJECT.md Feature tiers: Later | later |
+| 14 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
 
 ---
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
 | Decisions | | | | | | | |
-| 16 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions · retired decision C33 | done |
+| 15 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions · retired decision C33 | done |
 | v1 foundation | | | | | | | |
-| 17 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks · retired decision C33 | done |
-| 18 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |
-| 19 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | done |
+| 16 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks · retired decision C33 | done |
+| 17 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |
+| 18 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | done |
 | v1 core | | | | | | | |
-| 20 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | done |
-| 21 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | done |
+| 19 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | done |
+| 20 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | done |
+| v0.1.0 | | | | | | | |
+| 21 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | done |

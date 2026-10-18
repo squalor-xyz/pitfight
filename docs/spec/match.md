@@ -241,7 +241,7 @@ A bot is given to the match as:
   values stored as `Norm(v)` for this match's `N` (isa.md section 1), so a program
   does not depend on `CORESIZE`;
 - an *entry offset* `e` with `0 <= e < L`. The assembler decides how a source file
-  names `e`; the match only needs the number.
+  names `e` (the `ORG` directive, asm.md section 5); the match only needs the number.
 
 The bots are numbered `1 .. K` in the order given; this is the bot id of isa.md
 section 2. `K >= 2`. Their lengths are `L_1 .. L_K`; write `T` for their sum.

@@ -345,7 +345,7 @@
       "id": "S07",
       "title": "Build the assembler",
       "short_title": "Build the assembler",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [
         "S03",
@@ -391,7 +391,7 @@
         "importance": 3,
         "urgency": 2,
         "effort": 2,
-        "attempts": 0
+        "attempts": 1
       }
     },
     {
@@ -403,7 +403,19 @@
       "depends_on": [
         "S07"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "0e2bb3e0-221f-4416-b1ef-3608beb4dc64",
+          "kind": "",
+          "text": "**2026-10-18** — From S07: pit asm already has a listing formatter (cmd/pit/asm.go listing(), C72); move it into internal/asm as Disassemble and have pit asm call it. Round-trip tests compare .Cells and .Entry. isa.md section 8 listings use an 'N:' offset prefix the assembler rejects; tag those blocks text or rewrite them as asm before extracting examples. Low: 'JMP :x' reports 'label name JMP is reserved' (documented grammar).",
+          "created_at": "2026-10-18T04:02:20Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "S",
@@ -448,6 +460,17 @@
           "kind": "",
           "text": "**2026-10-16** — From S04: turn the vectors in docs/spec/match.md into tests: section 4 Next() and Draw tables (seeds 0, 1, 2^64-1, including the rejection rows), section 6 P1-P6, X2 and the exact X1/X3/X4/X5 error strings, section 8 M1-M6 (M6 has three bots). Validation order and messages are in section 1; K >= 2 bots, loaded cells carry the owner's bot id as writer (C56).",
           "created_at": "2026-10-16T03:18:59Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        },
+        {
+          "id": "0f54d842-192e-4323-99c6-a920986d1875",
+          "kind": "",
+          "text": "**2026-10-18** — From S07: asm.Program cells carry raw signed operand values (C69); the loader must Norm every AValue/BValue before placement (match.md section 5) and test a bot with a negative operand.",
+          "created_at": "2026-10-18T04:02:20Z",
           "attempt": 0,
           "by": "Jon R",
           "verified_by": "",
@@ -1035,7 +1058,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 65,
+    "next_id": 73,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -1611,6 +1634,78 @@
         "kind": "decision",
         "title": "Logo: Squalor product mark, ring with two facing pointers; asset is all rights reserved, not AGPL",
         "body": "Owner decision 2026-10-17. The pitfight mark (concept chosen by the owner) is a teal ring, the circular core, with a teal pointer and a cream pointer facing each other. The master and exports live in the private Squalor branding repo under generated/logos/pitfight/. This repo keeps only an unmodified copy, assets/pitfight-512.png, shown in README.md. The branding LICENSE grants that use, the GitHub social preview (pitfight-social.png, uploaded by the owner in repo Settings) and, for the future web viewer, its favicon-32.png, favicon-180.png and favicon.svg. The logo is Copyright Squalor LLC, all rights reserved, and is not covered by the AGPL; README.md says so. Never edit it here.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C65",
+        "kind": "decision",
+        "title": "asm API: Assemble(name, src) (Program{Cells, Entry}, error) with *asm.Error{File,Line,Col,Msg}",
+        "body": "Implementer decision under C35 (S07). Assemble returns a Program holding the isa.Cell slice and the entry offset, and the first error as *asm.Error whose text is file:line:col: message (line and col start at 1, col counts bytes); on error the Program is the zero value. Reason: match.md section 5 needs an entry offset next to the cells, so a bare []isa.Cell would lose it; one error is enough for a bot file and keeps the first-error order well defined.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C66",
+        "kind": "decision",
+        "title": "asm syntax: ';' comments, 'label:' definitions, case-insensitive opcodes/modifiers/ORG, case-sensitive labels, opcode[.mod] [A[, B]]",
+        "body": "Implementer decision under C35 (S07, docs/spec/asm.md sections 1-4). One statement per line; any number of 'name:' labels before it; a label names the next instruction (or the program length if none follows); label names may not be an opcode or ORG; modes # $ * @ { < } > precede the operand expression, default $; an omitted operand is $0. Reason: the colon removes the Redcode ambiguity between a label and an opcode and is easy to lex by hand; the rest follows common Redcode practice.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C67",
+        "kind": "decision",
+        "title": "asm default modifier: Redcode '94 table without MOD",
+        "body": "Implementer decision under C35 (S07, asm.md section 4). DAT and NOP: F; MOV, SEQ, SNE: AB if A is #, else B if B is #, else I; ADD, SUB, MUL, DIV: AB, B, else F; SLT: AB if A is #, else B; JMP, JMZ, JMN, DJN, SPL: B. Reason: isa.md leaves the default to the assembler (section 2) and the Redcode '94 table lets the starter bots be written without explicit modifiers.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C68",
+        "kind": "decision",
+        "title": "asm expressions: + - * / % and unary +/-, parentheses, labels relative to the instruction, int32 range",
+        "body": "Implementer decision under C35 (S07, asm.md section 6). Precedence: unary, then * / %, then binary + -, left-associative; decimal literals only; / and % truncate toward zero like Go; division by zero and any result outside int32 (a literal may be 2147483648 so the minimum can be written) is an error; a label's value is index(label) - index(instruction holding the operand), and in ORG it is the absolute index; expression height is limited to 256. Reason: the smallest set that writes offsets and label differences, with one documented range that makes int64 arithmetic overflow-free.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C69",
+        "kind": "decision",
+        "title": "asm output cells keep operand values as written (signed int32), not normalized to CORESIZE",
+        "body": "Implementer decision under C35 (S07, asm.md section 6). The assembler does not know CORESIZE, and match.md section 5 stores Norm(v) when the bot is loaded, so Cell.AValue and BValue from Assemble may be negative. Reason: keeps a program independent of the core size and keeps listings and the round trip exact.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C70",
+        "kind": "decision",
+        "title": "asm entry offset: the ORG expression directive, default 0, must lie in 0..L-1",
+        "body": "Implementer decision under C35 (S07, asm.md section 5), answering the S04 note. 'ORG expression' on any line, at most once, with labels as absolute indexes; Program.Entry carries the value; without ORG it is 0. Reason: match.md section 5 needs an entry offset e in [0, L) and isa.md has none; ORG is the Redcode name for it.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C71",
+        "kind": "decision",
+        "title": "asm errors: first error only, syntax errors before evaluation errors, fixed message texts and positions",
+        "body": "Implementer decision under C35 (S07, asm.md section 7). Assembly stops at the first error; syntax errors are found in source order while reading, then undefined labels, evaluation errors, the empty program and the ORG range in the order asm.md lists; each message text and its position is a documented table that TestErrors checks. Reason: C17 asks for line and column errors, and fixed texts make them testable; one error per run avoids cascades.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C72",
+        "kind": "decision",
+        "title": "pit asm <file>: prints a re-assemblable listing (ORG line, one canonical instruction per line); exit 1 on error, 2 on usage",
+        "body": "Implementer decision under C35 (S07, asm.md section 9). On success stdout gets 'ORG e' then 'OPCODE.MODIFIER <mode><value>, <mode><value>' per cell with signed decimal values and explicit modifiers, nothing else; an assembly error or unreadable file prints file:line:col: message (or 'pit asm: <os error>') on stderr and exits 1 with empty stdout; a wrong argument count or an argument starting with '-' prints 'usage: pit asm <file>' and exits 2. The file name is printed exactly as given. The usage text now lists asm as implemented, marks the other commands 'not implemented yet' and adds exit code 1. Reason: a listing is both human-readable and valid source, which the S08 round trip needs; the exit codes extend C40.",
         "status": "active",
         "reason": "",
         "successor": ""

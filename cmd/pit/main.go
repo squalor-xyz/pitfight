@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 // Command pit is the pitfight command line: assemble bots, run matches, run
-// tournaments and view replays. This file holds only usage handling; the
-// subcommands arrive with later slices.
+// tournaments and view replays. This file holds usage handling and dispatch; the
+// subcommands live in their own files and arrive one slice at a time.
 package main
 
 import (
@@ -15,14 +15,14 @@ const usage = `usage: pit <command> [arguments]
 
 pit assembles pitfight bots, runs matches and tournaments, and views replays.
 
-Commands (planned; not implemented yet):
+Commands:
   asm      assemble a bot source file
-  run      run a match between bots
-  tourney  run a round-robin tournament
-  view     play back a recorded replay
+  run      run a match between bots (not implemented yet)
+  tourney  run a round-robin tournament (not implemented yet)
+  view     play back a recorded replay (not implemented yet)
   help     print this text
 
-Exit codes: 0 success; 2 a usage error.
+Exit codes: 0 success; 1 an error in a command; 2 a usage error.
 `
 
 func main() {
@@ -37,6 +37,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 	switch args[0] {
+	case "asm":
+		return runAsm(args[1:], stdout, stderr)
 	case "help":
 		fmt.Fprint(stdout, usage)
 		return 0
