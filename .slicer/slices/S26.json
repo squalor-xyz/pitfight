@@ -1,0 +1,41 @@
+{
+  "id": "S26",
+  "title": "Add pit play to run a match and watch it in one command",
+  "lead": [
+    "`pit play a.s b.s [--seed N]` runs the match, starts the web viewer with that match loaded, and opens the browser. Ctrl-C stops it. `--terminal` plays the match in the terminal viewer instead. No replay file or second command is needed."
+  ],
+  "depends_note": null,
+  "findings_note": "",
+  "size": "M",
+  "flags": [],
+  "trees_note": "cmd",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** raw single-key terminal input; any change to the replay format; more than two bots unless `pit run` already accepts them.",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "Owner 2026-10-18: one command to watch a fight. This builds on the serve start page slice for the in-browser match and listing."
+    },
+    {
+      "heading": "Files",
+      "body": "- `cmd/pit/play.go` and `play_test.go` (new), plus the `cmd/pit/main.go` dispatch and usage.\n- Reuse the S22 flag helper (`cmd/pit/args.go`), the `pit run` match code, and the `pit serve` handler.\n- `README.md`: lead the quick start with `pit play bots/imp.s bots/dwarf.s`.\n- `AGENTS.md`: Layout and usage."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "- `pit play` with two bots and a seed serves a viewer URL whose replay has the same hash as `pit run` with the same bots and seed.\n- The browser opener is injectable. The test checks that the URL it gets has the replay preloaded, and that `--no-open` skips it.\n- `--terminal` runs the match and hands the replay to the terminal viewer code, tested with piped input as `pit view` is.\n- Bad input exits with the `pit run` codes: assembler errors give 1 with line and column, usage errors give 2."
+    },
+    {
+      "heading": "Implement",
+      "body": "- Listen on 127.0.0.1 with port 0, or `--port N`, and print the URL.\n- Open the browser with the platform opener from the standard library's `os/exec`: `open` on macOS, `xdg-open` on Linux. If that fails, print the URL and keep serving.\n- Keep the replay in memory. Write it to disk only with `--replay FILE`.\n- Default seed: random from a non-VM source (C12 and C36 apply to the VM and arena core, not the CLI), printed so the match can be reproduced. Record the choice per C35.\n- Stop cleanly on SIGINT."
+    },
+    {
+      "heading": "Check",
+      "body": "- `. scripts/env.sh && go test ./... && go vet ./... && test -z \"$(gofmt -l cmd internal web)\" && go build -o .cache/bin/pit ./cmd/pit`\n- `node --test web/test/*.test.js`\n- Manual (owner): run `.cache/bin/pit play bots/imp.s bots/dwarf.s`. The browser opens on the match. Ctrl-C stops it."
+    },
+    {
+      "heading": "Git",
+      "body": "Branch `slice/<id>-pit-play` in `.worktrees/<id>`. One commit when the owner asks."
+    }
+  ],
+  "notes": []
+}

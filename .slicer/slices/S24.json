@@ -14,7 +14,7 @@
   "sections": [
     {
       "heading": "Why",
-      "body": "Owner 2026-10-18: users should not have to download and unpack the archive for their OS and arch by hand. Owner decisions: an install script, macOS and Linux only, default prefix `~/.local` with no sudo, target v0.1.1."
+      "body": "Owner 2026-10-18: users should not have to download and unpack the archive for their OS and arch by hand. Owner decisions: an install script, macOS and Linux only, default prefix `~/.local` with no sudo, target v0.1.1.\n\nOwner 2026-10-18: runs after S25 (serve start page) and S26 (pit play); the README install one-liner should be followed by `pit play bots/imp.s bots/dwarf.s` using the installed bots path."
     },
     {
       "heading": "Files",

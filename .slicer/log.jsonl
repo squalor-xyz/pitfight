@@ -415,3 +415,7 @@
 {"when": "2026-10-18T19:41:32Z", "item": "C111", "action": "catalog", "from": "", "to": "body", "note": "edit"}
 {"when": "2026-10-18T19:42:16Z", "item": "S23", "action": "status", "from": "started", "to": "done", "note": "Fixed the v0.1.0 wording findings: README acceptance bullet (web half runs under node --test, canvas is manual), model.test.js frame count derived as cycles + 1, tui/model.go comment and catalog C97/C102/C111 (live clamp applies to the final value only; C111 cites the measured 1.38 MB for tourney.Run), AGENTS.md and isa.md rewraps, serveUsage symlink wording. The asm.md bomber listing is now an asm block under TestRoundTripSpecExamples (C116), internal/acceptance/doc.go is dropped (C115), and replay/read.go uses arena.MaxCoreSize. go test, go vet, gofmt, build, node --test and slicer check were all green.", "by": "Jon R"}
 {"when": "2026-10-18T19:42:42Z", "item": "S23", "action": "note", "from": "", "to": "", "note": "Later notes from the S23 relay: TestServeSymlinks (cmd/pit/s", "by": "Jon R"}
+{"when": "2026-10-18T21:50:15Z", "item": "S25", "action": "add", "from": "", "to": "open", "note": "Show bots and replays on the pit serve start page"}
+{"when": "2026-10-18T21:50:15Z", "item": "S26", "action": "add", "from": "", "to": "open", "note": "Add pit play to run a match and watch it in one command"}
+{"when": "2026-10-18T21:50:18Z", "item": "S24", "action": "set", "from": "", "to": "", "note": "depends_on S23→S23,S26"}
+{"when": "2026-10-18T21:50:18Z", "item": "S24", "action": "edit", "from": "", "to": "", "note": "Why"}
