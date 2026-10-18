@@ -546,7 +546,7 @@
       "id": "S10",
       "title": "Write the starter bots and golden-result tests",
       "short_title": "Write the starter bots and golden-result tests",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [
         "S09",
@@ -559,6 +559,17 @@
           "text": "**2026-10-15** — **2026-10-15** — From S03 review: isa.md §8 replicator sketch keeps one process (the original dies at cell 5); the starter replicator should loop back instead of DAT so it multiplies.",
           "created_at": "2026-10-15T16:35:30Z",
           "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        },
+        {
+          "id": "eb5d1d27-a6dd-4abd-bcca-eb54db027da2",
+          "kind": "",
+          "text": "**2026-10-18** — S10 closing note. Four original starter bots (bots/imp.s, dwarf.s, replicator.s, scanner.s), tests in internal/arena/bots_test.go and golden_test.go. Decisions C80 (golden table shape), C81 (bot designs and parameters), C82 (bots/ ships in release archives), C90 (scanner lap blind spot). No ISA findings: all four strategies are expressible.\n\nGolden values (default config, seeds 1/2/3, lower id first), how each was reviewed by hand. Cross-check: a separate Python implementation of SplitMix64, placement and the VM, written from isa.md and match.md only, with bot cells hand-transcribed from the sources, reproduced all 18 rows exactly (starts, cycles, winner). Then per row:\n- imp vs dwarf (imp moves first). The imp runs the cell it just wrote, so only a bomb landing exactly on that cell kills it. Dwarf bomb k lands in cycle 3k-1 at dwarf_start+3+4k; the imp head is at imp_start+t after cycle t; they meet at k = (imp_start - dwarf_start - 4) mod 8000. Seed 1: 4519-2555-4 = 1960, bomb in cycle 5879, imp dies in cycle 5880 (pinned 5880, winner 2; imp would reach the dwarf only at cycle 6036). Seed 2: 5432-4226-4 = 1202, cycle 3605, death in 3606 (pinned 3606, winner 2). Seed 3: the imp reaches the dwarf code at cycle 3140, before the meeting at k=4856, and overwrites it with imps; no DAT is executed, tie at 80000.\n- dwarf vs scanner. Seed 1 (2959, winner 1): dwarf bomb 986 (cycle 2957) hits scanner cell 0 at 466; the scanner runs cell 0 when the cycle is 1 mod 3, so it executes the DAT in cycle 2959. Seed 2 (3990, winner 1): bomb 1001 (cycle 3002) hits scanner cell 2 (the MOV); the scanner finds dwarf cell 2 at pass 1330 (4233+3*1330 = 8223 = 223 mod 8000) and executes the bombed cell in cycle 3990. Seed 3 (2138, winner 2): the scanner finds dwarf cell 1 at pass 712 and bombs it in cycle 2136; the dwarf runs JMP in 2136, ADD in 2137, the DAT in 2138; the dwarf's own first hit on the scanner would be in cycle 4391.\n- imp vs scanner and imp vs replicator (all 6 rows, ties at 80000): in the independent simulator the imp never executes a DAT, and the other bot keeps processes (scanner 1; replicator 108, 68, 117 at the end for seeds 1-3). Imp vs scanner executes no DAT at all: the scanner pointer stays a constant distance behind the imp head, or loses ground when it finds trail cells, so it cannot bomb the head. Checked by trace, not by closed form for every lap restart.\n- dwarf vs replicator (2334, 2896, 5425; winner 1). Copies sit 100 cells apart, so the dwarf's stride-4 bombs hit the same two cells of every copy: c = (dwarf start + 3 - replicator start) mod 4, and c+4. That is cells 2 and 6 at seeds 1 and 2, cells 3 and 7 at seed 3 (dwarf 7564, replicator 4373). The replicator never writes the dwarf's cells. Last death checked per seed against the bomb formula (bomb k at cycle 3k-1 on ptr+4k): seed 1 k=776, cycle 2327, cell 7626, last replicator death cycle 2334; seed 2 k=965, cell 5872, death 2896; seed 3 k=1806, cell 6788, death 5425.\n- replicator vs scanner (12099, 1046, 14208; winner 1): rests on the independent simulation and a trace, not a closed-form derivation. The replicator out-multiplies the scanner's bombs and its copy loops overwrite a scanner cell with an empty cell. Seed 1: bot 1's MOV.I at cycle 12099 copies an empty cell (source 7448) onto 7532, scanner cell 0, which the scanner then runs as DAT. Seed 2: written in cycle 1045 onto 4226, scanner dies in 1046.\n\nMutation checks (bots/test restored after each): imp target changed (TestImp); dwarf stride 5, bomb DAT.F #1 (after pinning the bomb cell explicitly), bomb NOP, JMP into ptr (TestDwarf); replicator JMP replaced by DAT, source count -7, SPL fixed at +100 (TestReplicator); scanner stride 2, bomb onto ptr, SNE for SEQ (TestScanner); stray bots/extra.s, bad modifier, temporary Disassemble B+1 (TestStarterBotsAssemble); dwarf stride 5, scanner stride 2, imp to JMP, replicator ADD #104 (TestGolden, many rows red). A first replicator hard-coded SPL start+100 and TestReplicator caught it (second spawn at the wrong address).\n\nKnown limits: scanner blind spot (C90): a lap examines relative cells 10..7807, so enemy code lying only in cells 7808..7899 (inside placement's guaranteed-empty gap) is never examined. Replicator copies collide on the 100-cell lattice and share one ptr per site, so some processes aim at garbage and die (first such death at cycle 112 in every replicator match); the golden rows are sensitive to this by design.",
+          "created_at": "2026-10-18T15:02:42Z",
+          "attempt": 1,
           "by": "Jon R",
           "verified_by": "",
           "verified_at": "",
@@ -590,7 +601,7 @@
         "importance": 3,
         "urgency": 2,
         "effort": 2,
-        "attempts": 0
+        "attempts": 1
       }
     },
     {
@@ -1136,7 +1147,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 80,
+    "next_id": 91,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -1847,6 +1858,42 @@
         "kind": "decision",
         "title": "isa.md section 8 listings are asm blocks without the N: prefix",
         "body": "The three starter-bot listings in docs/spec/isa.md are tagged asm and the N: prefix moved into the trailing comment (; N: text), so TestRoundTripSpecExamples can extract and assemble them; the cells are unchanged.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C80",
+        "kind": "decision",
+        "title": "Starter golden table shape (S10)",
+        "body": "Golden table pins the 6 unordered pairs of the four starter bots (lower id first, in the order imp, dwarf, replicator, scanner) at seeds 1, 2, 3 under the default config, 18 rows; the reverse order is the tournament's job (match.md section 7), and the table is small enough to review by hand.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C81",
+        "kind": "decision",
+        "title": "Starter bot designs and parameters (S10)",
+        "body": "Starter bots: dwarf bombs every 4th cell (3-cycle loop, separate bomb cell); replicator is 8 code cells plus an uncopied ptr cell, copies to +100, SPLs to the copy and loops back to copy 100 cells further; scanner examines every 3rd cell for 2600 passes per lap (7800 of 8000 cells, short of its own cells) and bombs with an empty cell. Parameters assume the default 8000-cell core; each is a plain source constant a later slice may tune.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C82",
+        "kind": "decision",
+        "title": "Ship bots/ in release archives (S10)",
+        "body": "Release archives include bots/ because README tells users to run pit run bots/imp.s bots/dwarf.s; build-release.sh copies the directory into each archive.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C90",
+        "kind": "decision",
+        "title": "Starter scanner lap blind spot (S10)",
+        "body": "The scanner's 2600-pass lap examines relative cells 10..7807, leaving 7808..7899 (inside placement's guaranteed-empty gap of 7900..7999) a ~92 cell blind spot for enemy code lying wholly there; accepted for the starter bot to keep it from examining its own cells; refines C81.",
         "status": "active",
         "reason": "",
         "successor": ""

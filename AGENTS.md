@@ -32,7 +32,7 @@ a shared circular memory arena. Go, standard library only.
   evaluation, opcode execution, process queues and events) and `internal/arena`
   (the seeded generator, placement and the match loop) exist so far.
 - `web/`: the web viewer. `docs/spec/`: the ISA, assembly and format specs
-  (`isa.md`, `asm.md`, `match.md`). `bots/`: the starter bots. `web/` and `bots/` do not exist yet.
+  (`isa.md`, `asm.md`, `match.md`). `bots/`: the starter bots (`imp.s`, `dwarf.s`, `replicator.s`, `scanner.s`). `web/` does not exist yet.
 - `scripts/env.sh`: Go cache and temp setup (see below).
   `scripts/build-release.sh`: release archives. `.github/workflows/`: CI and
   release.

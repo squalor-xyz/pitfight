@@ -26,6 +26,9 @@ Early development. What exists today:
 - `pit`: the CLI. Today it prints usage and has `pit asm bot.s`, which assembles a bot
   and prints the cells, and `pit run a.s b.s --seed 1`, which runs a match and prints
   the result (`--json` for one line of JSON; `pit run` with no files lists the flags).
+- `bots/`: four original starter bots (`imp.s`, `dwarf.s`, `replicator.s`,
+  `scanner.s`); golden tests in `internal/arena` pin their match results. Try
+  `pit run bots/imp.s bots/dwarf.s --seed 1`.
 
 Planned: round-robin tournaments
 (`pit tourney`), a replay format, and terminal and web replay viewers (`pit view`).
@@ -46,14 +49,15 @@ go build -o .cache/bin/pit ./cmd/pit
 ## Releases
 
 Pushing a tag such as `v0.1.0` runs the checks and publishes a GitHub Release with
-`pit` built for Linux, macOS and Windows on amd64 and arm64, plus a `SHA256SUMS`
-file. To build the same archives locally, run
-`scripts/build-release.sh v0.1.0 dist`.
+`pit` built for Linux, macOS and Windows on amd64 and arm64 (each archive also holds
+the starter bots in `bots/`), plus a `SHA256SUMS` file. To build the same archives
+locally, run `scripts/build-release.sh v0.1.0 dist`.
 
 ## Layout
 
 - `cmd/pit/`: the `pit` command.
 - `internal/`: the packages (`isa`, `asm`, `vm` and `arena` so far).
+- `bots/`: the starter bots.
 - `docs/spec/`: the ISA, assembly and match specs.
 - `scripts/env.sh`: Go cache and temp setup. `scripts/build-release.sh`: release
   archives.
