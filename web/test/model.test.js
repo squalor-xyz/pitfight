@@ -23,7 +23,7 @@ for (const [label, fixture, frames, fixtureName] of [
   test(`the frame model at each cycle equals ${label}`, () => {
     const ff = frames();
     assert.equal(ff.fixture, fixtureName);
-    assert.equal(ff.frames.length, 13);
+    assert.equal(ff.frames.length, ff.cycles + 1, 'one frame per cycle 0..cycles');
     const m = modelOf(fixture());
     assert.equal(m.cycles, ff.cycles);
     for (const want of ff.frames) {

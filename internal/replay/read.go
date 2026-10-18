@@ -212,7 +212,7 @@ func (p *parser) header(n int, line []byte) error {
 		v      int64
 		lo, hi int64
 	}{
-		{"core_size", c.CoreSize, vm.MinCoreSize, vm.MaxCoreSize},
+		{"core_size", c.CoreSize, vm.MinCoreSize, arena.MaxCoreSize},
 		{"cycle_limit", c.CycleLimit, 1, arena.MaxCycleLimit},
 		{"max_processes", c.MaxProcesses, 1, arena.MaxMaxProcesses},
 		{"min_separation", c.MinSeparation, 0, arena.MaxMinSeparation},
