@@ -1333,7 +1333,7 @@
       "id": "S23",
       "title": "Fix doc and test wording found in the v0.1.0 relays",
       "short_title": "v0.1.0 doc cleanups",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [],
       "note_records": [
@@ -1343,6 +1343,17 @@
           "text": "**2026-10-18** — From S22 (later): C111 text cites 0.46 MB for two imp matches while TestRunKeepsNoEvents now measures about 1.38 MB for 6 matches; replay/read.go:215 still reads vm.MaxCoreSize and MinCoreSize (same value, cosmetic). Not code-wording blockers: tourney --matches output is not written atomically (slice named only replays); TestRunKeepsNoEvents allocation bound (1/4 of event bytes) is a heuristic; TestRunConcurrent uses a 2 s barrier timeout.",
           "created_at": "2026-10-18T19:32:08Z",
           "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        },
+        {
+          "id": "1b9d3434-e541-4881-b36b-eff0b4410c00",
+          "kind": "",
+          "text": "**2026-10-18** — Later notes from the S23 relay: TestServeSymlinks (cmd/pit/serve_test.go:103-128) has no positive case for a relative symlink inside the served directory. Still open from S22: tourney --matches output is not written atomically; TestRunKeepsNoEvents allocation bound is a heuristic; TestRunConcurrent uses a 2 s barrier timeout.",
+          "created_at": "2026-10-18T19:42:42Z",
+          "attempt": 1,
           "by": "Jon R",
           "verified_by": "",
           "verified_at": "",
@@ -1368,7 +1379,7 @@
         "importance": 1,
         "urgency": 2,
         "effort": 1,
-        "attempts": 0
+        "attempts": 1
       }
     },
     {
@@ -1408,7 +1419,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 115,
+    "next_id": 117,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -2280,7 +2291,7 @@
         "id": "C97",
         "kind": "decision",
         "title": "Viewer frame model: cycle, owners, executed, live",
-        "body": "S12 (C35). internal/tui Frame = {cycle, owners[addr] = last writer id (0 none), executed = [{bot, pc}] of that cycle in ascending bot order, live[bot-1] = process count clamped at 0}; plain JSON in testdata/viewer/frames.json so the web viewer (S15) can compare. Reason: an x record names only the stepping process, so executed addresses per cycle are all a viewer can know; the model is independent of the renderer (C19).",
+        "body": "S12 (C35). internal/tui Frame = {cycle, owners[addr] = last writer id (0 none), executed = [{bot, pc}] of that cycle in ascending bot order, live[bot-1] = process count: 1 at the start plus spawns minus deaths}; only the reported live value is clamped at 0, the running count after each event is not (the player keeps it below 0 when a replay has more deaths than processes). Plain JSON in testdata/viewer/frames.json so the web viewer (S15) can compare. Reason: an x record names only the stepping process, so executed addresses per cycle are all a viewer can know; the model is independent of the renderer (C19).",
         "status": "active",
         "reason": "",
         "successor": ""
@@ -2325,7 +2336,7 @@
         "id": "C102",
         "kind": "decision",
         "title": "Viewer fixture: imp vs dwarf, seed 24, core 24, 12 cycles",
-        "body": "S12 (C35). testdata/viewer/fixture.jsonl = pit run bots/imp.s bots/dwarf.s --seed 24 --core-size 24 --min-separation 3 --cycle-limit 40 --replay FILE (a test regenerates it byte for byte); the imp starts at 3, the dwarf at 19, the imp wraps no edge but dies at cycle 12 on the dwarf's bomb. Reason: small enough to derive every frame by hand, with writes by both bots, a bomb overwriting an imp copy, and a death.",
+        "body": "S12 (C35). testdata/viewer/fixture.jsonl = pit run bots/imp.s bots/dwarf.s --seed 24 --core-size 24 --min-separation 3 --cycle-limit 40 --replay FILE (a test regenerates it byte for byte). Core of 24 cells, imp at 3 (copies itself one cell ahead each cycle, so it reaches 14 and never wraps the core end), dwarf at 19 with its pointer cell at 22. The dwarf's bombs wrap the core end (22 + 4k mod 24), the one at cycle 11 lands on 14, the imp's newest copy, and at cycle 12 the imp executes that bomb and dies (live 0 against 1, bot 2 wins). Reason: small enough to derive every frame by hand, with writes by both bots, a bomb overwriting an imp copy, a wrapping write and a death.",
         "status": "active",
         "reason": "",
         "successor": ""
@@ -2406,7 +2417,7 @@
         "id": "C111",
         "kind": "decision",
         "title": "Tournament events-off path is a nil observer, not new API",
-        "body": "tourney.play calls arena.RunObserved(cfg, bots, nil), which already keeps only one cycle of events; arena.Run is the one that keeps all events (65 MB allocated vs 0.46 MB for two imp matches at 80000 cycles). No new arena function; unexported tourney.playMatch is the test seam for the concurrency test. Reason: smallest change that removes the memory growth.",
+        "body": "tourney.play calls arena.RunObserved(cfg, bots, nil), which already keeps only one cycle of events; arena.Run is the one that keeps all events. TestRunKeepsNoEvents measures tourney.Run allocating about 1.38 MB for 6 matches (two imps that tie at 80000 cycles and a bot that dies at once, one round) against 11.5 MB for the events of the same matches kept by arena.Run. No new arena function; unexported tourney.playMatch is the test seam for the concurrency test. Reason: smallest change that removes the memory growth.",
         "status": "active",
         "reason": "",
         "successor": ""
@@ -2434,6 +2445,24 @@
         "kind": "decision",
         "title": "pit serve accepts Host localhost. with the root dot",
         "body": "isLocalHost trims one trailing dot before comparing with localhost (RFC 1034 root form of the same name). Other names with a dot, and 127.0.0.1., stay refused. Reason: same name, no rebinding risk added.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C115",
+        "kind": "decision",
+        "title": "Acceptance package keeps no doc.go; package comment moves to acceptance_test.go",
+        "body": "S23 (C35). internal/acceptance/doc.go is deleted and its package comment now heads acceptance_test.go, so the directory holds only _test.go files, as README.md and AGENTS.md say (test-only). go build ./..., go vet ./... and go test ./... are unchanged. Reason: the file existed only to carry the package comment, and a non-test file contradicted 'test-only'.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C116",
+        "kind": "decision",
+        "title": "asm.md bomber listing is an asm block under TestRoundTripSpecExamples",
+        "body": "S23 (C35). The listing printed by pit asm for the bomber in docs/spec/asm.md section 9 is tagged asm, not text, because a listing is itself valid source (asm.md section 9). TestRoundTripSpecExamples now round-trips it and counts 5 asm blocks in asm.md; TestSpecListing checks that the asm block after the bomber equals the output of pit asm. Reason: one place checks every runnable listing in the specs; the text tag left it covered by a string comparison only.",
         "status": "active",
         "reason": "",
         "successor": ""

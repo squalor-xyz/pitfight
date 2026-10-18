@@ -372,7 +372,7 @@ Implementer decision under C35 (S13). internal/tourney exports Pair/Pairings(n),
 
 ### C97 Viewer frame model: cycle, owners, executed, live
 
-S12 (C35). internal/tui Frame = {cycle, owners[addr] = last writer id (0 none), executed = [{bot, pc}] of that cycle in ascending bot order, live[bot-1] = process count clamped at 0}; plain JSON in testdata/viewer/frames.json so the web viewer (S15) can compare. Reason: an x record names only the stepping process, so executed addresses per cycle are all a viewer can know; the model is independent of the renderer (C19).
+S12 (C35). internal/tui Frame = {cycle, owners[addr] = last writer id (0 none), executed = [{bot, pc}] of that cycle in ascending bot order, live[bot-1] = process count: 1 at the start plus spawns minus deaths}; only the reported live value is clamped at 0, the running count after each event is not (the player keeps it below 0 when a replay has more deaths than processes). Plain JSON in testdata/viewer/frames.json so the web viewer (S15) can compare. Reason: an x record names only the stepping process, so executed addresses per cycle are all a viewer can know; the model is independent of the renderer (C19).
 
 ### C98 Viewer input: line-mode commands s, b, g, p, q
 
@@ -392,7 +392,7 @@ S12 (C35). cmd/pit gains runIn, run with a stdin reader; run(args, stdout, stder
 
 ### C102 Viewer fixture: imp vs dwarf, seed 24, core 24, 12 cycles
 
-S12 (C35). testdata/viewer/fixture.jsonl = pit run bots/imp.s bots/dwarf.s --seed 24 --core-size 24 --min-separation 3 --cycle-limit 40 --replay FILE (a test regenerates it byte for byte); the imp starts at 3, the dwarf at 19, the imp wraps no edge but dies at cycle 12 on the dwarf's bomb. Reason: small enough to derive every frame by hand, with writes by both bots, a bomb overwriting an imp copy, and a death.
+S12 (C35). testdata/viewer/fixture.jsonl = pit run bots/imp.s bots/dwarf.s --seed 24 --core-size 24 --min-separation 3 --cycle-limit 40 --replay FILE (a test regenerates it byte for byte). Core of 24 cells, imp at 3 (copies itself one cell ahead each cycle, so it reaches 14 and never wraps the core end), dwarf at 19 with its pointer cell at 22. The dwarf's bombs wrap the core end (22 + 4k mod 24), the one at cycle 11 lands on 14, the imp's newest copy, and at cycle 12 the imp executes that bomb and dies (live 0 against 1, bot 2 wins). Reason: small enough to derive every frame by hand, with writes by both bots, a bomb overwriting an imp copy, a wrapping write and a death.
 
 ### C103 S15 (C35): pit serve command shape
 
@@ -428,7 +428,7 @@ pit run --replay writes to .NAME.tmpPID.N in the same directory, syncs it and re
 
 ### C111 Tournament events-off path is a nil observer, not new API
 
-tourney.play calls arena.RunObserved(cfg, bots, nil), which already keeps only one cycle of events; arena.Run is the one that keeps all events (65 MB allocated vs 0.46 MB for two imp matches at 80000 cycles). No new arena function; unexported tourney.playMatch is the test seam for the concurrency test. Reason: smallest change that removes the memory growth.
+tourney.play calls arena.RunObserved(cfg, bots, nil), which already keeps only one cycle of events; arena.Run is the one that keeps all events. TestRunKeepsNoEvents measures tourney.Run allocating about 1.38 MB for 6 matches (two imps that tie at 80000 cycles and a bot that dies at once, one round) against 11.5 MB for the events of the same matches kept by arena.Run. No new arena function; unexported tourney.playMatch is the test seam for the concurrency test. Reason: smallest change that removes the memory growth.
 
 ### C112 Arena limits exported and shared with replay
 
@@ -441,6 +441,14 @@ pit view reads input with a bufio.Reader instead of bufio.Scanner; a line of mor
 ### C114 pit serve accepts Host localhost. with the root dot
 
 isLocalHost trims one trailing dot before comparing with localhost (RFC 1034 root form of the same name). Other names with a dot, and 127.0.0.1., stay refused. Reason: same name, no rebinding risk added.
+
+### C115 Acceptance package keeps no doc.go; package comment moves to acceptance_test.go
+
+S23 (C35). internal/acceptance/doc.go is deleted and its package comment now heads acceptance_test.go, so the directory holds only _test.go files, as README.md and AGENTS.md say (test-only). go build ./..., go vet ./... and go test ./... are unchanged. Reason: the file existed only to carry the package comment, and a non-test file contradicted 'test-only'.
+
+### C116 asm.md bomber listing is an asm block under TestRoundTripSpecExamples
+
+S23 (C35). The listing printed by pit asm for the bomber in docs/spec/asm.md section 9 is tagged asm, not text, because a listing is itself valid source (asm.md section 9). TestRoundTripSpecExamples now round-trips it and counts 5 asm blocks in asm.md; TestSpecListing checks that the asm block after the bomber equals the output of pit asm. Reason: one place checks every runnable listing in the specs; the text tag left it covered by a string comparison only.
 
 ### C33 CI deferred
 
@@ -492,7 +500,7 @@ PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first 
 
 *Retired: Settled by owner decision C31 (2026-10-15)..*
 
-24 items · — 4 · done 16 · later 4
+24 items · — 3 · done 17 · later 4
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
@@ -504,31 +512,31 @@ PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first 
 | 5 | [S20](slices/S20.md) | Host the web visualizer on squalor.xyz | S | 2 | web | PROJECT.md Feature tiers: Later | later |
 | 6 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
 | v0.1.1 | | | | | | | |
-| 7 | [S23](slices/S23.md) | v0.1.0 doc cleanups | S | 1 | docs | S17 later notes (from the S08, S12, S15 and S17 relays) · discovered from S17 | — |
-| 8 | [S24](slices/S24.md) | Install script | M | 2 | repo |  | — |
+| 7 | [S24](slices/S24.md) | Install script | M | 2 | repo |  | — |
 
 ---
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
 | Decisions | | | | | | | |
-| 9 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions · retired decision C33 | done |
+| 8 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions · retired decision C33 | done |
 | v1 foundation | | | | | | | |
-| 10 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks · retired decision C33 | done |
-| 11 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |
-| 12 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | done |
+| 9 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks · retired decision C33 | done |
+| 10 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |
+| 11 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | done |
 | v1 core | | | | | | | |
-| 13 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | done |
-| 14 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | done |
+| 12 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | done |
+| 13 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | done |
 | v0.1.0 | | | | | | | |
-| 15 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | done |
-| 16 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | done |
-| 17 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | done |
-| 18 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | done |
-| 19 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | done |
-| 20 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | done |
-| 21 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | done |
-| 22 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | done |
-| 23 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria · retired decision C33 | done |
+| 14 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | done |
+| 15 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | done |
+| 16 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | done |
+| 17 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | done |
+| 18 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | done |
+| 19 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | done |
+| 20 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | done |
+| 21 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | done |
+| 22 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria · retired decision C33 | done |
 | v0.1.1 | | | | | | | |
-| 24 | [S22](slices/S22.md) | v0.1.0 code cleanups | M | 2 | repo | S17 later notes (from the S09, S11, S12, S13 and S15 relays) · discovered from S17 | done |
+| 23 | [S22](slices/S22.md) | v0.1.0 code cleanups | M | 2 | repo | S17 later notes (from the S09, S11, S12, S13 and S15 relays) · discovered from S17 | done |
+| 24 | [S23](slices/S23.md) | v0.1.0 doc cleanups | S | 1 | docs | S17 later notes (from the S08, S12, S15 and S17 relays) · discovered from S17 | done |

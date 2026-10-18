@@ -140,7 +140,7 @@ func TestRoundTripSpecExamples(t *testing.T) {
 		min  int // at least this many asm blocks
 	}{
 		{"../../docs/spec/isa.md", 3},
-		{"../../docs/spec/asm.md", 4},
+		{"../../docs/spec/asm.md", 5}, // includes the listing of section 9
 	} {
 		data, err := os.ReadFile(doc.path)
 		if err != nil {

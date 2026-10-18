@@ -9,7 +9,9 @@ claim (isa.md section 7).
 
 Fenced blocks tagged `asm` are complete programs that assemble without error
 (`TestSpecExamples` checks this). Blocks tagged `text` are grammar, output or
-fragments and are not assembled.
+fragments and are not assembled. The `pit asm` listing in section 9 is tagged `asm`
+too, because a listing is a valid source file; the round-trip tests assemble it and
+`TestSpecListing` checks that it is what `pit asm` prints.
 
 ## 1. Source files
 
@@ -233,7 +235,7 @@ start:  ADD.AB #4, ptr      ; step the pointer in ptr's B field
 ptr:    DAT    #0, #0       ; pointer and bomb
 ```
 
-```text
+```asm
 ORG 0
 ADD.AB #4, $3
 MOV.I $2, @2

@@ -32,7 +32,9 @@ type Pointer struct {
 //     bot and the address it executed. Empty (never null) at cycle 0 and for a cycle
 //     the replay has no steps for.
 //   - Live: live process count per bot, index i for bot i+1: 1 at the start, plus
-//     spawns, minus deaths, not below 0.
+//     spawns, minus deaths. Only the reported value is clamped at 0; the running
+//     count keeps going below 0 on a replay with more deaths than processes, so a
+//     later spawn is counted against it, not against 0.
 type Frame struct {
 	Cycle    int       `json:"cycle"`
 	Owners   []uint32  `json:"owners"`

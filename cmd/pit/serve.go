@@ -33,8 +33,10 @@ Flags:
   --web DIR       serve the viewer from DIR (for example web/) instead of the
                   copy built into pit, to work on it without rebuilding
 
-Files outside the --replays and --web directories are never served, also not
-through .. or a symbolic link. Stop the server with Ctrl-C.
+A request cannot reach files outside the --replays and --web directories, by ..
+or by a symbolic link. A symbolic link inside one of them is followed only if its
+target is relative and stays inside that directory; any other link is answered
+404 (not found). Stop the server with Ctrl-C.
 
 Exit codes: 0 normal end; 1 an error starting or running the server; 2 a usage error.
 `

@@ -312,9 +312,9 @@ Different or absent:
 
 The ISA must express the starter bots (imp, bomber, replicator, scanner). Listings
 use the notation of section 2 with relative numeric offsets, one line per
-consecutive cell starting at offset 0; the number after each `;` is the cell's offset.
-They are programs in the assembly syntax of `docs/spec/asm.md`. They are sketches to show the ISA reaches
-each strategy; they are not balance results.
+consecutive cell starting at offset 0; the number after each `;` is the cell's
+offset. They are programs in the assembly syntax of `docs/spec/asm.md`. They are
+sketches to show the ISA reaches each strategy; they are not balance results.
 
 **Imp.** One cell, a moving process: `MOV.I $0, $1` copies itself onto the next cell
 each step, then continues into the copy.

@@ -84,10 +84,11 @@ Stop it with Ctrl-C and never leave one running. The JS tests need no server:
 `node --test web/test/*.test.js` (shell glob, not a directory; the modules are `.js`
 ES modules with no `package.json`, so the Node must detect module syntax and run
 `.js` files that use `import`/`export` as ES modules; Node 26.12.0 does, older
-versions are not verified and CI prints `node --version`). Parsing, model and player are tested against `testdata/viewer/`; only
-canvas drawing has no automated check beyond a fake context, so after a change to
-`web/js/render.js` or `main.js` look at it in a browser (load
-`internal/replay/testdata/imp_dwarf_seed1.jsonl`; step, play, pause, seek).
+versions are not verified and CI prints `node --version`). Parsing, model and
+player are tested against `testdata/viewer/`; only canvas drawing has no automated
+check beyond a fake context, so after a change to `web/js/render.js` or `main.js`
+look at it in a browser (load `internal/replay/testdata/imp_dwarf_seed1.jsonl`;
+step, play, pause, seek).
 `web/embed.go` is Go, so the gofmt check covers `web` too.
 
 CI runs on GitHub Actions (C63): `.github/workflows/ci.yml` runs the checks above

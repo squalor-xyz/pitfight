@@ -34,6 +34,8 @@ Early development. What exists today:
 - `internal/acceptance`: test-only. It builds `pit` and checks the five v1 acceptance
   criteria (spec coverage, the imp against dwarf result and replay hash, assembler
   errors and round trips, a stable 100-round tournament scoreboard, viewer parity).
+  The web half of viewer parity runs under `node --test web/test/*.test.js`, not
+  under `go test`, and canvas drawing is checked by hand in a browser.
 - `pit`: the CLI. Today it prints usage and has `pit asm bot.s`, which assembles a bot
   and prints the cells, `pit run a.s b.s --seed 1`, which runs a match and prints
   the result (`--json` for one line of JSON; `--replay FILE` also writes the replay

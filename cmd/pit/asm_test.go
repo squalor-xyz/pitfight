@@ -188,19 +188,18 @@ b:      MOV.X  #-1, {2
 	}
 }
 
-// TestSpecListing: the asm block of docs/spec/asm.md section 9 is followed by a
-// text block with the listing that pit asm prints for it.
+// TestSpecListing: the asm block of docs/spec/asm.md section 9 is followed by an
+// asm block with the listing that pit asm prints for it. The listing is tagged asm
+// because it is itself a valid source file, so asm.TestRoundTripSpecExamples
+// assembles it too.
 func TestSpecListing(t *testing.T) {
 	data, err := os.ReadFile("../../docs/spec/asm.md")
 	if err != nil {
 		t.Fatal(err)
 	}
 	asmBlocks := fencedBlocks(string(data), "asm")
-	if len(asmBlocks) == 0 {
-		t.Fatal("no asm block in asm.md")
-	}
 	var found bool
-	for _, b := range asmBlocks {
+	for i, b := range asmBlocks {
 		if strings.HasPrefix(b, "; the bomber of isa.md section 8\n") {
 			found = true
 			path := writeSrc(t, "doc.s", b)
@@ -208,9 +207,8 @@ func TestSpecListing(t *testing.T) {
 			if code := run([]string{"asm", path}, &stdout, &stderr); code != 0 {
 				t.Fatalf("exit %d: %s", code, stderr.String())
 			}
-			listings := fencedBlocks(string(data), "text")
-			if !slices.Contains(listings, stdout.String()) {
-				t.Errorf("asm.md has no text block equal to the listing %q", stdout.String())
+			if i+1 >= len(asmBlocks) || asmBlocks[i+1] != stdout.String() {
+				t.Errorf("the asm block after the bomber is not the listing %q", stdout.String())
 			}
 		}
 	}
