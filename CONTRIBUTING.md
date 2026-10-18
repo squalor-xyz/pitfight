@@ -36,6 +36,11 @@ go build -o .cache/bin/pit ./cmd/pit
 v1 acceptance criteria, among them a 100-round tournament of the starter bots; add
 `-short` to skip that one while iterating.
 
+`internal/install` is test-only: it runs `scripts/install.sh` (a POSIX `sh` installer, so
+no bashisms) against a fake release served by `net/http/httptest`, never the network. Run
+`sh -n scripts/install.sh` after editing the script. `scripts/build-release.sh` attaches
+the script to each release.
+
 GitHub Actions runs the same checks on pushes to `main` and on pull requests
 (`.github/workflows/ci.yml`). Run them locally before handing off a change anyway.
 

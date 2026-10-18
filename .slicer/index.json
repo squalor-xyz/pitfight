@@ -1386,13 +1386,25 @@
       "id": "S24",
       "title": "Add an install script for macOS and Linux",
       "short_title": "Install script",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [
         "S23",
         "S26"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "d8cf6782-857f-41a7-b221-108b75d8fd1a",
+          "kind": "",
+          "text": "**2026-10-18** — Later notes from the S24 relay: busybox wget lacks --https-only, so bare Alpine without curl cannot use the default URL (fails closed; README says curl or GNU wget); SHA256SUMS comes from the same origin as the archive, so it guards integrity, not a compromised release (C126); the real GitHub releases/latest redirect is untested (tests use an httptest redirect of the same shape).",
+          "created_at": "2026-10-18T23:53:29Z",
+          "attempt": 1,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "M",
@@ -1412,7 +1424,7 @@
         "importance": 2,
         "urgency": 2,
         "effort": 2,
-        "attempts": 0
+        "attempts": 1
       }
     },
     {
@@ -1524,7 +1536,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 123,
+    "next_id": 129,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -2622,6 +2634,60 @@
         "kind": "decision",
         "title": "S26 (C35): pit play serves the replay from memory at /replays/match.jsonl; viewer address is /?replay=/replays/match.jsonl&autoplay=1",
         "body": "S26 (C35). newPlayHandler wraps the pit serve handler (no directories, localOnly Host check, GET and HEAD only) and adds the in-memory replay at the /replays/ place that pit serve uses, so the viewer's existing ?replay= loading works unchanged; web/js/main.js gains one query parameter, autoplay=1, so the page plays at once like a match from the start page (?replay= alone stays paused). The replay is written to disk only by --replay. Listens on 127.0.0.1 only; the printed address is the one handed to the opener. The opener is open on macOS and xdg-open on Linux/BSD via os/exec, injected in tests; on failure or on other systems the address stays printed and serving continues (stderr says why).",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C123",
+        "kind": "decision",
+        "title": "install.sh resolves latest from the releases/latest/download/SHA256SUMS redirect",
+        "body": "Archive names carry the version, so the script fetches SHA256SUMS through GitHub's latest/download redirect and reads the version from the pit_VERSION_OS_ARCH.tar.gz entry; this needs no API call, no header parsing and works with curl and wget, and the archive is then fetched by tag.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C124",
+        "kind": "decision",
+        "title": "install.sh env vars: PREFIX, PITFIGHT_VERSION, PITFIGHT_BASE_URL",
+        "body": "PREFIX (default $HOME/.local, absolute) follows common installer practice; PITFIGHT_VERSION pins a release (v0.1.1 form, validated); PITFIGHT_BASE_URL (default the https GitHub releases URL) lets tests use a local server and is the only place a non-https URL is allowed.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C125",
+        "kind": "decision",
+        "title": "install.sh has no way to skip checksum verification and fails closed",
+        "body": "The archive must match exactly one SHA256SUMS line for its exact name, using sha256sum or shasum -a 256; a missing hash tool, SHA256SUMS download failure, missing or duplicate entry, or mismatch aborts before unpacking, and no env var disables this.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C126",
+        "kind": "decision",
+        "title": "install.sh is attached to releases by build-release.sh and is not in SHA256SUMS",
+        "body": "build-release.sh copies scripts/install.sh into OUTDIR so release.yml's dist/* upload attaches it with no workflow change; SHA256SUMS lists the archives only because the script is fetched over TLS as the trust root and the installer reads SHA256SUMS by archive name.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C127",
+        "kind": "decision",
+        "title": "install.sh stages in PREFIX, renames into place and never deletes user bots",
+        "body": "pit and the bots are copied to dot-named staging paths next to their destinations (same file system) and moved over with mv -f after the archive layout is validated; the shipped bot files are overwritten but other files in share/pitfight/bots stay.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C128",
+        "kind": "decision",
+        "title": "install.sh accepts only an archive with one top directory and regular files",
+        "body": "The tar listing must hold only pit_VERSION_OS_ARCH paths without .. components, and the unpacked tree must hold only directories and regular files (no links), pit, and a bots directory of files; anything else aborts before install.",
         "status": "active",
         "reason": "",
         "successor": ""

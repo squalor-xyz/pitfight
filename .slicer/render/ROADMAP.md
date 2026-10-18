@@ -474,6 +474,30 @@ S26 (C35). Without --seed the seed is a uint64 read from crypto/rand (CLI source
 
 S26 (C35). newPlayHandler wraps the pit serve handler (no directories, localOnly Host check, GET and HEAD only) and adds the in-memory replay at the /replays/ place that pit serve uses, so the viewer's existing ?replay= loading works unchanged; web/js/main.js gains one query parameter, autoplay=1, so the page plays at once like a match from the start page (?replay= alone stays paused). The replay is written to disk only by --replay. Listens on 127.0.0.1 only; the printed address is the one handed to the opener. The opener is open on macOS and xdg-open on Linux/BSD via os/exec, injected in tests; on failure or on other systems the address stays printed and serving continues (stderr says why).
 
+### C123 install.sh resolves latest from the releases/latest/download/SHA256SUMS redirect
+
+Archive names carry the version, so the script fetches SHA256SUMS through GitHub's latest/download redirect and reads the version from the pit_VERSION_OS_ARCH.tar.gz entry; this needs no API call, no header parsing and works with curl and wget, and the archive is then fetched by tag.
+
+### C124 install.sh env vars: PREFIX, PITFIGHT_VERSION, PITFIGHT_BASE_URL
+
+PREFIX (default $HOME/.local, absolute) follows common installer practice; PITFIGHT_VERSION pins a release (v0.1.1 form, validated); PITFIGHT_BASE_URL (default the https GitHub releases URL) lets tests use a local server and is the only place a non-https URL is allowed.
+
+### C125 install.sh has no way to skip checksum verification and fails closed
+
+The archive must match exactly one SHA256SUMS line for its exact name, using sha256sum or shasum -a 256; a missing hash tool, SHA256SUMS download failure, missing or duplicate entry, or mismatch aborts before unpacking, and no env var disables this.
+
+### C126 install.sh is attached to releases by build-release.sh and is not in SHA256SUMS
+
+build-release.sh copies scripts/install.sh into OUTDIR so release.yml's dist/* upload attaches it with no workflow change; SHA256SUMS lists the archives only because the script is fetched over TLS as the trust root and the installer reads SHA256SUMS by archive name.
+
+### C127 install.sh stages in PREFIX, renames into place and never deletes user bots
+
+pit and the bots are copied to dot-named staging paths next to their destinations (same file system) and moved over with mv -f after the archive layout is validated; the shipped bot files are overwritten but other files in share/pitfight/bots stay.
+
+### C128 install.sh accepts only an archive with one top directory and regular files
+
+The tar listing must hold only pit_VERSION_OS_ARCH paths without .. components, and the unpacked tree must hold only directories and regular files (no links), pit, and a bots directory of files; anything else aborts before install.
+
 ### C33 CI deferred
 
 Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run locally (see the in-repo Go cache and checks constraint).
@@ -524,7 +548,7 @@ PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first 
 
 *Retired: Settled by owner decision C31 (2026-10-15)..*
 
-26 items · — 3 · done 19 · later 4
+26 items · — 2 · done 20 · later 4
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
@@ -535,34 +559,33 @@ PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first 
 | 4 | [S19](slices/S19.md) | Persistent hill of ranked bots | M | 2 | tourney | PROJECT.md Feature tiers: Later | later |
 | 5 | [S20](slices/S20.md) | Host the web visualizer on squalor.xyz | S | 2 | web | PROJECT.md Feature tiers: Later | later |
 | 6 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
-| v0.1.1 | | | | | | | |
-| 7 | [S24](slices/S24.md) | Install script | M | 2 | repo |  | — |
 
 ---
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
 | Decisions | | | | | | | |
-| 8 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions · retired decision C33 | done |
+| 7 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions · retired decision C33 | done |
 | v1 foundation | | | | | | | |
-| 9 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks · retired decision C33 | done |
-| 10 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |
-| 11 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | done |
+| 8 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks · retired decision C33 | done |
+| 9 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |
+| 10 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | done |
 | v1 core | | | | | | | |
-| 12 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | done |
-| 13 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | done |
+| 11 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | done |
+| 12 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | done |
 | v0.1.0 | | | | | | | |
-| 14 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | done |
-| 15 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | done |
-| 16 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | done |
-| 17 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | done |
-| 18 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | done |
-| 19 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | done |
-| 20 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | done |
-| 21 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | done |
-| 22 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria · retired decision C33 | done |
+| 13 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | done |
+| 14 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | done |
+| 15 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | done |
+| 16 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | done |
+| 17 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | done |
+| 18 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | done |
+| 19 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | done |
+| 20 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | done |
+| 21 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria · retired decision C33 | done |
 | v0.1.1 | | | | | | | |
-| 23 | [S22](slices/S22.md) | v0.1.0 code cleanups | M | 2 | repo | S17 later notes (from the S09, S11, S12, S13 and S15 relays) · discovered from S17 | done |
-| 24 | [S23](slices/S23.md) | v0.1.0 doc cleanups | S | 1 | docs | S17 later notes (from the S08, S12, S15 and S17 relays) · discovered from S17 | done |
+| 22 | [S22](slices/S22.md) | v0.1.0 code cleanups | M | 2 | repo | S17 later notes (from the S09, S11, S12, S13 and S15 relays) · discovered from S17 | done |
+| 23 | [S23](slices/S23.md) | v0.1.0 doc cleanups | S | 1 | docs | S17 later notes (from the S08, S12, S15 and S17 relays) · discovered from S17 | done |
+| 24 | [S24](slices/S24.md) | Install script | M | 2 | repo |  | done |
 | 25 | [S25](slices/S25.md) | Serve start page | M | 2 | web, cmd |  | done |
 | 26 | [S26](slices/S26.md) | pit play | M | 2 | cmd |  | done |

@@ -9,6 +9,45 @@ Players write bots in a small assembly language. The bots are loaded into a circ
 core, take turns executing one instruction each, and try to make each other crash.
 The same bots, seed and configuration always produce the same match.
 
+## Install
+
+On macOS or Linux (amd64 or arm64), install `pit` and the starter bots into `~/.local`, with
+no sudo:
+
+```sh
+curl -fsSL https://github.com/squalor-xyz/pitfight/releases/latest/download/install.sh | sh
+```
+
+`pit` goes to `$PREFIX/bin` and the bots to `$PREFIX/share/pitfight/bots`; the script
+warns if `$PREFIX/bin` is not on your `PATH`. Two environment variables change what it
+does:
+
+- `PREFIX`: an absolute install prefix (default `$HOME/.local`).
+- `PITFIGHT_VERSION`: the release to install, for example `v0.1.1` (default: the latest).
+
+```sh
+curl -fsSL https://github.com/squalor-xyz/pitfight/releases/latest/download/install.sh | PREFIX="$HOME/pitfight" PITFIGHT_VERSION=v0.1.1 sh
+```
+
+The script downloads the archive for your OS and architecture from the GitHub Release and
+checks it against the release's `SHA256SUMS` before it installs anything; it refuses to
+install on a mismatch, a missing entry or a missing `sha256sum`/`shasum`. It needs `curl`
+or GNU `wget` (not busybox `wget`, which lacks `--https-only`; the script always fetches
+the default URL over https only), and it writes only under `PREFIX` and a temporary
+directory it removes on exit. Re-running it upgrades `pit` and replaces the
+starter bots (other files in the bots directory stay). Then play a match with the installed
+bots:
+
+```sh
+pit play ~/.local/share/pitfight/bots/imp.s ~/.local/share/pitfight/bots/dwarf.s
+```
+
+On Windows, or to install by hand, download the archive for your platform from the
+[releases page](https://github.com/squalor-xyz/pitfight/releases), check it against
+`SHA256SUMS`, and unpack it; it holds `pit` (`pit.exe`) and the bots. With Go 1.27.2
+installed, `go install github.com/squalor-xyz/pitfight/cmd/pit@latest` builds `pit` alone
+(no bots).
+
 ## Quick start
 
 Build `pit` (see [Build and test](#build-and-test)) and, from the repo root, run
@@ -95,19 +134,22 @@ node --test web/test/*.test.js     # web viewer tests; needs a Node that runs .j
 
 Pushing a tag such as `v0.1.0` runs the checks and publishes a GitHub Release with
 `pit` built for Linux, macOS and Windows on amd64 and arm64 (each archive also holds
-the starter bots in `bots/`), plus a `SHA256SUMS` file. To build the same archives
-locally, run `scripts/build-release.sh v0.1.0 dist`.
+the starter bots in `bots/`), plus a `SHA256SUMS` file for the archives and
+`install.sh`, the [install script](#install). To build the same files locally, run
+`scripts/build-release.sh v0.1.0 dist`.
 
 ## Layout
 
 - `cmd/pit/`: the `pit` command.
 - `internal/`: the packages (`isa`, `asm`, `vm`, `arena`, `replay`, `tourney` and `tui` so far), and
-  `acceptance`, the test-only v1 acceptance checks that run the built `pit`.
+  `acceptance`, the test-only v1 acceptance checks that run the built `pit`, and
+  `install`, the test-only checks of `scripts/install.sh`.
 - `testdata/viewer/`: the shared viewer fixtures (replays) and their expected frames.
 - `bots/`: the starter bots.
 - `docs/spec/`: the ISA, assembly, match, replay and tournament specs.
 - `scripts/env.sh`: Go cache and temp setup. `scripts/build-release.sh`: release
-  archives.
+  archives. `scripts/install.sh`: the installer for macOS and Linux, attached to each
+  release; `internal/install` is its test-only package.
 - `.github/workflows/`: CI and tagged releases.
 - `assets/`: the logo (not AGPL; see License).
 

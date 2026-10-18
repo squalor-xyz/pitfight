@@ -58,8 +58,15 @@ a shared circular memory arena. Go, standard library only.
   format specs (`isa.md`, `asm.md`, `match.md`, `replay.md`, `tourney.md`). `bots/`:
   the starter bots (`imp.s`, `dwarf.s`, `replicator.s`, `scanner.s`).
 - `scripts/env.sh`: Go cache and temp setup (see below).
-  `scripts/build-release.sh`: release archives. `.github/workflows/`: CI and
-  release.
+  `scripts/build-release.sh`: release archives (it also copies `scripts/install.sh` into
+  OUTDIR, so the release attaches it; `SHA256SUMS` lists the archives only).
+  `scripts/install.sh`: the POSIX `sh` installer for macOS and Linux (`PREFIX`, default
+  `$HOME/.local`; `PITFIGHT_VERSION`, default the latest, found through the
+  `releases/latest/download/SHA256SUMS` redirect; `PITFIGHT_BASE_URL` for tests). It checks
+  the archive against `SHA256SUMS` and fails closed, with no way to skip that. Keep it
+  free of bashisms (it runs under dash). `internal/install` is test-only: it runs the
+  script against a fake release served by `httptest`, with `PREFIX`, `HOME` and `TMPDIR`
+  in temp dirs, never the network. `.github/workflows/`: CI and release.
 - `assets/pitfight-512.png`: the logo, an unmodified copy of the master in the
   private Squalor branding repo. All rights reserved, not AGPL; never edit,
   resize or recolor it here. Changes go through branding.

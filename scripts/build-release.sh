@@ -5,7 +5,9 @@
 # platform plus SHA256SUMS into OUTDIR. Run from anywhere, by path:
 #   scripts/build-release.sh VERSION OUTDIR
 # VERSION (for example v0.1.0) only names the archives. Each archive holds the
-# pit binary, LICENSE, NOTICE, README.md and the starter bots in bots/. Used by
+# pit binary, LICENSE, NOTICE, README.md and the starter bots in bots/. OUTDIR also
+# gets a copy of scripts/install.sh, so that it is attached to the release too; it is
+# not listed in SHA256SUMS, which covers the archives only. Used by
 # .github/workflows/release.yml.
 
 set -euo pipefail
@@ -44,5 +46,7 @@ for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 wi
 		tar -C "$stage" -czf "$outdir/$name.tar.gz" "$name"
 	fi
 done
+
+cp "$root/scripts/install.sh" "$outdir/install.sh"
 
 (cd "$outdir" && shasum -a 256 pit_"${version}"_* > SHA256SUMS)
