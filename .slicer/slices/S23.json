@@ -1,0 +1,41 @@
+{
+  "id": "S23",
+  "title": "Fix doc and test wording found in the v0.1.0 relays",
+  "lead": [
+    "Doc, comment and test-wording fixes that v0.1.0 reviewers noted as later work. No behavior change. Line numbers are as of tag v0.1.0."
+  ],
+  "depends_note": null,
+  "findings_note": "S17 later notes (from the S08, S12, S15 and S17 relays)",
+  "size": "S",
+  "flags": [],
+  "trees_note": "docs",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** code behavior changes (see the companion code cleanup slice); new docs.",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "Docs should match the code (gate criterion). These mismatches were minor enough to land v0.1.0 with, and are tracked here."
+    },
+    {
+      "heading": "Files",
+      "body": "- `README.md` (lines 34-36): the acceptance-test sentence overstates C19, because the canvas check is manual and the web half runs under `node --test`.\n- `web/test/model.test.js` (line 25): hard-codes 13 frames for both fixture pairs; derive the count as cycles + 1, as the Go side does.\n- `internal/tui/model.go` (line 35) and catalog C97: say the live-count clamp applies only to the final value. Also improve the C102 fixture wording.\n- `AGENTS.md` (line 83), `docs/spec/isa.md` (line 316): rewrap the long lines.\n- `cmd/pit/serve.go`: the serveUsage symlink wording.\n- `docs/spec/asm.md`: the bomber listing is tagged `text` and covered only by `TestSpecListing`; bring it under `TestRoundTripSpecExamples` or say why not.\n- `internal/acceptance/doc.go`: keep it, or drop it so the package is strictly test-only. This is the implementer's call, recorded per C35."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "- `model.test.js` fails if a fixture's frame count is not cycles + 1. Today both fixtures happen to give 13.\n- If the bomber listing joins the round-trip examples, `TestRoundTripSpecExamples` covers it."
+    },
+    {
+      "heading": "Implement",
+      "body": "- Make each wording fix above. Update catalog C97 and C102 with `slicer catalog`."
+    },
+    {
+      "heading": "Check",
+      "body": "- `. scripts/env.sh && go test ./... && go vet ./... && test -z \"$(gofmt -l cmd internal web)\"`\n- `node --test web/test/*.test.js`\n- `slicer check`"
+    },
+    {
+      "heading": "Git",
+      "body": "Branch `slice/<id>-doc-cleanups` in `.worktrees/<id>`. One commit when the owner asks."
+    }
+  ],
+  "notes": []
+}

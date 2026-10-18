@@ -2,7 +2,7 @@
   "version": 9,
   "id_prefix": "S",
   "id_width": 2,
-  "next_id": 22,
+  "next_id": 24,
   "preamble": "pitfight (formerly the working name bot-arena; CLI command `pit`): a Core War-style programming game. Players write small bots for a tiny virtual machine; the bots share a circular memory arena and try to make each other crash. v1 is the ISA spec, assembler, deterministic VM and arena, tournament runner, replay format, and terminal and web viewers, in Go (standard library only) with a plain JavaScript + canvas web viewer. Source: PROJECT.md and the owner decisions of 2026-10-15 (C26-C37).",
   "passes": [],
   "items": [
@@ -1284,6 +1284,66 @@
         "importance": 1,
         "urgency": 1,
         "effort": 3,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S22",
+      "title": "Fix code rough edges found in the v0.1.0 relays",
+      "short_title": "v0.1.0 code cleanups",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "M",
+        "flags": [],
+        "trees": [
+          "repo"
+        ],
+        "trees_literal": false,
+        "findings": "S17 later notes (from the S09, S11, S12, S13 and S15 relays)",
+        "discovered_from": "S17",
+        "parent": "",
+        "cites": [],
+        "key": "cleanup-v0.1.0-code",
+        "pass": "",
+        "group": "v0.1.1",
+        "reason": "",
+        "importance": 2,
+        "urgency": 2,
+        "effort": 2,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S23",
+      "title": "Fix doc and test wording found in the v0.1.0 relays",
+      "short_title": "v0.1.0 doc cleanups",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "S",
+        "flags": [],
+        "trees": [
+          "docs"
+        ],
+        "trees_literal": false,
+        "findings": "S17 later notes (from the S08, S12, S15 and S17 relays)",
+        "discovered_from": "S17",
+        "parent": "",
+        "cites": [],
+        "key": "cleanup-v0.1.0-docs",
+        "pass": "",
+        "group": "v0.1.1",
+        "reason": "",
+        "importance": 1,
+        "urgency": 2,
+        "effort": 1,
         "attempts": 0
       }
     }

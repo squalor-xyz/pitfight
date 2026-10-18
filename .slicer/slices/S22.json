@@ -1,0 +1,41 @@
+{
+  "id": "S22",
+  "title": "Fix code rough edges found in the v0.1.0 relays",
+  "lead": [
+    "Small correctness and maintenance issues that the v0.1.0 relay reviewers recorded as later notes. None breaks a v1 acceptance criterion. Line numbers are as of tag v0.1.0; re-check them with `slicer refs`."
+  ],
+  "depends_note": null,
+  "findings_note": "S17 later notes (from the S09, S11, S12, S13 and S15 relays)",
+  "size": "M",
+  "flags": [],
+  "trees_note": "repo",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** new features; changes to the replay format or the ISA; doc-only wording (see the companion docs cleanup slice).",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "Reviewers of S11, S12, S13 and S15 found these during review. They were left out of scope so the slices could land, and are tracked here so they are not lost on a done item."
+    },
+    {
+      "heading": "Files",
+      "body": "- `cmd/pit/run.go`, `cmd/pit/tourney.go`: the shared flag-interleave loop and `--` handling.\n- `cmd/pit/run.go`: replay file writing.\n- `internal/replay/read.go` (lines 20-25), `internal/arena/config.go` (lines 13-18): duplicated limits.\n- `internal/arena/match.go`, `internal/tourney/run.go`: an events-off path for scoring-only runs.\n- `internal/tourney/tourney_test.go`: a parallelism test.\n- `cmd/pit/view.go`: stdin line length.\n- `cmd/pit/serve.go`: Host header check."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "- A flag whose value is the literal `--` (e.g. `--replay --`) is taken as a value, not as the end of flags, in both `pit run` and `pit tourney`.\n- A replay write that fails partway leaves no partial file at the target path.\n- `internal/replay` and `internal/arena` agree on the limits from one source (a test fails if they diverge, or the duplicate is removed).\n- A tournament run with events off gives the same scoreboard as with events on, and keeps no event slices.\n- A barrier-style test proves `--jobs N` runs matches concurrently (the `jobs=1` mutant in `tourney.Run` must fail it).\n- `pit view` accepts a command line longer than 64 KB, or rejects it with a clear error and keeps reading.\n- `pit serve` accepts the Host `localhost.` (trailing dot) the same as `localhost`, or the refusal is documented."
+    },
+    {
+      "heading": "Implement",
+      "body": "- Fold the duplicated flag-interleave loop of `tourney.go` and `run.go` into one helper in `cmd/pit`, fixing `--` handling there once.\n- Write replays to a temp file in the same directory and rename into place.\n- Export or share the arena limits so `internal/replay` reads them instead of copying them.\n- Add an option to `arena.Run`/`RunObserved` that skips event collection, and use it in `internal/tourney` (S13 measured about 143 MB peak at default workers).\n- Add the tourney concurrency test.\n- Replace the default `bufio.Scanner` limit in `pit view` or handle `bufio.ErrTooLong`.\n- Decide the trailing-dot Host case in `pit serve` and record it per C35."
+    },
+    {
+      "heading": "Check",
+      "body": "- `. scripts/env.sh && go test ./... && go vet ./... && test -z \"$(gofmt -l cmd internal web)\" && go build -o .cache/bin/pit ./cmd/pit`\n- `node --test web/test/*.test.js`\n- Golden results, replay hashes and acceptance tests (C15-C19) are unchanged."
+    },
+    {
+      "heading": "Git",
+      "body": "Branch `slice/<id>-code-cleanups` in `.worktrees/<id>`. One commit when the owner asks."
+    }
+  ],
+  "notes": []
+}
