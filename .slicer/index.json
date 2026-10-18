@@ -1291,7 +1291,7 @@
       "id": "S22",
       "title": "Fix code rough edges found in the v0.1.0 relays",
       "short_title": "v0.1.0 code cleanups",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [],
       "note_records": [],
@@ -1314,7 +1314,7 @@
         "importance": 2,
         "urgency": 2,
         "effort": 2,
-        "attempts": 0
+        "attempts": 1
       }
     },
     {
@@ -1352,7 +1352,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 109,
+    "next_id": 115,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -2324,6 +2324,60 @@
         "kind": "decision",
         "title": "Second shared viewer fixture with SPL: testdata/viewer/spl_fixture.jsonl and spl_frames.json",
         "body": "frames.json had no spawn or death, so live-process parity of the Go and web viewers was unchecked; the pair is written by pit run from testdata/viewer/spl_splitter.s and spl_sitter.s (seed 1, core 24), its frames derived by hand, and read by internal/tui TestFrames and web/test/model.test.js.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C109",
+        "kind": "decision",
+        "title": "Flag interleaving and -- in pit run, tourney and view",
+        "body": "cmd/pit parseInterleaved splits args with the flag package's own rules before one Parse: a non-bool flag without =value takes the next argument as its value even if that is --, and only a -- in a flag position ends the flags. One helper replaces three copies (run, tourney, view). Reason: the old test for a consumed -- could not tell a terminator from a flag value, so --replay -- turned later flags into files.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C110",
+        "kind": "decision",
+        "title": "Replays are written through a temp file and rename",
+        "body": "pit run --replay writes to .NAME.tmpPID.N in the same directory, syncs it and renames it over FILE, removing the temp on any failure, so FILE is never partial. A replaced regular file keeps its mode (the temp file is chmodded to it before the rename); a new file gets 0644 less the umask. A target that exists and is not a regular file (symlink, device, pipe) is written in place, because a rename would replace it. Reason: atomic result for files, no surprise for /dev/null or links, and no mode change on overwrite.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C111",
+        "kind": "decision",
+        "title": "Tournament events-off path is a nil observer, not new API",
+        "body": "tourney.play calls arena.RunObserved(cfg, bots, nil), which already keeps only one cycle of events; arena.Run is the one that keeps all events (65 MB allocated vs 0.46 MB for two imp matches at 80000 cycles). No new arena function; unexported tourney.playMatch is the test seam for the concurrency test. Reason: smallest change that removes the memory growth.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C112",
+        "kind": "decision",
+        "title": "Arena limits exported and shared with replay",
+        "body": "arena exports MaxCoreSize (= vm.MaxCoreSize), MaxCycleLimit, MaxMaxProcesses, MaxMinSeparation, MaxBots, MaxBotLength; internal/replay reads them instead of keeping copies. Reason: one source for the match.md section 1 limits.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C113",
+        "kind": "decision",
+        "title": "pit view skips command lines over 64 KiB with a message",
+        "body": "pit view reads input with a bufio.Reader instead of bufio.Scanner; a line of more than 65536 bytes (without the line break) is read to its end, ignored, shows 'line too long' on screen, and the session goes on (exit 0). Reason: bounded memory, and a pasted long line no longer ends the session with 'token too long'.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C114",
+        "kind": "decision",
+        "title": "pit serve accepts Host localhost. with the root dot",
+        "body": "isLocalHost trims one trailing dot before comparing with localhost (RFC 1034 root form of the same name). Other names with a dot, and 127.0.0.1., stay refused. Reason: same name, no rebinding risk added.",
         "status": "active",
         "reason": "",
         "successor": ""

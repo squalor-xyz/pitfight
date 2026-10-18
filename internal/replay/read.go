@@ -16,14 +16,6 @@ import (
 	"github.com/squalor-xyz/pitfight/internal/vm"
 )
 
-// Limits of match.md section 1, as the header must respect them.
-const (
-	maxCycleLimit    = 1<<31 - 1
-	maxMaxProcesses  = 1 << 20
-	maxMinSeparation = 1 << 20
-	maxBots          = 1 << 20
-)
-
 // VersionError is the error for a replay whose version this package does not read.
 type VersionError struct {
 	Version int64
@@ -221,9 +213,9 @@ func (p *parser) header(n int, line []byte) error {
 		lo, hi int64
 	}{
 		{"core_size", c.CoreSize, vm.MinCoreSize, vm.MaxCoreSize},
-		{"cycle_limit", c.CycleLimit, 1, maxCycleLimit},
-		{"max_processes", c.MaxProcesses, 1, maxMaxProcesses},
-		{"min_separation", c.MinSeparation, 0, maxMinSeparation},
+		{"cycle_limit", c.CycleLimit, 1, arena.MaxCycleLimit},
+		{"max_processes", c.MaxProcesses, 1, arena.MaxMaxProcesses},
+		{"min_separation", c.MinSeparation, 0, arena.MaxMinSeparation},
 	} {
 		if f.v < f.lo || f.v > f.hi {
 			return rangeErr(n, f.name, f.v, f.lo, f.hi)
@@ -233,8 +225,8 @@ func (p *parser) header(n int, line []byte) error {
 	if err != nil {
 		return fmt.Errorf("replay: line %d: seed %q is not an unsigned 64-bit decimal", n, c.Seed)
 	}
-	if len(h.Bots) < 2 || len(h.Bots) > maxBots {
-		return fmt.Errorf("replay: line %d: need 2..%d bots, got %d", n, maxBots, len(h.Bots))
+	if len(h.Bots) < 2 || len(h.Bots) > arena.MaxBots {
+		return fmt.Errorf("replay: line %d: need 2..%d bots, got %d", n, arena.MaxBots, len(h.Bots))
 	}
 	cfg := arena.Config{
 		CoreSize: int(c.CoreSize), CycleLimit: int(c.CycleLimit), MaxProcesses: int(c.MaxProcesses),

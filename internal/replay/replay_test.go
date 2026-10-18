@@ -731,3 +731,45 @@ func TestEntryAddressWraps(t *testing.T) {
 		}
 	}
 }
+
+// TestLimitsMatchArena: the reader holds the header to the limits of match.md
+// section 1, and those are the limits of internal/arena, from one source: a value at
+// the limit is accepted, one above it is refused with the arena limit in the message.
+func TestLimitsMatchArena(t *testing.T) {
+	small := string(fixture(t, "win_death.jsonl"))
+	with := func(old, new string) string {
+		if strings.Count(small, old) != 1 {
+			t.Fatalf("%q occurs %d times in the fixture", old, strings.Count(small, old))
+		}
+		return strings.Replace(small, old, new, 1)
+	}
+	tests := []struct {
+		field, old string
+		max        int
+		low        int
+	}{
+		{"cycle_limit", `"cycle_limit":5`, arena.MaxCycleLimit, 1},
+		{"max_processes", `"max_processes":8`, arena.MaxMaxProcesses, 1},
+		{"min_separation", `"min_separation":0`, arena.MaxMinSeparation, 0},
+	}
+	for _, tt := range tests {
+		// At the limit the whole file reads: no other check depends on the value.
+		okLine := fmt.Sprintf(`"%s":%d`, tt.field, tt.max)
+		if _, err := Read(strings.NewReader(with(tt.old, okLine))); err != nil {
+			t.Errorf("%s at the arena limit %d: %v", tt.field, tt.max, err)
+		}
+		_, err := Read(strings.NewReader(with(tt.old, fmt.Sprintf(`"%s":%d`, tt.field, tt.max+1))))
+		want := fmt.Sprintf("%s %d out of range %d..%d", tt.field, tt.max+1, tt.low, tt.max)
+		if err == nil || !strings.Contains(err.Error(), want) {
+			t.Errorf("%s above the arena limit: error %v, want one containing %q", tt.field, err, want)
+		}
+	}
+
+	// The bot count: one bot is refused with the arena limit in the message.
+	one := `{"t":"header","version":1,"config":{"core_size":16,"cycle_limit":5,"max_processes":8,"min_separation":0,"seed":"1"},"bots":[` +
+		strings.SplitN(strings.SplitN(small, `"bots":[`, 2)[1], "},{", 2)[0] + "}]}\n"
+	_, err := Read(strings.NewReader(one))
+	if want := fmt.Sprintf("need 2..%d bots, got 1", arena.MaxBots); err == nil || !strings.Contains(err.Error(), want) {
+		t.Errorf("one bot: error %v, want one containing %q", err, want)
+	}
+}

@@ -362,3 +362,48 @@ func TestRunReplayErrors(t *testing.T) {
 		t.Error("the usage text does not list --replay")
 	}
 }
+
+// TestRunDashDashFlagValue: a flag value that is the literal "--" is a value, not the
+// end of the flags. Here "--replay --" takes "--" as its file name, so the later
+// "--core-size 0" is still a flag, and the match is refused for that value (a refused
+// match writes no file). If "--" ended the flags, "--core-size" would be a bot file.
+func TestRunDashDashFlagValue(t *testing.T) {
+	paths := replayTestBots(t)
+	code, out, errOut := runPit("run", "--replay", "--", paths[0], paths[1], "--core-size", "0")
+	if code != 1 || out != "" || !strings.Contains(errOut, "invalid config: CORESIZE 0") {
+		t.Errorf("exit code %d, stdout %q, stderr %q; want 1 and the CORESIZE error", code, out, errOut)
+	}
+	if _, err := os.Stat("--"); err == nil {
+		os.Remove("--")
+		t.Error("a refused match wrote the file --")
+	}
+}
+
+// TestRunReplayFailureLeavesTarget: the replay is written to a temporary file next to
+// the target and renamed into place, so when that cannot be done the target is not
+// touched. Here the directory is read-only, so no temporary file can be made; a
+// direct write of the existing, writable file would succeed and replace its content.
+func TestRunReplayFailureLeavesTarget(t *testing.T) {
+	paths := replayTestBots(t)
+	dir := t.TempDir()
+	target := filepath.Join(dir, "match.jsonl")
+	if err := os.WriteFile(target, []byte("old"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chmod(dir, 0o555); err != nil {
+		t.Skip("cannot make a directory read-only:", err)
+	}
+	t.Cleanup(func() { os.Chmod(dir, 0o755) })
+	if f, err := os.Create(filepath.Join(dir, "probe")); err == nil {
+		f.Close()
+		t.Skip("the directory is writable although read-only (running as root?)")
+	}
+
+	code, out, errOut := runPit("run", "--cycle-limit", "10", "--replay", target, paths[0], paths[1])
+	if code != 1 || out != "" || !strings.Contains(errOut, "pit run:") {
+		t.Errorf("exit code %d, stdout %q, stderr %q; want 1, empty and an error", code, out, errOut)
+	}
+	if got, err := os.ReadFile(target); err != nil || string(got) != "old" {
+		t.Errorf("the target holds %q (%v) after a failed write, want old", got, err)
+	}
+}

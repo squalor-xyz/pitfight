@@ -8,12 +8,17 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
+	"sync/atomic"
 	"testing"
+	"time"
+	"unsafe"
 
 	"github.com/squalor-xyz/pitfight/internal/arena"
 	"github.com/squalor-xyz/pitfight/internal/asm"
+	"github.com/squalor-xyz/pitfight/internal/vm"
 )
 
 // assemble turns source into a named bot.
@@ -401,5 +406,103 @@ func TestScoreboardIndependentOfJobs(t *testing.T) {
 	slices.Reverse(reversed)
 	if got := scoreboardBytes(t, bots, reversed); !bytes.Equal(got, want) {
 		t.Errorf("reverse arrival: scoreboard differs:\n%s\nwant:\n%s", got, want)
+	}
+}
+
+// totalAlloc returns the bytes allocated by f.
+func totalAlloc(f func()) uint64 {
+	var before, after runtime.MemStats
+	runtime.GC()
+	runtime.ReadMemStats(&before)
+	f()
+	runtime.ReadMemStats(&after)
+	return after.TotalAlloc - before.TotalAlloc
+}
+
+// TestRunKeepsNoEvents: a tournament only scores the matches, so it must not collect
+// the VM events of a match (S13 measured about 143 MB at the default workers). Two
+// imps write a cell every cycle: 2 x 80000 events per tied match, a few MB if kept; a
+// third bot that dies at once makes the other matches decisive. Every result (cycles,
+// and the winner or the tie) is the one of the same match played with events
+// (arena.Run), and the allocation is far below what keeping the events costs.
+func TestRunKeepsNoEvents(t *testing.T) {
+	imp := "MOV.I $0, $1\n"
+	bots := []Bot{assemble(t, "imp1", imp), assemble(t, "imp2", imp), assemble(t, "suicide", suicideSrc)}
+	cfg := arena.DefaultConfig() // cycle limit 80000
+	var results []MatchResult
+	got := totalAlloc(func() {
+		var err error
+		if results, err = Run(cfg, bots, 1, 1); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	// The same matches with events kept.
+	var eventBytes uint64
+	var wins, ties int
+	for _, r := range results {
+		c := cfg
+		c.Seed = r.Seed
+		res, events, err := arena.Run(c, []arena.Bot{bots[r.First].Bot, bots[r.Second].Bot})
+		if err != nil {
+			t.Fatal(err)
+		}
+		wantWinner := -1
+		if res.Outcome == arena.Win {
+			wantWinner = []int{r.First, r.Second}[res.Winner-1]
+			wins++
+		} else {
+			ties++
+		}
+		if res.Cycles != r.Cycles || r.Winner != wantWinner {
+			t.Errorf("match %+v: tournament cycles %d winner %d, arena.Run cycles %d winner %d",
+				r.Match, r.Cycles, r.Winner, res.Cycles, wantWinner)
+		}
+		eventBytes += uint64(len(events)) * uint64(unsafe.Sizeof(vm.Event{}))
+	}
+	if wins == 0 || ties == 0 {
+		t.Fatalf("%d wins and %d ties; the test needs both", wins, ties)
+	}
+	if eventBytes < 8<<20 {
+		t.Fatalf("the test matches have %d bytes of events; too few for the check", eventBytes)
+	}
+	t.Logf("Run allocated %d bytes; the events of its matches are %d bytes", got, eventBytes)
+	if got > eventBytes/4 {
+		t.Errorf("Run allocated %d bytes for matches with %d bytes of events; it keeps events", got, eventBytes)
+	}
+}
+
+// TestRunConcurrent proves that jobs matches run at the same time: the stand-in for a
+// match waits until jobs of them have started, and fails after a timeout. With fewer
+// workers than jobs the barrier never fills.
+func TestRunConcurrent(t *testing.T) {
+	const jobs = 4
+	bots := []Bot{assemble(t, "a", sitterSrc), assemble(t, "b", sitterSrc), assemble(t, "c", sitterSrc)}
+	var arrived atomic.Int32
+	full := make(chan struct{})
+	var timedOut atomic.Bool
+	old := playMatch
+	playMatch = func(_ arena.Config, _ []Bot, m Match) (MatchResult, error) {
+		if arrived.Add(1) == jobs {
+			close(full)
+		}
+		select {
+		case <-full:
+		case <-time.After(2 * time.Second):
+			timedOut.Store(true)
+		}
+		return MatchResult{Match: m, Cycles: 1, Winner: -1}, nil
+	}
+	t.Cleanup(func() { playMatch = old })
+
+	if m := Matches(len(bots), 2); len(m) < jobs {
+		t.Fatalf("%d matches, need at least %d", len(m), jobs)
+	}
+	results, err := Run(arena.DefaultConfig(), bots, 2, jobs)
+	if err != nil || len(results) != len(Matches(len(bots), 2)) {
+		t.Fatalf("%d results, error %v", len(results), err)
+	}
+	if timedOut.Load() {
+		t.Errorf("fewer than %d matches ran at the same time", jobs)
 	}
 }

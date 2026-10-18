@@ -215,3 +215,18 @@ func TestTourneyErrors(t *testing.T) {
 		})
 	}
 }
+
+// TestTourneyDashDashFlagValue: a flag value that is the literal "--" is a value, not
+// the end of the flags. Here "--matches --" takes "--" as its file name, so the later
+// "--rounds 0" is still a flag and is refused as one (usage error, nothing written).
+func TestTourneyDashDashFlagValue(t *testing.T) {
+	dir := starterDir(t)
+	code, out, errOut := tourneyPit("tourney", "--matches", "--", dir, "--rounds", "0")
+	if code != 2 || out != "" || !strings.Contains(errOut, "--rounds must be at least 1, got 0") {
+		t.Errorf("exit code %d, stdout %q, stderr %q; want 2 and the --rounds error", code, out, errOut)
+	}
+	if _, err := os.Stat("--"); err == nil {
+		os.Remove("--")
+		t.Error("a refused run wrote the file --")
+	}
+}

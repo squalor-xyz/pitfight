@@ -55,7 +55,8 @@ Matches run on `--jobs` workers (goroutines). Each result is stored in the slot 
 match index, and everything printed is computed from the results in match order, so
 the output does not depend on the worker count or on the order in which matches finish.
 Printing never iterates a map. The same bots, rounds and configuration give the same
-bytes.
+bytes. A tournament only scores the matches, so it keeps no VM events, only the
+result of each match.
 
 ## 5. Output
 

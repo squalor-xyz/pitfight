@@ -21,7 +21,8 @@ const runUsage = `usage: pit run [flags] [--] <bot.s> <bot.s> [<bot.s> ...]
 
 Assembles the bots, runs one match and prints the result. Bots get the ids 1, 2,
 ... in the order given. Flags and files may come in any order; every argument
-after -- is a file, even one that starts with a dash.
+after -- is a file, even one that starts with a dash. A flag that takes a value takes
+the next argument as it, even if that is --.
 
 Flags:
   --seed N            placement seed, 0 to 2^64-1 (default 0)
@@ -30,7 +31,9 @@ Flags:
   --max-processes N   live processes allowed per bot, 1 to 1048576 (default 8000)
   --min-separation N  empty cells between neighbouring bots, 0 to 1048576 (default 100)
   --json              print the result as one line of JSON instead of text
-  --replay FILE       also write the replay (docs/spec/replay.md) to FILE and print its hash
+  --replay FILE       also write the replay (docs/spec/replay.md) to FILE and print its
+                      hash (written to a temporary file first, so a failed write
+                      leaves no partial FILE)
 
 Exit codes: 0 the match ran; 1 an error in a bot file or the configuration; 2 a usage error.
 `
@@ -51,30 +54,15 @@ func runRun(args []string, stdout, stderr io.Writer) int {
 	fs.BoolVar(&asJSON, "json", false, "")
 	fs.StringVar(&replayPath, "replay", "", "")
 
-	// The flag package stops at the first file name; parse again after each one so
-	// that "pit run a.s b.s --seed 1" works.
-	var files []string
-	for {
-		if err := fs.Parse(args); err != nil {
-			if errors.Is(err, flag.ErrHelp) {
-				fmt.Fprint(stdout, runUsage)
-				return 0
-			}
-			fmt.Fprintf(stderr, "pit run: %v\n\n%s", err, runUsage)
-			return 2
+	// Flags and files may come in any order, and "--" ends the flags.
+	files, err := parseInterleaved(fs, args)
+	if err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			fmt.Fprint(stdout, runUsage)
+			return 0
 		}
-		rest := fs.Args()
-		// Parse consumed a "--" if the last argument it took is one; a flag value
-		// cannot be "--" because no flag accepts it. Everything after it is a file.
-		if used := len(args) - len(rest); used > 0 && args[used-1] == "--" {
-			files = append(files, rest...)
-			break
-		}
-		if len(rest) == 0 {
-			break
-		}
-		files = append(files, rest[0])
-		args = rest[1:]
+		fmt.Fprintf(stderr, "pit run: %v\n\n%s", err, runUsage)
+		return 2
 	}
 	if len(files) == 0 {
 		fmt.Fprint(stderr, runUsage)
@@ -98,7 +86,6 @@ func runRun(args []string, stdout, stderr io.Writer) int {
 	var (
 		res        arena.Result
 		replayHash string
-		err        error
 	)
 	if replayPath == "" {
 		res, _, err = arena.Run(cfg, bots)
@@ -108,7 +95,7 @@ func runRun(args []string, stdout, stderr io.Writer) int {
 			res = rec.Result
 			data := rec.Bytes()
 			replayHash = replay.Hash(data)
-			err = os.WriteFile(replayPath, data, 0o644)
+			err = writeFileAtomic(replayPath, 0o644, func(w io.Writer) error { _, err := w.Write(data); return err })
 		}
 	}
 	if err != nil {

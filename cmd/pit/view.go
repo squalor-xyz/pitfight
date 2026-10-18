@@ -32,6 +32,8 @@ Commands are read from standard input, one per line (press Enter after each):
   p N     play N cycles, then pause
   q       quit
   (empty line: step 1, or pause while playing)
+A line of more than 65536 bytes is ignored with a message, and the next lines still
+run.
 A play shows one cycle per --delay and stops at the last cycle. At the end of input
 the command exits; it first finishes a play started with a count (p N), but stops a
 play to the end at once, so piped input uses "p N".
@@ -43,6 +45,46 @@ Flags:
 
 Exit codes: 0 normal end; 1 an error in the replay file or reading input; 2 a usage error.
 `
+
+// maxViewLine is the longest command line, without its line break, that pit view
+// runs. A longer line is skipped with a message and the session goes on.
+const maxViewLine = 64 * 1024
+
+// viewLine is one line of input. TooLong is set, and Text empty, for a line of more
+// than maxViewLine bytes.
+type viewLine struct {
+	Text    string
+	TooLong bool
+}
+
+// readViewLine reads the next line of r, a reader with a buffer of at least
+// maxViewLine+2 bytes, without its "\n" or "\r\n". A line that is too long is read to
+// its end and given as such. At the end of input it returns io.EOF, after the last
+// line if that has no line break.
+func readViewLine(r *bufio.Reader) (viewLine, error) {
+	b, err := r.ReadSlice('\n')
+	if errors.Is(err, bufio.ErrBufferFull) {
+		for errors.Is(err, bufio.ErrBufferFull) {
+			_, err = r.ReadSlice('\n')
+		}
+		if err == io.EOF {
+			err = nil // the next read reports the end of input
+		}
+		return viewLine{TooLong: true}, err
+	}
+	if err == io.EOF && len(b) > 0 {
+		err = nil
+	}
+	if err != nil {
+		return viewLine{}, err
+	}
+	text := strings.TrimSuffix(string(b), "\n")
+	text = strings.TrimSuffix(text, "\r")
+	if len(text) > maxViewLine {
+		return viewLine{TooLong: true}, nil
+	}
+	return viewLine{Text: text}, nil
+}
 
 // viewConfig is the part of a view session that tests replace.
 type viewConfig struct {
@@ -64,28 +106,15 @@ func runView(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	fs.IntVar(&rows, "rows", rows, "")
 	fs.IntVar(&delayMS, "delay", delayMS, "")
 
-	// The flag package stops at the first file name; parse again after each one so
-	// that "pit view replay.jsonl --cols 40" works.
-	var files []string
-	for {
-		if err := fs.Parse(args); err != nil {
-			if errors.Is(err, flag.ErrHelp) {
-				fmt.Fprint(stdout, viewUsage)
-				return 0
-			}
-			fmt.Fprintf(stderr, "pit view: %v\n\n%s", err, viewUsage)
-			return 2
+	// Flags and the file may come in any order, and "--" ends the flags.
+	files, err := parseInterleaved(fs, args)
+	if err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			fmt.Fprint(stdout, viewUsage)
+			return 0
 		}
-		rest := fs.Args()
-		if used := len(args) - len(rest); used > 0 && args[used-1] == "--" {
-			files = append(files, rest...)
-			break
-		}
-		if len(rest) == 0 {
-			break
-		}
-		files = append(files, rest[0])
-		args = rest[1:]
+		fmt.Fprintf(stderr, "pit view: %v\n\n%s", err, viewUsage)
+		return 2
 	}
 	if len(files) != 1 {
 		fmt.Fprint(stderr, viewUsage)
@@ -140,21 +169,27 @@ func viewSession(in io.Reader, out io.Writer, pl *tui.Player, cfg viewConfig) er
 	if after == nil {
 		after = time.After
 	}
-	lines := make(chan string)
+	lines := make(chan viewLine)
 	stop := make(chan struct{})
 	defer close(stop)
 	var readErr error // set before lines is closed
 	go func() {
 		defer close(lines)
-		sc := bufio.NewScanner(in)
-		for sc.Scan() {
+		r := bufio.NewReaderSize(in, maxViewLine+2)
+		for {
+			l, err := readViewLine(r)
+			if err != nil {
+				if err != io.EOF {
+					readErr = err
+				}
+				return
+			}
 			select {
-			case lines <- sc.Text():
+			case lines <- l:
 			case <-stop:
 				return
 			}
 		}
-		readErr = sc.Err()
 	}()
 
 	var message string
@@ -166,7 +201,7 @@ func viewSession(in io.Reader, out io.Writer, pl *tui.Player, cfg viewConfig) er
 	}
 	input := lines // set to nil at the end of input so that select ignores it
 	for {
-		var line string
+		var line viewLine
 		if pl.Playing() {
 			select {
 			case l, ok := <-input:
@@ -199,11 +234,13 @@ func viewSession(in io.Reader, out io.Writer, pl *tui.Player, cfg viewConfig) er
 		}
 
 		wasPlaying := pl.Playing()
-		fields := strings.Fields(line)
+		fields := strings.Fields(line.Text)
 		if wasPlaying {
 			pl.Pause()
 		}
 		switch {
+		case line.TooLong:
+			message = fmt.Sprintf("line too long (more than %d bytes), ignored", maxViewLine)
 		case len(fields) == 0 && wasPlaying, len(fields) == 1 && fields[0] == "p" && wasPlaying:
 			// Only pauses.
 		case len(fields) == 0:

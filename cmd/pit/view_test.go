@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -369,5 +370,35 @@ func TestFixtureIsPitRunOutput(t *testing.T) {
 	}
 	if !bytes.Equal(got, want) {
 		t.Errorf("pit run output differs from %s", viewFixture)
+	}
+}
+
+// TestViewLongLine: a command line longer than the limit is rejected with a message on
+// the screen, the rest of that line is skipped, and the next lines still run. A line
+// at the limit works. Before, the scanner failed with "token too long" and the
+// command exited 1.
+func TestViewLongLine(t *testing.T) {
+	pad := func(cmd string, n int) string { return cmd + strings.Repeat(" ", n-len(cmd)) }
+	long := pad("g 4", maxViewLine+3) + "\n"         // 3 bytes over the limit: too long
+	atLimit := pad("g 5", maxViewLine) + "\r\n"      // maxViewLine bytes before the line break: works
+	justOver := pad("g 6", maxViewLine+1) + "\n"     // one more: too long
+	last := "s" + strings.Repeat("x", 3*maxViewLine) // no line break at the end of input
+	input := "g 2\n" + long + atLimit + justOver + "g 7\n" + last
+	code, out, errOut := pitView(t, input, viewFixture, "--delay", "0", "--cols", "8", "--rows", "4")
+	if code != 0 || errOut != "" {
+		t.Fatalf("exit code %d, stderr %q; want 0 and empty", code, errOut)
+	}
+	// Drawings: start, g 2, (too long), g 5, (too long), g 7, (last line: too long); a
+	// message leaves the cycle as it was.
+	got := states(t, out)
+	want := []string{"0 paused", "2 paused", "2 paused", "5 paused", "5 paused", "7 paused", "7 paused"}
+	if strings.Join(got, ", ") != strings.Join(want, ", ") {
+		t.Errorf("drawings = %q, want %q", got, want)
+	}
+	if !strings.Contains(viewUsage, strconv.Itoa(maxViewLine)) {
+		t.Errorf("the usage text does not state the limit %d", maxViewLine)
+	}
+	if n := strings.Count(out, "line too long"); n != 3 {
+		t.Errorf("%d \"line too long\" messages, want 3", n)
 	}
 }
