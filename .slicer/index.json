@@ -2,7 +2,7 @@
   "version": 9,
   "id_prefix": "S",
   "id_width": 2,
-  "next_id": 24,
+  "next_id": 25,
   "preamble": "pitfight (formerly the working name bot-arena; CLI command `pit`): a Core War-style programming game. Players write small bots for a tiny virtual machine; the bots share a circular memory arena and try to make each other crash. v1 is the ISA spec, assembler, deterministic VM and arena, tournament runner, replay format, and terminal and web viewers, in Go (standard library only) with a plain JavaScript + canvas web viewer. Source: PROJECT.md and the owner decisions of 2026-10-15 (C26-C37).",
   "passes": [],
   "items": [
@@ -1356,6 +1356,38 @@
         "importance": 1,
         "urgency": 2,
         "effort": 1,
+        "attempts": 0
+      }
+    },
+    {
+      "id": "S24",
+      "title": "Add an install script for macOS and Linux",
+      "short_title": "Install script",
+      "status": "open",
+      "has_slice": true,
+      "depends_on": [
+        "S23"
+      ],
+      "note_records": [],
+      "claim": null,
+      "fields": {
+        "size": "M",
+        "flags": [],
+        "trees": [
+          "repo"
+        ],
+        "trees_literal": false,
+        "findings": "",
+        "discovered_from": "",
+        "parent": "",
+        "cites": [],
+        "key": "installer-sh",
+        "pass": "",
+        "group": "v0.1.1",
+        "reason": "",
+        "importance": 2,
+        "urgency": 2,
+        "effort": 2,
         "attempts": 0
       }
     }
