@@ -238,6 +238,10 @@ Implementer decision under C35 and C32 (2026-10-17, owner-requested docs setup).
 
 Owner decision 2026-10-17, lifting C33. .github/workflows/ci.yml runs go test, go vet, gofmt -l cmd internal and go build with scripts/env.sh sourced, on ubuntu-latest, on pushes to main and on pull requests. release.yml runs on tags v*: it calls ci.yml, then scripts/build-release.sh VERSION dist builds pit with CGO_ENABLED=0, -trimpath and -ldflags=-s -w for linux, darwin and windows on amd64 and arm64, archives (tar.gz; zip for windows) holding pit, LICENSE, NOTICE and README.md, writes SHA256SUMS, and publishes them with gh release create --generate-notes. Approved dependencies (C13): actions/checkout v7.0.1 and actions/setup-go v7.0.0 (GitHub, MIT), pinned by commit SHA, with the go-version-file from go.mod and no cache. GitHub Actions is a proprietary service, approved by the owner. pit has no version output yet; that is left to a future slice.
 
+### C64 Logo: Squalor product mark, ring with two facing pointers; asset is all rights reserved, not AGPL
+
+Owner decision 2026-10-17. The pitfight mark (concept chosen by the owner) is a teal ring, the circular core, with a teal pointer and a cream pointer facing each other. The master and exports live in the private Squalor branding repo under generated/logos/pitfight/. This repo keeps only an unmodified copy, assets/pitfight-512.png, shown in README.md. The branding LICENSE grants that use, the GitHub social preview (pitfight-social.png, uploaded by the owner in repo Settings) and, for the future web viewer, its favicon-32.png, favicon-180.png and favicon.svg. The logo is Copyright Squalor LLC, all rights reserved, and is not covered by the AGPL; README.md says so. Never edit it here.
+
 ### C33 CI deferred
 
 Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run locally (see the in-repo Go cache and checks constraint).

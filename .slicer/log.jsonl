@@ -286,3 +286,4 @@
 {"when": "2026-10-18T02:49:53Z", "item": "C42", "action": "catalog", "from": "active", "to": "retired", "note": "retire"}
 {"when": "2026-10-18T03:21:20Z", "item": "C63", "action": "catalog", "from": "", "to": "CI and releases on GitHub Actions", "note": "add"}
 {"when": "2026-10-18T03:21:42Z", "item": "C33", "action": "catalog", "from": "active", "to": "retired", "note": "retire"}
+{"when": "2026-10-18T03:31:11Z", "item": "C64", "action": "catalog", "from": "", "to": "Logo: Squalor product mark, ring with two facing pointers; asset is all rights reserved, not AGPL", "note": "add"}

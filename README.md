@@ -1,3 +1,5 @@
+<img src="assets/pitfight-512.png" alt="pitfight logo" width="128">
+
 # pitfight
 
 A Core War-style programming game in Go: write tiny bots for a small virtual machine
@@ -49,6 +51,7 @@ file. To build the same archives locally, run
 - `scripts/env.sh`: Go cache and temp setup. `scripts/build-release.sh`: release
   archives.
 - `.github/workflows/`: CI and tagged releases.
+- `assets/`: the logo (not AGPL; see License).
 
 ## Contributing
 
@@ -60,3 +63,7 @@ project brief and is background reading only.
 Copyright (C) 2026 Squalor LLC. pitfight is free software under the GNU Affero General
 Public License, version 3 or (at your option) any later version. See [LICENSE](LICENSE)
 and [NOTICE](NOTICE).
+
+The pitfight logo (`assets/pitfight-512.png`) is not covered by the AGPL. It is
+Copyright 2026 Squalor LLC, all rights reserved, and is included here under a narrow
+grant from Squalor LLC to use it unmodified in this repository's `assets/` and README.
