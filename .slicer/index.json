@@ -1424,7 +1424,19 @@
       "depends_on": [
         "S23"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "ea6a12da-a72a-4483-9429-96b7091b12f7",
+          "kind": "",
+          "text": "**2026-10-18** — Later notes from the S25 relay: an 80000-cycle tie returns about 11.6 MB in one response and the work slot is released before the write; rootFS.Open stats then opens (FIFO swap window needs write access to the served dir); POST with no Origin and no Sec-Fetch-Site (curl) is allowed per C117; DOM wiring in main.js/index.html and defaultBotsDir in serve() lack automated tests; TestAPIFifo uses mkfifo via os/exec and skips if absent. Owner to decide whether C103 text is amended or retired now that C117 amends it.",
+          "created_at": "2026-10-18T22:42:28Z",
+          "attempt": 1,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "M",
@@ -1461,7 +1473,19 @@
       "depends_on": [
         "S25"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "e90fed22-781e-4f02-95ec-eab8ce61f05d",
+          "kind": "",
+          "text": "**2026-10-18** — From S25: serveapi.match takes names from the one --bots listing; pit play takes two arbitrary paths, so reuse pit run's assemble/record path for those and reuse newServeHandler/localOnly/mount, adding a way to serve an in-memory replay. Note cmd/pit tests already take about 35 s (TestAPIMatchHash, TestServeBotsFlag run full 80000-cycle matches); prefer short cycle limits in new tests.",
+          "created_at": "2026-10-18T22:42:27Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "M",
