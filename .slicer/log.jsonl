@@ -306,3 +306,5 @@
 {"when": "2026-10-18T03:48:35Z", "item": "C71", "action": "catalog", "from": "", "to": "asm errors: first error only, syntax errors before evaluation errors, fixed message texts and positions", "note": "add"}
 {"when": "2026-10-18T03:48:36Z", "item": "C72", "action": "catalog", "from": "", "to": "pit asm <file>: prints a re-assemblable listing (ORG line, one canonical instruction per line); exit 1 on error, 2 on usage", "note": "add"}
 {"when": "2026-10-18T04:01:54Z", "item": "S07", "action": "status", "from": "started", "to": "done", "note": "Verified: assembler in internal/asm with ORG entry offset, pit asm listing, docs/spec/asm.md, decisions C65-C72; go test, vet, gofmt, build and 60s FuzzAssemble green; reviewer and gate PASS.", "by": "Jon R"}
+{"when": "2026-10-18T04:02:20Z", "item": "S09", "action": "note", "from": "", "to": "", "note": "From S07: asm.Program cells carry raw signed operand values ", "by": "Jon R"}
+{"when": "2026-10-18T04:02:20Z", "item": "S08", "action": "note", "from": "", "to": "", "note": "From S07: pit asm already has a listing formatter (cmd/pit/a", "by": "Jon R"}

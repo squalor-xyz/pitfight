@@ -403,7 +403,19 @@
       "depends_on": [
         "S07"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "0e2bb3e0-221f-4416-b1ef-3608beb4dc64",
+          "kind": "",
+          "text": "**2026-10-18** — From S07: pit asm already has a listing formatter (cmd/pit/asm.go listing(), C72); move it into internal/asm as Disassemble and have pit asm call it. Round-trip tests compare .Cells and .Entry. isa.md section 8 listings use an 'N:' offset prefix the assembler rejects; tag those blocks text or rewrite them as asm before extracting examples. Low: 'JMP :x' reports 'label name JMP is reserved' (documented grammar).",
+          "created_at": "2026-10-18T04:02:20Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "S",
@@ -448,6 +460,17 @@
           "kind": "",
           "text": "**2026-10-16** — From S04: turn the vectors in docs/spec/match.md into tests: section 4 Next() and Draw tables (seeds 0, 1, 2^64-1, including the rejection rows), section 6 P1-P6, X2 and the exact X1/X3/X4/X5 error strings, section 8 M1-M6 (M6 has three bots). Validation order and messages are in section 1; K >= 2 bots, loaded cells carry the owner's bot id as writer (C56).",
           "created_at": "2026-10-16T03:18:59Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        },
+        {
+          "id": "0f54d842-192e-4323-99c6-a920986d1875",
+          "kind": "",
+          "text": "**2026-10-18** — From S07: asm.Program cells carry raw signed operand values (C69); the loader must Norm every AValue/BValue before placement (match.md section 5) and test a bot with a negative operand.",
+          "created_at": "2026-10-18T04:02:20Z",
           "attempt": 0,
           "by": "Jon R",
           "verified_by": "",
