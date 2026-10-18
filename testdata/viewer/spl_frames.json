@@ -1,0 +1,21 @@
+{
+  "description": "Expected frame model of spl_fixture.jsonl (written by: pit run testdata/viewer/spl_splitter.s testdata/viewer/spl_sitter.s --seed 1 --core-size 24 --min-separation 3 --cycle-limit 12 --replay testdata/viewer/spl_fixture.jsonl) after each cycle 0..12, derived by hand from the two bot sources, docs/spec/isa.md section 5 (SPL puts PC+1 then the target at the back of the queue) and the placement of the header (splitter at 7, sitter at 16); written out by a throwaway script from that trace, not from any viewer or the replay. Same frame fields as frames.json. The queue of the splitter is [8,10] after cycle 1, [10,9,11] after 2, [9,11,10] after 3, and the process at 9 (DAT) dies in cycle 4, so live is 2, 3, 3, 2 for cycles 1-4; after that the imp-like process at 11 copies itself forward one cell at every other cycle (12, 13, 14, 15) while the process at 10 jumps to itself.",
+  "fixture": "spl_fixture.jsonl",
+  "core_size": 24,
+  "cycles": 12,
+  "frames": [
+    {"cycle":0,"owners":[0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,2,0,0,0,0,0,0,0],"executed":[],"live":[1,1]},
+    {"cycle":1,"owners":[0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,2,0,0,0,0,0,0,0],"executed":[{"bot":1,"pc":7},{"bot":2,"pc":16}],"live":[2,1]},
+    {"cycle":2,"owners":[0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,2,0,0,0,0,0,0,0],"executed":[{"bot":1,"pc":8},{"bot":2,"pc":16}],"live":[3,1]},
+    {"cycle":3,"owners":[0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,2,0,0,0,0,0,0,0],"executed":[{"bot":1,"pc":10},{"bot":2,"pc":16}],"live":[3,1]},
+    {"cycle":4,"owners":[0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,2,0,0,0,0,0,0,0],"executed":[{"bot":1,"pc":9},{"bot":2,"pc":16}],"live":[2,1]},
+    {"cycle":5,"owners":[0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,2,0,0,0,0,0,0,0],"executed":[{"bot":1,"pc":11},{"bot":2,"pc":16}],"live":[2,1]},
+    {"cycle":6,"owners":[0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,2,0,0,0,0,0,0,0],"executed":[{"bot":1,"pc":10},{"bot":2,"pc":16}],"live":[2,1]},
+    {"cycle":7,"owners":[0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,2,0,0,0,0,0,0,0],"executed":[{"bot":1,"pc":12},{"bot":2,"pc":16}],"live":[2,1]},
+    {"cycle":8,"owners":[0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,2,0,0,0,0,0,0,0],"executed":[{"bot":1,"pc":10},{"bot":2,"pc":16}],"live":[2,1]},
+    {"cycle":9,"owners":[0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,2,0,0,0,0,0,0,0],"executed":[{"bot":1,"pc":13},{"bot":2,"pc":16}],"live":[2,1]},
+    {"cycle":10,"owners":[0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,2,0,0,0,0,0,0,0],"executed":[{"bot":1,"pc":10},{"bot":2,"pc":16}],"live":[2,1]},
+    {"cycle":11,"owners":[0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,2,0,0,0,0,0,0,0],"executed":[{"bot":1,"pc":14},{"bot":2,"pc":16}],"live":[2,1]},
+    {"cycle":12,"owners":[0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,2,0,0,0,0,0,0,0],"executed":[{"bot":1,"pc":10},{"bot":2,"pc":16}],"live":[2,1]}
+  ]
+}

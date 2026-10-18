@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/squalor-xyz/pitfight/internal/arena"
@@ -20,9 +21,12 @@ const (
 )
 
 // loadFixture reads the shared viewer fixture.
-func loadFixture(t testing.TB) *replay.Replay {
+func loadFixture(t testing.TB) *replay.Replay { return loadReplayFile(t, fixturePath) }
+
+// loadReplayFile reads a replay file of testdata/viewer.
+func loadReplayFile(t testing.TB, path string) *replay.Replay {
 	t.Helper()
-	f, err := os.Open(fixturePath)
+	f, err := os.Open(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,9 +46,12 @@ type framesFile struct {
 	Frames   []Frame `json:"frames"`
 }
 
-func loadFrames(t testing.TB) framesFile {
+func loadFrames(t testing.TB) framesFile { return loadFramesFile(t, framesPath) }
+
+// loadFramesFile reads a frames file of testdata/viewer.
+func loadFramesFile(t testing.TB, path string) framesFile {
 	t.Helper()
-	data, err := os.ReadFile(framesPath)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,24 +71,35 @@ func newModel(t testing.TB, r *replay.Replay) *Model {
 	return m
 }
 
-// TestFrames checks the frame model of the shared fixture against frames.json,
-// which was derived by hand from the two bot sources, not from this code.
+// TestFrames checks the frame model of each shared fixture against its frames file,
+// which was derived by hand from the bot sources, not from this code. The SPL
+// fixture covers spawns and deaths, which the first one lacks.
 func TestFrames(t *testing.T) {
-	ff := loadFrames(t)
-	m := newModel(t, loadFixture(t))
-	if ff.Fixture != "fixture.jsonl" || ff.CoreSize != 24 || ff.Cycles != 12 || len(ff.Frames) != 13 {
-		t.Fatalf("frames.json header: fixture %q core %d cycles %d, %d frames", ff.Fixture, ff.CoreSize, ff.Cycles, len(ff.Frames))
-	}
-	if m.Cycles() != ff.Cycles {
-		t.Errorf("Cycles() = %d, want %d", m.Cycles(), ff.Cycles)
-	}
-	for _, want := range ff.Frames {
-		if err := m.Seek(want.Cycle); err != nil {
-			t.Fatal(err)
-		}
-		if got := m.Frame(); !reflect.DeepEqual(got, want) {
-			t.Errorf("cycle %d:\n got %+v\nwant %+v", want.Cycle, got, want)
-		}
+	for _, tc := range []struct {
+		name, fixture, frames string
+		coreSize, cycles      int
+	}{
+		{"imp and dwarf", fixturePath, framesPath, 24, 12},
+		{"SPL", "../../testdata/viewer/spl_fixture.jsonl", "../../testdata/viewer/spl_frames.json", 24, 12},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ff := loadFramesFile(t, tc.frames)
+			m := newModel(t, loadReplayFile(t, tc.fixture))
+			if ff.CoreSize != tc.coreSize || ff.Cycles != tc.cycles || len(ff.Frames) != tc.cycles+1 || !strings.HasSuffix(tc.fixture, "/"+ff.Fixture) {
+				t.Fatalf("frames file header: fixture %q core %d cycles %d, %d frames", ff.Fixture, ff.CoreSize, ff.Cycles, len(ff.Frames))
+			}
+			if m.Cycles() != ff.Cycles {
+				t.Errorf("Cycles() = %d, want %d", m.Cycles(), ff.Cycles)
+			}
+			for _, want := range ff.Frames {
+				if err := m.Seek(want.Cycle); err != nil {
+					t.Fatal(err)
+				}
+				if got := m.Frame(); !reflect.DeepEqual(got, want) {
+					t.Errorf("cycle %d:\n got %+v\nwant %+v", want.Cycle, got, want)
+				}
+			}
+		})
 	}
 }
 

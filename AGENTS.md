@@ -35,8 +35,11 @@ a shared circular memory arena. Go, standard library only.
   replay file: writer, strict reader, hashes and the player that rebuilds the core),
   `internal/tourney` (round-robin tournaments and the scoreboard) and `internal/tui`
   (the terminal viewer: frame model, player, ANSI renderer) exist so far.
-- `testdata/viewer/`: the shared viewer fixture (`fixture.jsonl`, written by `pit run`)
-  and `frames.json`, the frames every viewer (terminal and web) must produce from it.
+  `internal/acceptance` is test-only: the v1 acceptance checks (C15 to C19), which build
+  and run the real `pit` binary; `go test -short` skips its 2400-match tournament.
+- `testdata/viewer/`: the shared viewer fixtures (`fixture.jsonl` and `spl_fixture.jsonl`,
+  written by `pit run`) and `frames.json` and `spl_frames.json`, the frames every viewer
+  (terminal and web) must produce from them. The SPL pair covers spawns and deaths.
 - `web/`: the replay-only web viewer: `index.html`, `style.css` and the ES modules in
   `js/` (`replay.js` parser, `model.js` frame model, `player.js` state machine,
   `render.js` canvas, `main.js` wiring; only `render.js` and `main.js` touch the DOM).
