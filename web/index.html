@@ -1,0 +1,54 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>pitfight replay viewer</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <header>
+    <h1>pitfight</h1>
+    <label class="file">Replay file
+      <input id="file" type="file" accept=".jsonl,.json,.txt,application/x-ndjson,application/json,text/plain">
+    </label>
+    <span id="source"></span>
+  </header>
+
+  <p id="error" role="alert" hidden></p>
+
+  <main id="viewer" hidden>
+    <div class="controls" role="group" aria-label="Playback">
+      <button id="first" type="button" title="Go to cycle 0 (Home)">&#x23EE;</button>
+      <button id="back" type="button" title="Step back one cycle (Left arrow)">&#x23F4;</button>
+      <button id="play" type="button" title="Play or pause (Space)">Play</button>
+      <button id="forward" type="button" title="Step forward one cycle (Right arrow)">&#x23F5;</button>
+      <button id="last" type="button" title="Go to the last cycle (End)">&#x23ED;</button>
+      <label>Speed
+        <select id="speed">
+          <option value="5">5 cycles/s</option>
+          <option value="20" selected>20 cycles/s</option>
+          <option value="60">60 cycles/s</option>
+          <option value="240">240 cycles/s</option>
+          <option value="1000">1000 cycles/s</option>
+        </select>
+      </label>
+      <output id="cycle" aria-live="off">cycle 0 / 0</output>
+    </div>
+    <input id="seek" type="range" min="0" max="0" value="0" step="1" aria-label="Cycle">
+    <div class="stage">
+      <canvas id="canvas" role="img" aria-label="The core: one square per cell, colored by the bot that last wrote it; white outlines mark the cells executed in this cycle"></canvas>
+      <aside>
+        <ul id="bots" aria-label="Bots"></ul>
+        <p id="result"></p>
+        <p class="hint">Square color: the bot that last wrote the cell. White outline: executed this cycle.
+          Keys: Space play/pause, arrows step, Home/End jump.</p>
+      </aside>
+    </div>
+  </main>
+
+  <p id="intro">Choose a replay file written by <code>pit run --replay FILE</code>.</p>
+</body>
+</html>

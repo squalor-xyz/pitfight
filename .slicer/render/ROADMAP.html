@@ -225,6 +225,14 @@
 <div class="prose"><p>S12 (C35). cmd/pit gains runIn, run with a stdin reader; run(args, stdout, stderr) stays and passes an empty reader, so existing tests and the AGENTS.md signature hold. Reason: pit view is the first command that reads input and tests must feed it a strings.Reader.</p></div>
 <h3>C102 Viewer fixture: imp vs dwarf, seed 24, core 24, 12 cycles</h3>
 <div class="prose"><p>S12 (C35). testdata/viewer/fixture.jsonl = pit run bots/imp.s bots/dwarf.s --seed 24 --core-size 24 --min-separation 3 --cycle-limit 40 --replay FILE (a test regenerates it byte for byte); the imp starts at 3, the dwarf at 19, the imp wraps no edge but dies at cycle 12 on the dwarf&#x27;s bomb. Reason: small enough to derive every frame by hand, with writes by both bots, a bomb overwriting an imp copy, and a death.</p></div>
+<h3>C103 S15 (C35): pit serve command shape</h3>
+<div class="prose"><p>S15 (C35). &#x27;pit serve [--port N] [--replays DIR] [--web DIR]&#x27; (net/http, stdlib) always binds 127.0.0.1 (default port 8080, 0 = free port), serves the viewer at / and the --replays directory at /replays/. Directories are opened as os.Root, so .. and symlinks cannot leave them (a refused path is 404). Only GET and HEAD are served (405 with Allow otherwise), and a request whose Host is not loopback or localhost gets 403 with no body (DNS-rebinding guard). Ctrl-C stops it. Reason: the smallest stdlib option that works around browsers blocking fetch from file://; loopback only means no flag can expose files to the network; S14 reuses newServeHandler.</p></div>
+<h3>C104 S15 (C35): web viewer embedded into pit, not shipped beside it</h3>
+<div class="prose"><p>S15 (C35). web/embed.go (package web, go:embed index.html style.css js) embeds the viewer files into the pit binary, excluding web/test; &#x27;pit serve --web DIR&#x27; serves from disk instead for development. Reason: release archives hold one binary with no path to find web/ from, and embedding needs no change to scripts/build-release.sh.</p></div>
+<h3>C105 S15 (C35): web viewer layout, colors, replay loading and test run</h3>
+<div class="prose"><p>S15 (C35). Canvas: the core as square tiles in address order, tile colour per bot from last-writer id (golden-angle hues, hsl), empty cells dark grey, cells executed this cycle outlined in white (white tile if tiles are under 5 px); a core with more cells than pixels shows one tile per block of cells with the owner holding most cells, lowest id on a tie (as the terminal viewer). Side panel: per-bot live count and executed pc. Controls: first/back/play-pause/forward/last, speed (cycles per second), seek slider, keys Space/arrows/Home/End. Replay chosen with a file input, or &#x27;?replay=URL&#x27;. JS tests: &#x27;node --test web/test/*.test.js&#x27; (node:test, shell glob). There is no package.json, so the Node must run .js files with ES module syntax by module-syntax detection: Node 26.12.0 is verified, older versions are not; CI runs the tests with the runner&#x27;s Node and prints node --version. Reason: spec leaves layout open; the Go terminal viewer&#x27;s block rule and frame model are the reference.</p></div>
+<h3>C106 S15 (C35): JS replay parser strictness</h3>
+<div class="prose"><p>S15 (C35). web/js/replay.js checks the line grammar and order, bot ids, address ranges, consecutive cycles, load cell counts and the end line against the cycles, and rejects other versions with &#x27;replay: unsupported version N (this reader reads version 1)&#x27;. Config and bot-length ranges follow docs/spec/match.md section 1: core_size 1..1048576, max_processes 1..1048576, min_separation 0..1048576, cycle_limit 1..2^31-1, bot length 1..1048576, so a file cannot make the model allocate a huge core. It does not check exact writer bytes, placement consistency or that a bot steps only while live (the note from S11), so the model shows what is recorded. Live count = 1 + spawns - deaths, unclamped internally, shown as max(0, n) (as internal/tui). Reason: the viewer must not refuse files the Go reader accepts but should not trust ranges it indexes or allocates with.</p></div>
 <h3>C33 CI deferred</h3>
 <div class="prose"><p>Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run locally (see the in-repo Go cache and checks constraint).</p></div>
 <p><em>Retired: Owner lifted the CI deferral 2026-10-17; GitHub Actions chosen. Successor: C63.</em></p>
@@ -252,36 +260,36 @@
 <div class="prose"><p>PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first (needed for debugging), web viewer second. PROJECT.md names no alternative; both viewers are v1. (PROJECT.md Open decisions 6)</p></div>
 <p><em>Retired: Settled by owner decision C31 (2026-10-15)..</em></p>
 </section>
-<p class="summary">21 items · — 4 · done 13 · later 4</p>
+<p class="summary">21 items · — 3 · done 14 · later 4</p>
 <table><thead><tr><th>#</th><th>ID</th><th>Title</th><th>Size</th><th>Effort</th><th>Trees</th><th>Findings</th><th>Status</th></tr></thead><tbody>
 <tr class="open"><td>1</td><td>S14</td><td>Optional Go WASM build for live matches</td><td>S</td><td>1</td><td>vm, web</td><td>PROJECT.md Milestone 7, Stack recommendation</td><td class="status">—</td></tr>
+<tr class="open"><td>2</td><td>S16</td><td>Check licensing of Redcode standards and warriors</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Dependency / licensing notes</td><td class="status">—</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v0.1.0</strong></td></tr>
-<tr class="open"><td>2</td><td>S15</td><td>Build the web viewer</td><td>L</td><td>3</td><td>web</td><td>PROJECT.md Milestone 7, Goals 6</td><td class="status">—</td></tr>
-<tr class="open"><td>3</td><td>S16</td><td>Check licensing of Redcode standards and warriors</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Dependency / licensing notes</td><td class="status">—</td></tr>
-<tr class="open"><td>4</td><td>S17</td><td>Verify v1 acceptance criteria</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md v1 acceptance criteria · retired decision C33</td><td class="status">—</td></tr>
+<tr class="open"><td>3</td><td>S17</td><td>Verify v1 acceptance criteria</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md v1 acceptance criteria · retired decision C33</td><td class="status">—</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>Later tier</strong></td></tr>
-<tr class="other"><td>5</td><td>S18</td><td>LLM agent harness</td><td>L</td><td>3</td><td>harness</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
-<tr class="other"><td>6</td><td>S19</td><td>Persistent hill of ranked bots</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
-<tr class="other"><td>7</td><td>S20</td><td>Host the web visualizer on squalor.xyz</td><td>S</td><td>2</td><td>web</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
-<tr class="other"><td>8</td><td>S21</td><td>ISA variants and new game modes</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>4</td><td>S18</td><td>LLM agent harness</td><td>L</td><td>3</td><td>harness</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>5</td><td>S19</td><td>Persistent hill of ranked bots</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>6</td><td>S20</td><td>Host the web visualizer on squalor.xyz</td><td>S</td><td>2</td><td>web</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>7</td><td>S21</td><td>ISA variants and new game modes</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
 </tbody></table>
 <table><thead><tr><th>#</th><th>ID</th><th>Title</th><th>Size</th><th>Effort</th><th>Trees</th><th>Findings</th><th>Status</th></tr></thead><tbody>
 <tr class="group"><td></td><td colspan="7"><strong>Decisions</strong></td></tr>
-<tr class="done"><td>9</td><td>S01</td><td>Confirm open decisions</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Open decisions · retired decision C33</td><td class="status">done</td></tr>
+<tr class="done"><td>8</td><td>S01</td><td>Confirm open decisions</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Open decisions · retired decision C33</td><td class="status">done</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v1 foundation</strong></td></tr>
-<tr class="done"><td>10</td><td>S02</td><td>Set up project scaffolding</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md Stack recommendation, Risks · retired decision C33</td><td class="status">done</td></tr>
-<tr class="done"><td>11</td><td>S03</td><td>Write the ISA spec</td><td>M</td><td>2</td><td>docs</td><td>PROJECT.md Milestone 1, Goals 1</td><td class="status">done</td></tr>
-<tr class="done"><td>12</td><td>S04</td><td>Specify match rules and verify default parameters</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Goals 3-4, Open decisions 5</td><td class="status">done</td></tr>
+<tr class="done"><td>9</td><td>S02</td><td>Set up project scaffolding</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md Stack recommendation, Risks · retired decision C33</td><td class="status">done</td></tr>
+<tr class="done"><td>10</td><td>S03</td><td>Write the ISA spec</td><td>M</td><td>2</td><td>docs</td><td>PROJECT.md Milestone 1, Goals 1</td><td class="status">done</td></tr>
+<tr class="done"><td>11</td><td>S04</td><td>Specify match rules and verify default parameters</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Goals 3-4, Open decisions 5</td><td class="status">done</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v1 core</strong></td></tr>
-<tr class="done"><td>13</td><td>S05</td><td>Build VM core memory and addressing modes</td><td>M</td><td>2</td><td>vm</td><td>PROJECT.md Milestone 2</td><td class="status">done</td></tr>
-<tr class="done"><td>14</td><td>S06</td><td>Execute opcodes and process queues in the VM</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Milestone 2, Core concepts</td><td class="status">done</td></tr>
+<tr class="done"><td>12</td><td>S05</td><td>Build VM core memory and addressing modes</td><td>M</td><td>2</td><td>vm</td><td>PROJECT.md Milestone 2</td><td class="status">done</td></tr>
+<tr class="done"><td>13</td><td>S06</td><td>Execute opcodes and process queues in the VM</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Milestone 2, Core concepts</td><td class="status">done</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v0.1.0</strong></td></tr>
-<tr class="done"><td>15</td><td>S07</td><td>Build the assembler</td><td>M</td><td>2</td><td>asm</td><td>PROJECT.md Milestone 3, Goals 2</td><td class="status">done</td></tr>
-<tr class="done"><td>16</td><td>S08</td><td>Add the disassembler and round-trip tests</td><td>S</td><td>1</td><td>asm</td><td>PROJECT.md Milestone 3</td><td class="status">done</td></tr>
-<tr class="done"><td>17</td><td>S09</td><td>Run matches in the arena</td><td>M</td><td>2</td><td>arena</td><td>PROJECT.md Milestone 4, Goals 3-4</td><td class="status">done</td></tr>
-<tr class="done"><td>18</td><td>S10</td><td>Write the starter bots and golden-result tests</td><td>M</td><td>2</td><td>bots</td><td>PROJECT.md v1 features, Risks</td><td class="status">done</td></tr>
-<tr class="done"><td>19</td><td>S11</td><td>Define and write the replay format</td><td>M</td><td>2</td><td>replay</td><td>PROJECT.md Milestone 5, Goals 7, Risks</td><td class="status">done</td></tr>
-<tr class="done"><td>20</td><td>S12</td><td>Build the terminal viewer</td><td>M</td><td>2</td><td>tui</td><td>PROJECT.md Milestone 5, Goals 6</td><td class="status">done</td></tr>
-<tr class="done"><td>21</td><td>S13</td><td>Run tournaments with a scoreboard</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Milestone 6, Goals 5</td><td class="status">done</td></tr>
+<tr class="done"><td>14</td><td>S07</td><td>Build the assembler</td><td>M</td><td>2</td><td>asm</td><td>PROJECT.md Milestone 3, Goals 2</td><td class="status">done</td></tr>
+<tr class="done"><td>15</td><td>S08</td><td>Add the disassembler and round-trip tests</td><td>S</td><td>1</td><td>asm</td><td>PROJECT.md Milestone 3</td><td class="status">done</td></tr>
+<tr class="done"><td>16</td><td>S09</td><td>Run matches in the arena</td><td>M</td><td>2</td><td>arena</td><td>PROJECT.md Milestone 4, Goals 3-4</td><td class="status">done</td></tr>
+<tr class="done"><td>17</td><td>S10</td><td>Write the starter bots and golden-result tests</td><td>M</td><td>2</td><td>bots</td><td>PROJECT.md v1 features, Risks</td><td class="status">done</td></tr>
+<tr class="done"><td>18</td><td>S11</td><td>Define and write the replay format</td><td>M</td><td>2</td><td>replay</td><td>PROJECT.md Milestone 5, Goals 7, Risks</td><td class="status">done</td></tr>
+<tr class="done"><td>19</td><td>S12</td><td>Build the terminal viewer</td><td>M</td><td>2</td><td>tui</td><td>PROJECT.md Milestone 5, Goals 6</td><td class="status">done</td></tr>
+<tr class="done"><td>20</td><td>S13</td><td>Run tournaments with a scoreboard</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Milestone 6, Goals 5</td><td class="status">done</td></tr>
+<tr class="done"><td>21</td><td>S15</td><td>Build the web viewer</td><td>L</td><td>3</td><td>web</td><td>PROJECT.md Milestone 7, Goals 6</td><td class="status">done</td></tr>
 </tbody></table>
 </body></html>

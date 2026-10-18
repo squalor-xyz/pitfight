@@ -372,3 +372,15 @@
 {"when": "2026-10-18T15:50:44Z", "item": "S12", "action": "status", "from": "started", "to": "done", "note": "pit view with internal/tui model, player and ANSI renderer; shared testdata/viewer fixture.jsonl and frames.json (hand-derived); decisions C97-C102; go test, vet, gofmt and build green; 58 mutations red; reviewer and gate PASS. Interactive manual check in a real terminal remains with the owner.", "by": "Jon R"}
 {"when": "2026-10-18T15:51:13Z", "item": "S15", "action": "note", "from": "", "to": "", "note": "From S12: the viewer fixture has no SPL step, so frames.json", "by": "Jon R"}
 {"when": "2026-10-18T15:51:13Z", "item": "S17", "action": "note", "from": "", "to": "", "note": "From S12 (later): Frame doc comment at internal/tui/model.go", "by": "Jon R"}
+{"when": "2026-10-18T15:52:30Z", "item": "S15", "action": "status", "from": "open", "to": "started", "note": "", "by": "Jon R"}
+{"when": "2026-10-18T16:01:53Z", "item": "C103", "action": "catalog", "from": "", "to": "S15 (C35): pit serve command shape", "note": "add"}
+{"when": "2026-10-18T16:01:53Z", "item": "C104", "action": "catalog", "from": "", "to": "S15 (C35): web viewer embedded into pit, not shipped beside it", "note": "add"}
+{"when": "2026-10-18T16:01:53Z", "item": "C105", "action": "catalog", "from": "", "to": "S15 (C35): web viewer layout, colors, replay loading and test run", "note": "add"}
+{"when": "2026-10-18T16:01:53Z", "item": "C106", "action": "catalog", "from": "", "to": "S15 (C35): JS replay parser strictness", "note": "add"}
+{"when": "2026-10-18T16:15:03Z", "item": "C105", "action": "catalog", "from": "", "to": "body", "note": "edit"}
+{"when": "2026-10-18T16:15:03Z", "item": "C106", "action": "catalog", "from": "", "to": "body", "note": "edit"}
+{"when": "2026-10-18T16:15:03Z", "item": "C103", "action": "catalog", "from": "", "to": "body", "note": "edit"}
+{"when": "2026-10-18T16:17:07Z", "item": "S15", "action": "status", "from": "started", "to": "done", "note": "Verified: web viewer in web/ (replay, model, player, render, main); pit serve on 127.0.0.1 with loopback Host guard, GET/HEAD only, os.Root confinement; 71 node tests and Go tests green; frame model matches testdata/viewer/frames.json; canvas rendering manual check left to the owner.", "by": "Jon R"}
+{"when": "2026-10-18T16:17:42Z", "item": "S17", "action": "note", "from": "", "to": "", "note": "From S15: web/terminal viewer parity (C19) rests on one fixt", "by": "Jon R"}
+{"when": "2026-10-18T16:17:42Z", "item": "S14", "action": "note", "from": "", "to": "", "note": "From S15: pit serve takes two positional dirs and embeds an ", "by": "Jon R"}
+{"when": "2026-10-18T16:17:42Z", "item": "S20", "action": "note", "from": "", "to": "", "note": "From S15: hosted viewer needs an AGPL section 13 source link", "by": "Jon R"}

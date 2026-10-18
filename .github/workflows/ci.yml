@@ -28,7 +28,7 @@ jobs:
       - name: gofmt
         run: |
           . scripts/env.sh
-          out=$(gofmt -l cmd internal)
+          out=$(gofmt -l cmd internal web)
           if [ -n "$out" ]; then
             echo "gofmt needed on:"
             echo "$out"
@@ -36,3 +36,9 @@ jobs:
           fi
       - name: build
         run: . scripts/env.sh && go build -o .cache/bin/pit ./cmd/pit
+      # The web viewer's tests use the Node preinstalled on the runner (no setup-node,
+      # C13). The version is printed so a failure from an old Node is easy to spot.
+      - name: web tests
+        run: |
+          node --version
+          node --test web/test/*.test.js

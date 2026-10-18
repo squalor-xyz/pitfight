@@ -45,7 +45,12 @@ Early development. What exists today:
   a reproducible scoreboard ([docs/spec/tourney.md](docs/spec/tourney.md)). Try
   `pit tourney bots/ --rounds 100`.
 
-Planned: the web replay viewer.
+- `web/`: the replay-only web viewer: plain JavaScript ES modules and canvas, no
+  framework and no build step. It plays a replay with step, play, pause and seek,
+  and shows the same frames as the terminal viewer. `pit serve` serves it on
+  127.0.0.1 (a browser cannot read files from `file://`); open the printed address
+  and pick a replay file, or run `pit serve --replays DIR` and open
+  `/?replay=/replays/NAME`. The viewer is built into the `pit` binary.
 
 ## Build and test
 
@@ -56,8 +61,9 @@ in bash or zsh:
 . scripts/env.sh                   # keeps Go caches and temp files under .cache/
 go test ./...
 go vet ./...
-gofmt -l cmd internal              # must print nothing
+gofmt -l cmd internal web          # must print nothing
 go build -o .cache/bin/pit ./cmd/pit
+node --test web/test/*.test.js     # web viewer tests; needs a Node that runs .js ES modules without package.json (26.12.0 verified)
 ```
 
 ## Releases

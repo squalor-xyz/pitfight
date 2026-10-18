@@ -21,6 +21,7 @@ Commands:
   run      run a match between bots
   tourney  run a round-robin tournament
   view     play back a recorded replay in the terminal
+  serve    serve the web replay viewer on this machine
   help     print this text
 
 Exit codes: 0 success; 1 an error in a command; 2 a usage error.
@@ -51,6 +52,8 @@ func runIn(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 		return runTourney(args[1:], stdout, stderr)
 	case "view":
 		return runView(args[1:], stdin, stdout, stderr)
+	case "serve":
+		return runServe(args[1:], stdout, stderr)
 	case "help":
 		fmt.Fprint(stdout, usage)
 		return 0

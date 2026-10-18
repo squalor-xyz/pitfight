@@ -25,7 +25,7 @@ a shared circular memory arena. Go, standard library only.
 ## Layout
 
 - `cmd/pit/`: `main`. `run(args, stdout, stderr)` returns the exit code; today
-  it handles usage, `pit asm`, `pit run`, `pit tourney` and `pit view`
+  it handles usage, `pit asm`, `pit run`, `pit tourney`, `pit view` and `pit serve`
   (`runIn` is `run` with a stdin for the commands of `pit view`).
 - `internal/isa`, `asm`, `vm`, `arena`, `replay`, `tourney`, `tui`: the
   packages, one slice at a time. Only `internal/isa` (instruction types),
@@ -37,8 +37,13 @@ a shared circular memory arena. Go, standard library only.
   (the terminal viewer: frame model, player, ANSI renderer) exist so far.
 - `testdata/viewer/`: the shared viewer fixture (`fixture.jsonl`, written by `pit run`)
   and `frames.json`, the frames every viewer (terminal and web) must produce from it.
-- `web/`: the web viewer. `docs/spec/`: the ISA, assembly and format specs
-  (`isa.md`, `asm.md`, `match.md`, `replay.md`, `tourney.md`). `bots/`: the starter bots (`imp.s`, `dwarf.s`, `replicator.s`, `scanner.s`). `web/` does not exist yet.
+- `web/`: the replay-only web viewer: `index.html`, `style.css` and the ES modules in
+  `js/` (`replay.js` parser, `model.js` frame model, `player.js` state machine,
+  `render.js` canvas, `main.js` wiring; only `render.js` and `main.js` touch the DOM).
+  `web/test/*.test.js` are the `node:test` tests; `web/embed.go` embeds the viewer
+  into `pit` (not the tests) for `pit serve`. `docs/spec/`: the ISA, assembly and
+  format specs (`isa.md`, `asm.md`, `match.md`, `replay.md`, `tourney.md`). `bots/`:
+  the starter bots (`imp.s`, `dwarf.s`, `replicator.s`, `scanner.s`).
 - `scripts/env.sh`: Go cache and temp setup (see below).
   `scripts/build-release.sh`: release archives. `.github/workflows/`: CI and
   release.
@@ -56,8 +61,9 @@ Run from the repo root:
 . scripts/env.sh                   # Go caches and temp files stay under .cache/ (C34)
 go test ./...
 go vet ./...
-gofmt -l cmd internal              # must print nothing
+gofmt -l cmd internal web          # must print nothing
 go build -o .cache/bin/pit ./cmd/pit
+node --test web/test/*.test.js     # the web viewer's tests (see Node below)
 ```
 
 `scripts/env.sh` must be sourced by path from bash or zsh. Dash and other shells
@@ -65,6 +71,21 @@ that cannot report the sourced path make it print an error and return 1, setting
 and creating nothing. It also refuses to run unless its repo root holds `go.mod`
 and `scripts/env.sh`. Run every Go command with it sourced. Never run
 `go env -w`; it writes outside the repo. Do not add a Makefile.
+
+Web viewer. Browsers do not let a page read files from `file://`, so serve it:
+`.cache/bin/pit serve` (viewer built into the binary, http://127.0.0.1:8080/) or
+`.cache/bin/pit serve --web web --replays testdata/viewer` to serve the files of
+`web/` from disk while you edit them and a directory of replays at `/replays/`
+(`/?replay=/replays/fixture.jsonl` loads one; the page also has a file picker).
+Stop it with Ctrl-C and never leave one running. The JS tests need no server:
+`node --test web/test/*.test.js` (shell glob, not a directory; the modules are `.js`
+ES modules with no `package.json`, so the Node must detect module syntax and run
+`.js` files that use `import`/`export` as ES modules; Node 26.12.0 does, older
+versions are not verified and CI prints `node --version`). Parsing, model and player are tested against `testdata/viewer/`; only
+canvas drawing has no automated check beyond a fake context, so after a change to
+`web/js/render.js` or `main.js` look at it in a browser (load
+`internal/replay/testdata/imp_dwarf_seed1.jsonl`; step, play, pause, seek).
+`web/embed.go` is Go, so the gofmt check covers `web` too.
 
 CI runs on GitHub Actions (C63): `.github/workflows/ci.yml` runs the checks above
 on pushes to `main` and on pull requests; still run them locally before handoff.
