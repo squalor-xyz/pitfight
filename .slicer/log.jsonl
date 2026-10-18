@@ -318,3 +318,5 @@
 {"when": "2026-10-18T14:23:22Z", "item": "C79", "action": "catalog", "from": "", "to": "arena API: arena.Run(cfg, bots) returns Result, []vm.Event, error (S09)", "note": "add"}
 {"when": "2026-10-18T14:38:25Z", "item": "S09", "action": "note", "from": "", "to": "", "note": "Review FAIL (gate 1): README.md:56 still says packages are i", "by": "Jon R"}
 {"when": "2026-10-18T14:39:13Z", "item": "S09", "action": "status", "from": "started", "to": "done", "note": "Verified: arena SplitMix64 PRNG, seeded placement and match loop; pit run with --seed/--core-size/--cycle-limit/--max-processes/--min-separation/--json and --; spec vectors (Next/Draw, P1-P6, X1-X5, M1-M6) tested; Norm on load with negative-operand test; isa.Cell comment amended; go test, vet, gofmt, build green; decisions C75-C79.", "by": "Jon R"}
+{"when": "2026-10-18T14:39:37Z", "item": "S11", "action": "note", "from": "", "to": "", "note": "From S09: arena.Run returns a flat []vm.Event with no cycle ", "by": "Jon R"}
+{"when": "2026-10-18T14:39:37Z", "item": "S13", "action": "note", "from": "", "to": "", "note": "From S09: arena.Run keeps all events in memory; consider a w", "by": "Jon R"}

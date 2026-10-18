@@ -603,7 +603,19 @@
         "S09",
         "S01"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "77d5f830-988a-499c-b64f-33380a332a59",
+          "kind": "",
+          "text": "**2026-10-18** — From S09: arena.Run returns a flat []vm.Event with no cycle boundaries and no initial-load events (C79). Replay needs cycle markers or a per-cycle hook; initial state = bot cells Norm'd at Result.Placement.Starts with writer = bot id; JMP-to-self steps emit no event.",
+          "created_at": "2026-10-18T14:39:37Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "M",
@@ -703,6 +715,17 @@
           "kind": "",
           "text": "**2026-10-16** — From S04 review: match.md section 7 gives the lower bot id the first move in every cycle (ids are not rotated). TestPairings should play each pair in both orders, or state another neutraliser, and record it per C35.",
           "created_at": "2026-10-16T03:18:59Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        },
+        {
+          "id": "cdc3bc0e-5f96-40ef-8899-26260377cadd",
+          "kind": "",
+          "text": "**2026-10-18** — From S09: arena.Run keeps all events in memory; consider a way to skip event collection for scoring-only tournament runs. Place panics on empty lengths (documented; Run validates K>=2).",
+          "created_at": "2026-10-18T14:39:37Z",
           "attempt": 0,
           "by": "Jon R",
           "verified_by": "",
