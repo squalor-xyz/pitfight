@@ -281,3 +281,6 @@
 {"when": "2026-10-17T16:09:52Z", "item": "C60", "action": "catalog", "from": "", "to": "VM execution and process queue API", "note": "add"}
 {"when": "2026-10-17T16:09:52Z", "item": "C61", "action": "catalog", "from": "", "to": "VM integer event records and ordering", "note": "add"}
 {"when": "2026-10-17T16:22:25Z", "item": "S06", "action": "status", "from": "started", "to": "done", "note": "Implemented all ISA opcodes, bounded FIFO process queues, and integer-valued cell-write/spawn/death events in spec order, including intermediate pre-decrement and post-increment writes. Verified 353 passing test records across 35 top-level tests/fuzz targets, 30 killed mutation variants, go vet, formatting, purity and no-map checks; FuzzStep passed 60.421s with 165198 executions. Final reviewer gate VERDICT: PASS; reviewer and architect also PASS. No commits.", "by": "Jon R"}
+{"when": "2026-10-18T02:49:43Z", "item": "C32", "action": "catalog", "from": "", "to": "body", "note": "edit"}
+{"when": "2026-10-18T02:49:46Z", "item": "C62", "action": "catalog", "from": "", "to": "LICENSE present; README.md and CONTRIBUTING.md added; SPDX header on Go and shell files", "note": "add"}
+{"when": "2026-10-18T02:49:53Z", "item": "C42", "action": "catalog", "from": "active", "to": "retired", "note": "retire"}

@@ -33,6 +33,8 @@ a shared circular memory arena. Go, standard library only.
 - `web/`: the web viewer. `docs/spec/`: the ISA and format specs (`isa.md`,
   `match.md`). `bots/`: the starter bots. `web/` and `bots/` do not exist yet.
 - `scripts/env.sh`: Go cache and temp setup (see below).
+- `README.md`: project overview for readers. `CONTRIBUTING.md`: contributor
+  summary of these rules, including slicer use. Keep both in step with this file.
 
 ## Setup and checks
 
@@ -83,9 +85,9 @@ CI is deferred and no CI host is chosen (C33); the checks above run locally.
 ## License
 
 AGPL-3.0-or-later, copyright Squalor LLC (C32). `NOTICE` holds the copyright line
-and the "or any later version" notice. `LICENSE` must be the verbatim AGPL-3.0
-text, supplied by the owner as a file; it is PENDING and does not exist yet. Do
-not write, fetch or paraphrase the text, and never edit it once it is added.
+and the "or any later version" notice. `LICENSE` is the verbatim AGPL-3.0 text,
+taken from github/choosealicense.com with only its YAML front matter removed;
+C32 records the source and checksum. Never edit, rewrap or paraphrase it.
 
 ## Git
 

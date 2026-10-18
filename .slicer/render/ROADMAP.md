@@ -136,7 +136,7 @@ Owner decision 2026-10-15. Accepted: terminal viewer first, web viewer second. R
 
 ### C32 License: AGPL-3.0-or-later, copyright Squalor LLC
 
-Owner decision 2026-10-15. The project license is AGPL-3.0-or-later, copyright Squalor LLC. LICENSE must be the verbatim AGPL-3.0 text, which the owner will supply as a file (no network fetch); the license text must not be modified. The copyright line and the or-later notice go in a NOTICE file. Until the owner supplies the text, the scaffolding slice writes NOTICE and flags LICENSE as pending owner input.
+Owner decision 2026-10-15. The project license is AGPL-3.0-or-later, copyright Squalor LLC. LICENSE must be the verbatim AGPL-3.0 text and must not be modified. The copyright line and the or-later notice go in a NOTICE file. Owner override 2026-10-17: the agent fetches the text instead of the owner supplying it; www.gnu.org refused TLS from the owner's network, so it was taken from github/choosealicense.com _licenses/agpl-3.0.txt (last changed in commit 088a44d), YAML front matter and the separating blank line removed, otherwise byte for byte (661 lines, sha256 8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef). Rejected: licenses/license-templates (template placeholders, old http URLs) and SPDX license-list-data (rewrapped).
 
 ### C33 CI deferred
 
@@ -157,10 +157,6 @@ Implementer decision under C35 (S02). `pit` with no arguments prints usage to st
 ### C41 scripts/env.sh needs bash or zsh and refuses to run outside a repo root
 
 Implementer decision under C35 (S02), accepted by the owner 2026-10-15, overriding the slice's 'POSIX sh, no bashisms' text. A sourced POSIX script cannot learn its own path, so env.sh reads BASH_SOURCE or zsh's %x, derives the repo root from it, clears CDPATH for the cd, and exports nothing and creates nothing unless that root holds go.mod and scripts/env.sh (otherwise it prints an error and returns 1; dash fails the same way). It is sourced by absolute path from anywhere. Reason: the cache directories must follow the checkout (each worktree has its own .cache/) and a wrong or copied env.sh must never write Go caches elsewhere. env.sh does not set GOFLAGS=-modcacherw (the module has no dependencies); a slice that adds an approved dependency should revisit that.
-
-### C42 LICENSE left absent; pending state recorded in AGENTS.md and NOTICE; SPDX header on Go and shell files
-
-Implementer decision under C35 and C32 (S02). LICENSE is not created because the owner has not supplied the AGPL-3.0 text; AGENTS.md has a License section stating it is PENDING and that the text must not be written, fetched or edited, and NOTICE's last line points to it. Every Go file and scripts/env.sh start with SPDX-License-Identifier: AGPL-3.0-or-later. Reason: slice step 5 allows either outcome; the flag in both files keeps a missing LICENSE from reading as an oversight.
 
 ### C43 ISA opcode set: 15 opcodes, codes in table order, no MOD or CMP
 
@@ -237,6 +233,16 @@ S06 implementer decision under C35: Core.NewQueue(max, pcs...) returns (*Queue,e
 ### C61 VM integer event records and ordering
 
 S06 implementer decision under C35: Event contains Kind (uint8 EventKind: CellWrite=0, ProcessSpawn=1, ProcessDeath=2), Bot uint32, PC int32, Address int32 and Cell isa.Cell. CellWrite holds the complete post-write cell including writer; process events have zero Cell. PC identifies the executed instruction, Address the written cell, child PC or dead PC. Only actual SPL child creation emits spawn; continuations and denied spawns emit nothing. All cell writes, including equal-value writes, appear in spec phase order; process events follow A/B post-increments. Reason: plain integer values retain intermediate writes for replay without I/O or clocks; caller-owned buffers avoid imposing event storage on the VM.
+
+### C62 LICENSE present; README.md and CONTRIBUTING.md added; SPDX header on Go and shell files
+
+Implementer decision under C35 and C32 (2026-10-17, owner-requested docs setup). LICENSE holds the AGPL-3.0 text per C32; NOTICE's last line points to it and AGENTS.md records its source and that it is never edited. README.md gives the overview, status, checks and license; CONTRIBUTING.md summarizes AGENTS.md rules and slicer use; PROJECT.md gets a background-only note at the top, body unchanged. Every Go file and scripts/env.sh start with SPDX-License-Identifier: AGPL-3.0-or-later. Reason: the owner asked for the license and contributor docs; AGENTS.md stays the source of truth for agents.
+
+### C42 LICENSE left absent; pending state recorded in AGENTS.md and NOTICE; SPDX header on Go and shell files
+
+Implementer decision under C35 and C32 (S02). LICENSE is not created because the owner has not supplied the AGPL-3.0 text; AGENTS.md has a License section stating it is PENDING and that the text must not be written, fetched or edited, and NOTICE's last line points to it. Every Go file and scripts/env.sh start with SPDX-License-Identifier: AGPL-3.0-or-later. Reason: slice step 5 allows either outcome; the flag in both files keeps a missing LICENSE from reading as an oversight.
+
+*Retired: LICENSE now exists (C32 override 2026-10-17); superseded by C62. Successor: C62.*
 
 ## Assumptions
 

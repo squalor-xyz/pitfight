@@ -1,3 +1,9 @@
+> **Background only.** This is the original project brief, kept as written. The
+> project is now named **pitfight** (CLI `pit`, C26), is written in Go with the
+> standard library only (C28), and is licensed AGPL-3.0-or-later (C32). Where this
+> file and the slicer catalog differ, the catalog wins
+> (`slicer catalog list --json --lean`). See [README.md](README.md).
+
 # bot-arena — a programming game where tiny programs fight (working name)
 
 ## Summary

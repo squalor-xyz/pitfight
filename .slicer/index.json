@@ -1035,7 +1035,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 62,
+    "next_id": 63,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -1322,7 +1322,7 @@
         "id": "C32",
         "kind": "decision",
         "title": "License: AGPL-3.0-or-later, copyright Squalor LLC",
-        "body": "Owner decision 2026-10-15. The project license is AGPL-3.0-or-later, copyright Squalor LLC. LICENSE must be the verbatim AGPL-3.0 text, which the owner will supply as a file (no network fetch); the license text must not be modified. The copyright line and the or-later notice go in a NOTICE file. Until the owner supplies the text, the scaffolding slice writes NOTICE and flags LICENSE as pending owner input.",
+        "body": "Owner decision 2026-10-15. The project license is AGPL-3.0-or-later, copyright Squalor LLC. LICENSE must be the verbatim AGPL-3.0 text and must not be modified. The copyright line and the or-later notice go in a NOTICE file. Owner override 2026-10-17: the agent fetches the text instead of the owner supplying it; www.gnu.org refused TLS from the owner's network, so it was taken from github/choosealicense.com _licenses/agpl-3.0.txt (last changed in commit 088a44d), YAML front matter and the separating blank line removed, otherwise byte for byte (661 lines, sha256 8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef). Rejected: licenses/license-templates (template placeholders, old http URLs) and SPDX license-list-data (rewrapped).",
         "status": "active",
         "reason": "",
         "successor": ""
@@ -1413,9 +1413,9 @@
         "kind": "decision",
         "title": "LICENSE left absent; pending state recorded in AGENTS.md and NOTICE; SPDX header on Go and shell files",
         "body": "Implementer decision under C35 and C32 (S02). LICENSE is not created because the owner has not supplied the AGPL-3.0 text; AGENTS.md has a License section stating it is PENDING and that the text must not be written, fetched or edited, and NOTICE's last line points to it. Every Go file and scripts/env.sh start with SPDX-License-Identifier: AGPL-3.0-or-later. Reason: slice step 5 allows either outcome; the flag in both files keeps a missing LICENSE from reading as an oversight.",
-        "status": "active",
-        "reason": "",
-        "successor": ""
+        "status": "retired",
+        "reason": "LICENSE now exists (C32 override 2026-10-17); superseded by C62",
+        "successor": "C62"
       },
       {
         "id": "C43",
@@ -1584,6 +1584,15 @@
         "kind": "decision",
         "title": "VM integer event records and ordering",
         "body": "S06 implementer decision under C35: Event contains Kind (uint8 EventKind: CellWrite=0, ProcessSpawn=1, ProcessDeath=2), Bot uint32, PC int32, Address int32 and Cell isa.Cell. CellWrite holds the complete post-write cell including writer; process events have zero Cell. PC identifies the executed instruction, Address the written cell, child PC or dead PC. Only actual SPL child creation emits spawn; continuations and denied spawns emit nothing. All cell writes, including equal-value writes, appear in spec phase order; process events follow A/B post-increments. Reason: plain integer values retain intermediate writes for replay without I/O or clocks; caller-owned buffers avoid imposing event storage on the VM.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C62",
+        "kind": "decision",
+        "title": "LICENSE present; README.md and CONTRIBUTING.md added; SPDX header on Go and shell files",
+        "body": "Implementer decision under C35 and C32 (2026-10-17, owner-requested docs setup). LICENSE holds the AGPL-3.0 text per C32; NOTICE's last line points to it and AGENTS.md records its source and that it is never edited. README.md gives the overview, status, checks and license; CONTRIBUTING.md summarizes AGENTS.md rules and slicer use; PROJECT.md gets a background-only note at the top, body unchanged. Every Go file and scripts/env.sh start with SPDX-License-Identifier: AGPL-3.0-or-later. Reason: the owner asked for the license and contributor docs; AGENTS.md stays the source of truth for agents.",
         "status": "active",
         "reason": "",
         "successor": ""
