@@ -318,6 +318,30 @@ Release archives include bots/ because README tells users to run pit run bots/im
 
 The scanner's 2600-pass lap examines relative cells 10..7807, leaving 7808..7899 (inside placement's guaranteed-empty gap of 7900..7999) a ~92 cell blind spot for enemy code lying wholly there; accepted for the starter bot to keep it from examining its own cells; refines C81.
 
+### C91 Tournament scoring: win 3, tie 1 each, loss 0; rank by points, wins, name (S13)
+
+Implementer decision under C35 and C38 (S13). A won match scores 3 points, each bot of a tied match 1, a lost match 0; the scoreboard ranks by more points, then more wins, then the bot name in byte order, so no two bots share a rank. Reason: 3/1/0 is the usual Core War hill convention, keeps a tie worth less than half a win-and-loss pair so decisive bots rank above bots that only draw (the imp ties most matches), and the wins and name tiebreaks make the order total and independent of file order. docs/spec/tourney.md section 3.
+
+### C92 Tournament pairings: every pair in both orders each round, one seed per round (S13)
+
+Implementer decision under C35 (S13), answering the S04 note. Pairs are the unordered pairs of the name-sorted bots; each round plays every pair twice, as (a,b) then (b,a), so each bot is id 1 (first mover, match.md section 7) as often as id 2; all matches of a round use that round's seed. Reason: match ids are not rotated, so playing both orders is the simplest neutraliser and needs no change to the arena; a shared round seed keeps the two orders of a pair comparable. Matches are numbered along this fixed list, which is also the order results are scored and printed in (C36). docs/spec/tourney.md section 2.
+
+### C93 Tournament seeds: Seed(round) = first SplitMix64 output seeded with the round number, rounds from 1 (S13)
+
+Implementer decision under C35 and C36 (S13). Seed(r) is Next() of the match.md section 4 generator seeded with r, for r = 1..R; Seed(1)=10451216379200822465, Seed(2)=10905525725756348110. Reason: a pure function of the round with no clock and no math/rand, reusing the in-repo generator so it survives Go upgrades, and mixing spreads consecutive rounds over the whole 64-bit range instead of handing the placement small adjacent seeds. docs/spec/tourney.md section 2.
+
+### C94 pit tourney flags and exit codes (S13)
+
+Implementer decision under C35 (S13). pit tourney [flags] <dir>: --rounds N (default 100, the C18 acceptance count), --jobs N (default runtime.NumCPU; changes speed, never output), the four match config flags of pit run (--core-size, --cycle-limit, --max-processes, --min-separation; no --seed, rounds supply seeds), --json and --matches FILE; flags and the directory in any order. Bots are the *.s files directly in the directory, sorted by name and named without .s. Exit 0 ran, 1 directory, bot, config or file error, 2 usage (including rounds or jobs below 1). Reason: mirrors pit run (C75, C78) so one set of habits works for both, and the default 100 makes the C18 command short. docs/spec/tourney.md sections 1, 5 and 6.
+
+### C95 pit tourney output: text scoreboard; --json scoreboard lines; --matches per-match JSON lines with decimal-string seeds (S13)
+
+Implementer decision under C35 and C39 (S13). Default output is a config line, a scoring line and a right-aligned table (rank, bot, points, played, wins, ties, losses, mean_cycles); --json prints one object per bot (rank, bot, points, played, wins, ties, losses, cycles, mean_cycles); --matches FILE writes one object per match (index, round, seed, first, second, outcome, winner or null, cycles). Seeds are decimal strings (owner decision on C77). Both JSON forms are JSON lines with the same keys on every line. Reason: results stay as files with no database (C39) and uniform lines load straight into DuckDB read_json; the worker count is not printed so the bytes are the same for any --jobs. docs/spec/tourney.md section 5.
+
+### C96 tourney package API: Pairings, Matches, Seed, Run(cfg, bots, rounds, jobs), Score, Format* (S13)
+
+Implementer decision under C35 (S13). internal/tourney exports Pair/Pairings(n), Match/Matches(n, rounds), Seed(round), Bot{Name, Bot}, MatchResult{Match, Cycles, Winner (bot index, -1 for a tie)}, Run(arena.Config, []Bot, rounds, jobs) ([]MatchResult, error), Standing, Score(bots, results), and FormatText, FormatJSON and FormatMatches. Run uses a fixed-size goroutine pool fed match indexes over a channel; each worker writes only its own result slot, and an error is the one of the lowest failing match index. Reason: results are kept by match index, never by completion order or map iteration (C36), and the formatters live next to Score so a test can compare the exact scoreboard bytes across worker counts without the CLI.
+
 ### C33 CI deferred
 
 Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run locally (see the in-repo Go cache and checks constraint).
@@ -368,39 +392,39 @@ PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first 
 
 *Retired: Settled by owner decision C31 (2026-10-15)..*
 
-21 items · — 7 · done 10 · later 4
+21 items · — 6 · done 11 · later 4
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
 | v0.1.0 | | | | | | | |
 | 1 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | — |
 | 2 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | — |
-| 3 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | — |
-| 4 | [S14](slices/S14.md) | Optional Go WASM build for live matches | S | 1 | vm, web | PROJECT.md Milestone 7, Stack recommendation | — |
-| 5 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | — |
-| 6 | [S16](slices/S16.md) | Check licensing of Redcode standards and warriors | S | 1 | docs | PROJECT.md Dependency / licensing notes | — |
-| 7 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria · retired decision C33 | — |
+| 3 | [S14](slices/S14.md) | Optional Go WASM build for live matches | S | 1 | vm, web | PROJECT.md Milestone 7, Stack recommendation | — |
+| 4 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | — |
+| 5 | [S16](slices/S16.md) | Check licensing of Redcode standards and warriors | S | 1 | docs | PROJECT.md Dependency / licensing notes | — |
+| 6 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria · retired decision C33 | — |
 | Later tier | | | | | | | |
-| 8 | [S18](slices/S18.md) | LLM agent harness | L | 3 | harness | PROJECT.md Feature tiers: Later | later |
-| 9 | [S19](slices/S19.md) | Persistent hill of ranked bots | M | 2 | tourney | PROJECT.md Feature tiers: Later | later |
-| 10 | [S20](slices/S20.md) | Host the web visualizer on squalor.xyz | S | 2 | web | PROJECT.md Feature tiers: Later | later |
-| 11 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
+| 7 | [S18](slices/S18.md) | LLM agent harness | L | 3 | harness | PROJECT.md Feature tiers: Later | later |
+| 8 | [S19](slices/S19.md) | Persistent hill of ranked bots | M | 2 | tourney | PROJECT.md Feature tiers: Later | later |
+| 9 | [S20](slices/S20.md) | Host the web visualizer on squalor.xyz | S | 2 | web | PROJECT.md Feature tiers: Later | later |
+| 10 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
 
 ---
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
 | Decisions | | | | | | | |
-| 12 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions · retired decision C33 | done |
+| 11 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions · retired decision C33 | done |
 | v1 foundation | | | | | | | |
-| 13 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks · retired decision C33 | done |
-| 14 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |
-| 15 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | done |
+| 12 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks · retired decision C33 | done |
+| 13 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |
+| 14 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | done |
 | v1 core | | | | | | | |
-| 16 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | done |
-| 17 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | done |
+| 15 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | done |
+| 16 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | done |
 | v0.1.0 | | | | | | | |
-| 18 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | done |
-| 19 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | done |
-| 20 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | done |
-| 21 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | done |
+| 17 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | done |
+| 18 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | done |
+| 19 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | done |
+| 20 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | done |
+| 21 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | done |

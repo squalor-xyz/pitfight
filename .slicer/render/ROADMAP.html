@@ -187,6 +187,18 @@
 <div class="prose"><p>Release archives include bots/ because README tells users to run pit run bots/imp.s bots/dwarf.s; build-release.sh copies the directory into each archive.</p></div>
 <h3>C90 Starter scanner lap blind spot (S10)</h3>
 <div class="prose"><p>The scanner&#x27;s 2600-pass lap examines relative cells 10..7807, leaving 7808..7899 (inside placement&#x27;s guaranteed-empty gap of 7900..7999) a ~92 cell blind spot for enemy code lying wholly there; accepted for the starter bot to keep it from examining its own cells; refines C81.</p></div>
+<h3>C91 Tournament scoring: win 3, tie 1 each, loss 0; rank by points, wins, name (S13)</h3>
+<div class="prose"><p>Implementer decision under C35 and C38 (S13). A won match scores 3 points, each bot of a tied match 1, a lost match 0; the scoreboard ranks by more points, then more wins, then the bot name in byte order, so no two bots share a rank. Reason: 3/1/0 is the usual Core War hill convention, keeps a tie worth less than half a win-and-loss pair so decisive bots rank above bots that only draw (the imp ties most matches), and the wins and name tiebreaks make the order total and independent of file order. docs/spec/tourney.md section 3.</p></div>
+<h3>C92 Tournament pairings: every pair in both orders each round, one seed per round (S13)</h3>
+<div class="prose"><p>Implementer decision under C35 (S13), answering the S04 note. Pairs are the unordered pairs of the name-sorted bots; each round plays every pair twice, as (a,b) then (b,a), so each bot is id 1 (first mover, match.md section 7) as often as id 2; all matches of a round use that round&#x27;s seed. Reason: match ids are not rotated, so playing both orders is the simplest neutraliser and needs no change to the arena; a shared round seed keeps the two orders of a pair comparable. Matches are numbered along this fixed list, which is also the order results are scored and printed in (C36). docs/spec/tourney.md section 2.</p></div>
+<h3>C93 Tournament seeds: Seed(round) = first SplitMix64 output seeded with the round number, rounds from 1 (S13)</h3>
+<div class="prose"><p>Implementer decision under C35 and C36 (S13). Seed(r) is Next() of the match.md section 4 generator seeded with r, for r = 1..R; Seed(1)=10451216379200822465, Seed(2)=10905525725756348110. Reason: a pure function of the round with no clock and no math/rand, reusing the in-repo generator so it survives Go upgrades, and mixing spreads consecutive rounds over the whole 64-bit range instead of handing the placement small adjacent seeds. docs/spec/tourney.md section 2.</p></div>
+<h3>C94 pit tourney flags and exit codes (S13)</h3>
+<div class="prose"><p>Implementer decision under C35 (S13). pit tourney [flags] &lt;dir&gt;: --rounds N (default 100, the C18 acceptance count), --jobs N (default runtime.NumCPU; changes speed, never output), the four match config flags of pit run (--core-size, --cycle-limit, --max-processes, --min-separation; no --seed, rounds supply seeds), --json and --matches FILE; flags and the directory in any order. Bots are the *.s files directly in the directory, sorted by name and named without .s. Exit 0 ran, 1 directory, bot, config or file error, 2 usage (including rounds or jobs below 1). Reason: mirrors pit run (C75, C78) so one set of habits works for both, and the default 100 makes the C18 command short. docs/spec/tourney.md sections 1, 5 and 6.</p></div>
+<h3>C95 pit tourney output: text scoreboard; --json scoreboard lines; --matches per-match JSON lines with decimal-string seeds (S13)</h3>
+<div class="prose"><p>Implementer decision under C35 and C39 (S13). Default output is a config line, a scoring line and a right-aligned table (rank, bot, points, played, wins, ties, losses, mean_cycles); --json prints one object per bot (rank, bot, points, played, wins, ties, losses, cycles, mean_cycles); --matches FILE writes one object per match (index, round, seed, first, second, outcome, winner or null, cycles). Seeds are decimal strings (owner decision on C77). Both JSON forms are JSON lines with the same keys on every line. Reason: results stay as files with no database (C39) and uniform lines load straight into DuckDB read_json; the worker count is not printed so the bytes are the same for any --jobs. docs/spec/tourney.md section 5.</p></div>
+<h3>C96 tourney package API: Pairings, Matches, Seed, Run(cfg, bots, rounds, jobs), Score, Format* (S13)</h3>
+<div class="prose"><p>Implementer decision under C35 (S13). internal/tourney exports Pair/Pairings(n), Match/Matches(n, rounds), Seed(round), Bot{Name, Bot}, MatchResult{Match, Cycles, Winner (bot index, -1 for a tie)}, Run(arena.Config, []Bot, rounds, jobs) ([]MatchResult, error), Standing, Score(bots, results), and FormatText, FormatJSON and FormatMatches. Run uses a fixed-size goroutine pool fed match indexes over a channel; each worker writes only its own result slot, and an error is the one of the lowest failing match index. Reason: results are kept by match index, never by completion order or map iteration (C36), and the formatters live next to Score so a test can compare the exact scoreboard bytes across worker counts without the CLI.</p></div>
 <h3>C33 CI deferred</h3>
 <div class="prose"><p>Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run locally (see the in-repo Go cache and checks constraint).</p></div>
 <p><em>Retired: Owner lifted the CI deferral 2026-10-17; GitHub Actions chosen. Successor: C63.</em></p>
@@ -214,36 +226,36 @@
 <div class="prose"><p>PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first (needed for debugging), web viewer second. PROJECT.md names no alternative; both viewers are v1. (PROJECT.md Open decisions 6)</p></div>
 <p><em>Retired: Settled by owner decision C31 (2026-10-15)..</em></p>
 </section>
-<p class="summary">21 items · — 7 · done 10 · later 4</p>
+<p class="summary">21 items · — 6 · done 11 · later 4</p>
 <table><thead><tr><th>#</th><th>ID</th><th>Title</th><th>Size</th><th>Effort</th><th>Trees</th><th>Findings</th><th>Status</th></tr></thead><tbody>
 <tr class="group"><td></td><td colspan="7"><strong>v0.1.0</strong></td></tr>
 <tr class="open"><td>1</td><td>S11</td><td>Define and write the replay format</td><td>M</td><td>2</td><td>replay</td><td>PROJECT.md Milestone 5, Goals 7, Risks</td><td class="status">—</td></tr>
 <tr class="open"><td>2</td><td>S12</td><td>Build the terminal viewer</td><td>M</td><td>2</td><td>tui</td><td>PROJECT.md Milestone 5, Goals 6</td><td class="status">—</td></tr>
-<tr class="open"><td>3</td><td>S13</td><td>Run tournaments with a scoreboard</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Milestone 6, Goals 5</td><td class="status">—</td></tr>
-<tr class="open"><td>4</td><td>S14</td><td>Optional Go WASM build for live matches</td><td>S</td><td>1</td><td>vm, web</td><td>PROJECT.md Milestone 7, Stack recommendation</td><td class="status">—</td></tr>
-<tr class="open"><td>5</td><td>S15</td><td>Build the web viewer</td><td>L</td><td>3</td><td>web</td><td>PROJECT.md Milestone 7, Goals 6</td><td class="status">—</td></tr>
-<tr class="open"><td>6</td><td>S16</td><td>Check licensing of Redcode standards and warriors</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Dependency / licensing notes</td><td class="status">—</td></tr>
-<tr class="open"><td>7</td><td>S17</td><td>Verify v1 acceptance criteria</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md v1 acceptance criteria · retired decision C33</td><td class="status">—</td></tr>
+<tr class="open"><td>3</td><td>S14</td><td>Optional Go WASM build for live matches</td><td>S</td><td>1</td><td>vm, web</td><td>PROJECT.md Milestone 7, Stack recommendation</td><td class="status">—</td></tr>
+<tr class="open"><td>4</td><td>S15</td><td>Build the web viewer</td><td>L</td><td>3</td><td>web</td><td>PROJECT.md Milestone 7, Goals 6</td><td class="status">—</td></tr>
+<tr class="open"><td>5</td><td>S16</td><td>Check licensing of Redcode standards and warriors</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Dependency / licensing notes</td><td class="status">—</td></tr>
+<tr class="open"><td>6</td><td>S17</td><td>Verify v1 acceptance criteria</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md v1 acceptance criteria · retired decision C33</td><td class="status">—</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>Later tier</strong></td></tr>
-<tr class="other"><td>8</td><td>S18</td><td>LLM agent harness</td><td>L</td><td>3</td><td>harness</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
-<tr class="other"><td>9</td><td>S19</td><td>Persistent hill of ranked bots</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
-<tr class="other"><td>10</td><td>S20</td><td>Host the web visualizer on squalor.xyz</td><td>S</td><td>2</td><td>web</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
-<tr class="other"><td>11</td><td>S21</td><td>ISA variants and new game modes</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>7</td><td>S18</td><td>LLM agent harness</td><td>L</td><td>3</td><td>harness</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>8</td><td>S19</td><td>Persistent hill of ranked bots</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>9</td><td>S20</td><td>Host the web visualizer on squalor.xyz</td><td>S</td><td>2</td><td>web</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
+<tr class="other"><td>10</td><td>S21</td><td>ISA variants and new game modes</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
 </tbody></table>
 <table><thead><tr><th>#</th><th>ID</th><th>Title</th><th>Size</th><th>Effort</th><th>Trees</th><th>Findings</th><th>Status</th></tr></thead><tbody>
 <tr class="group"><td></td><td colspan="7"><strong>Decisions</strong></td></tr>
-<tr class="done"><td>12</td><td>S01</td><td>Confirm open decisions</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Open decisions · retired decision C33</td><td class="status">done</td></tr>
+<tr class="done"><td>11</td><td>S01</td><td>Confirm open decisions</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Open decisions · retired decision C33</td><td class="status">done</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v1 foundation</strong></td></tr>
-<tr class="done"><td>13</td><td>S02</td><td>Set up project scaffolding</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md Stack recommendation, Risks · retired decision C33</td><td class="status">done</td></tr>
-<tr class="done"><td>14</td><td>S03</td><td>Write the ISA spec</td><td>M</td><td>2</td><td>docs</td><td>PROJECT.md Milestone 1, Goals 1</td><td class="status">done</td></tr>
-<tr class="done"><td>15</td><td>S04</td><td>Specify match rules and verify default parameters</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Goals 3-4, Open decisions 5</td><td class="status">done</td></tr>
+<tr class="done"><td>12</td><td>S02</td><td>Set up project scaffolding</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md Stack recommendation, Risks · retired decision C33</td><td class="status">done</td></tr>
+<tr class="done"><td>13</td><td>S03</td><td>Write the ISA spec</td><td>M</td><td>2</td><td>docs</td><td>PROJECT.md Milestone 1, Goals 1</td><td class="status">done</td></tr>
+<tr class="done"><td>14</td><td>S04</td><td>Specify match rules and verify default parameters</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Goals 3-4, Open decisions 5</td><td class="status">done</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v1 core</strong></td></tr>
-<tr class="done"><td>16</td><td>S05</td><td>Build VM core memory and addressing modes</td><td>M</td><td>2</td><td>vm</td><td>PROJECT.md Milestone 2</td><td class="status">done</td></tr>
-<tr class="done"><td>17</td><td>S06</td><td>Execute opcodes and process queues in the VM</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Milestone 2, Core concepts</td><td class="status">done</td></tr>
+<tr class="done"><td>15</td><td>S05</td><td>Build VM core memory and addressing modes</td><td>M</td><td>2</td><td>vm</td><td>PROJECT.md Milestone 2</td><td class="status">done</td></tr>
+<tr class="done"><td>16</td><td>S06</td><td>Execute opcodes and process queues in the VM</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Milestone 2, Core concepts</td><td class="status">done</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v0.1.0</strong></td></tr>
-<tr class="done"><td>18</td><td>S07</td><td>Build the assembler</td><td>M</td><td>2</td><td>asm</td><td>PROJECT.md Milestone 3, Goals 2</td><td class="status">done</td></tr>
-<tr class="done"><td>19</td><td>S08</td><td>Add the disassembler and round-trip tests</td><td>S</td><td>1</td><td>asm</td><td>PROJECT.md Milestone 3</td><td class="status">done</td></tr>
-<tr class="done"><td>20</td><td>S09</td><td>Run matches in the arena</td><td>M</td><td>2</td><td>arena</td><td>PROJECT.md Milestone 4, Goals 3-4</td><td class="status">done</td></tr>
-<tr class="done"><td>21</td><td>S10</td><td>Write the starter bots and golden-result tests</td><td>M</td><td>2</td><td>bots</td><td>PROJECT.md v1 features, Risks</td><td class="status">done</td></tr>
+<tr class="done"><td>17</td><td>S07</td><td>Build the assembler</td><td>M</td><td>2</td><td>asm</td><td>PROJECT.md Milestone 3, Goals 2</td><td class="status">done</td></tr>
+<tr class="done"><td>18</td><td>S08</td><td>Add the disassembler and round-trip tests</td><td>S</td><td>1</td><td>asm</td><td>PROJECT.md Milestone 3</td><td class="status">done</td></tr>
+<tr class="done"><td>19</td><td>S09</td><td>Run matches in the arena</td><td>M</td><td>2</td><td>arena</td><td>PROJECT.md Milestone 4, Goals 3-4</td><td class="status">done</td></tr>
+<tr class="done"><td>20</td><td>S10</td><td>Write the starter bots and golden-result tests</td><td>M</td><td>2</td><td>bots</td><td>PROJECT.md v1 features, Risks</td><td class="status">done</td></tr>
+<tr class="done"><td>21</td><td>S13</td><td>Run tournaments with a scoreboard</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Milestone 6, Goals 5</td><td class="status">done</td></tr>
 </tbody></table>
 </body></html>
