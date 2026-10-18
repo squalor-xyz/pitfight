@@ -701,7 +701,19 @@
         "S11",
         "S01"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "56a515a2-14af-4656-928c-2c7852d67e4f",
+          "kind": "",
+          "text": "**2026-10-18** — From S11: an x record names only the process that stepped, so a viewer cannot place a multi-process bot's other queued processes; draw executed addresses per cycle. The replay reader does not validate header placement consistency (overlap, total length vs core, entry outside the bot) and accepts some files the writer never produces (a live bot with no x step in a cycle, cycles after one bot is left, spawns beyond max_processes), so viewers must not assume those invariants.",
+          "created_at": "2026-10-18T15:27:57Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "M",
@@ -892,6 +904,17 @@
           "verified_by": "",
           "verified_at": "",
           "stale_after": ""
+        },
+        {
+          "id": "4f70c3d1-caca-4617-b71d-cce0f7a8fa6a",
+          "kind": "",
+          "text": "**2026-10-18** — From S11: an x record names only the process that stepped, so a viewer cannot place a multi-process bot's other queued processes; draw executed addresses per cycle. The replay reader does not validate header placement consistency (overlap, total length vs core, entry outside the bot) and accepts some files the writer never produces (a live bot with no x step in a cycle, cycles after one bot is left, spawns beyond max_processes), so viewers must not assume those invariants.",
+          "created_at": "2026-10-18T15:27:58Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
         }
       ],
       "claim": null,
@@ -988,6 +1011,17 @@
           "kind": "",
           "text": "**2026-10-18** — From S08 (low): asm.md bomber listing is tagged text and covered only by cmd/pit TestSpecListing, not TestRoundTripSpecExamples; docs/spec/isa.md:316 is one long line. Owner 2026-10-18 kept pit asm as the only listing entry point (C73).",
           "created_at": "2026-10-18T14:28:35Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        },
+        {
+          "id": "d06a3cd2-c6a9-429b-9321-0590045da276",
+          "kind": "",
+          "text": "**2026-10-18** — From S11 (later): replay read.go:20-25 duplicates arena's private limits (arena/config.go:13-18); os.WriteFile in cmd/pit/run.go may leave a partial replay file on a write error; the golden fixture hand-check used a Python stepper that is not in the repo (replay.md section 9 says so).",
+          "created_at": "2026-10-18T15:27:58Z",
           "attempt": 0,
           "by": "Jon R",
           "verified_by": "",
