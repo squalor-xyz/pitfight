@@ -33,8 +33,9 @@ A replay is, in this order:
 
 1. one `header` line;
 2. one `load` line per bot, in bot id order (`K` lines);
-3. zero or more groups, each one `c` line followed by one or more event lines
-   (`w`, `s`, `d`);
+3. one group per cycle, `1 .. cycles` without gaps, each one `c` line followed by one
+   or more steps; a step is one `x` line followed by zero or more event lines (`w`,
+   `s`, `d`);
 4. one `end` line, the last line.
 
 Nothing else is allowed. `N` below is `core_size`, `K` the number of bots.
@@ -51,8 +52,8 @@ section 2 as codes (the code tables are in section 3 there):
 Opcode `0..14` (`DAT`=0 .. `NOP`=14), modifier `0..6` (`A`=0 .. `I`=6), mode `0..7`
 (`#`=0 .. `>`=7), values `0 .. N-1` (stored values, `Norm` already applied). The
 writer id of a cell is not in the array: in a `load` line it is the line's bot, in a
-`w` line it is the line's bot (a write always sets the writer to the executing bot,
-isa.md section 2).
+`w` line it is the bot of the step (a write always sets the writer to the executing
+bot, isa.md section 2).
 
 ## 4. Line types
 
@@ -95,38 +96,52 @@ process, at `entry_address`.
 {"t":"c","n":1}
 ```
 
-Opens the events of cycle `n`, `1 .. cycle_limit`. The `n` of the `c` lines strictly
-increase. Only cycles that have at least one event have a `c` line; in a cycle
-without a line (every step was a jump to itself, a `NOP` and the like) nothing
-changed, and the core and the process counts are those of the previous cycle.
+Opens cycle `n`. The cycles are numbered `1, 2, ...` and every cycle of the match has
+its line, so `n` is one more than the `n` of the previous `c` line and the first is 1.
+A cycle has at least one step: the match runs only while two bots are live, so a
+cycle without a live process cannot occur.
+
+### `x` (execute)
+
+```
+{"t":"x","b":1,"pc":4519}
+```
+
+One step: bot `b` (`1 .. K`) executed the instruction at address `pc` (`0 .. N-1`),
+the front process of its queue (match.md section 7). There is one `x` line for every
+step, also for a step that changes nothing (a `JMP`, a `NOP`, a test that skips), so
+the `pc` values of a cycle are exactly the executed addresses: the execution pointers
+a viewer draws. Within a cycle the steps are in ascending bot id, and a bot has at
+most one step per cycle. A bot has a step in a cycle only while it has a live process
+(see `s` and `d`). The event lines that follow an `x` line, up to the next `x`, `c` or
+`end` line, belong to that step.
 
 ### `w` (write)
 
 ```
-{"t":"w","b":1,"pc":4519,"a":4520,"c":[1,6,1,0,1,1]}
+{"t":"w","a":4520,"c":[1,6,1,0,1,1]}
 ```
 
-A cell write: bot `b` executed the instruction at `pc` and `a` now holds the cell
-`c` (with writer `b`). Predecrements, the destination write and post-increments each
-write; a write of an unchanged value is still a write (vm event rule, C61).
-`b` is `1 .. K`; `pc` and `a` are `0 .. N-1`.
+A cell write in the step above it: address `a` (`0 .. N-1`) now holds the cell `c`,
+with the step's bot as writer. Predecrements, the destination write and
+post-increments each write, in the order of isa.md section 4; a write of an unchanged
+value is still a write (vm event rule, C61).
 
 ### `s` (spawn) and `d` (death)
 
 ```
-{"t":"s","b":2,"pc":10,"a":12}
-{"t":"d","b":2,"pc":10,"a":10}
+{"t":"s","a":12}
+{"t":"d"}
 ```
 
-`s`: the `SPL` at `pc` of bot `b` added a process at address `a`. `d`: the process of
-bot `b` that executed `pc` died; `a` equals `pc`. Normal continuation of a process
-is not recorded. A viewer counts the live processes of bot `b` as 1 at the start,
-plus its `s` lines, minus its `d` lines; the bot is live while the count is above 0.
-The addresses of the other live processes are not recorded; the `pc` of every event
-names a cell that was executed.
-
-Within a cycle the events are in execution order: bots in ascending id, and within
-a step the writes (in the order of isa.md section 4) before the spawn or death.
+`s`: the `SPL` of the step added a process of the step's bot at address `a`
+(`0 .. N-1`). `d`: the process that executed the step died (`DAT`, or a division by
+zero), so a death needs no address, it is the `pc` of the step. A step has at most one
+`s` or `d`, and it is the step's last line, after its writes. Normal continuation of a
+process is not recorded. A viewer counts the live processes of bot `b` as 1 at the
+start, plus its `s` lines, minus its `d` lines; the bot is live while the count is
+above 0. Where each process goes next is not recorded, but the next `x` line of the
+bot names the address its next process executes.
 
 ### `end`
 
@@ -134,17 +149,18 @@ a step the writes (in the order of isa.md section 4) before the spawn or death.
 {"t":"end","cycles":80000,"survivors":[1,2],"outcome":"tie","winner":0,"tied":[1,2]}
 ```
 
-The result of match.md section 8: `cycles` (`1 .. cycle_limit`, at least the last
-`c` line's `n`), `survivors` and `tied` (ascending ids, possibly empty), `outcome`
+The result of match.md section 8: `cycles` (`1 .. cycle_limit`, equal to the `n` of
+the last `c` line), `survivors` and `tied` (ascending ids, possibly empty), `outcome`
 (`win` or `tie`) and `winner` (0 for a tie). A `win` has `survivors` equal to
 `[winner]` and an empty `tied`; a `tie` has `winner` 0 and a non-empty `tied`.
 
 ## 5. Playing a replay
 
 State at cycle 0: the empty core with the `load` cells written. State at cycle `c`:
-that state with the events of every `c` group up to and including cycle `c`
-applied, in file order; a `w` writes cell `c` with writer `b` at `a`. This is
-exactly the core of the live match after cycle `c` (`TestReplayEquivalence`).
+that state with the events of every cycle up to and including cycle `c` applied, in
+file order; a `w` writes cell `c` with the step's bot as writer at `a`. This is
+exactly the core of the live match after cycle `c`, and the `x` lines of cycle `c` are
+exactly the live steps of that cycle, bot and address (`TestReplayEquivalence`).
 
 There are no snapshot lines in version 1 (C85): a viewer that wants to seek keeps
 its own checkpoints while reading, and adding snapshot lines would be a new version
@@ -180,27 +196,41 @@ and no optional fields.
 A reader validates the whole file and returns an error, never a partial replay:
 the order of section 2, the ranges of section 4 (every address `0 .. N-1`, every bot
 id `1 .. K`, every code a valid code, `cells` as long as `length`), the id
-sequence, increasing cycles, the result's consistency, and that the line is byte for
+sequence, consecutive cycles, ascending bots within a cycle, a bot stepping only while
+its process count (from `s` and `d`) is above 0, at most one `s` or `d` per step and
+as its last line, the result's consistency, and that the line is byte for
 byte the line the writer would produce for the values it holds (so no other
 spacing, field order, number spelling or duplicate and unknown fields). A file that
 does not end with a line feed, or has bytes after the `end` line, is not valid.
 
 ## 9. Reference output
 
-`internal/replay/testdata/imp_dwarf_seed1.jsonl` is the replay of the imp
-(`MOV.I $0, $1`) against the dwarf (the bomber of isa.md section 8) with
-`--seed 1 --cycle-limit 40`; the other settings are the defaults of match.md
-section 1. A reduced cycle limit keeps the file small; the default limit of 80000
-gives about 10 MB. The replay hash of the fixture is pinned in
+`internal/replay/testdata/imp_dwarf_seed1.jsonl` is the replay of the starter bots
+`bots/imp.s` and `bots/dwarf.s` (the dwarf has five cells) with `--seed 1
+--cycle-limit 40`; the other settings are the defaults of match.md section 1. A
+reduced cycle limit keeps the fixture small (5.9 KB). Its replay hash is pinned in
 `internal/replay/replay_test.go` as `goldenHash`
-(`37ccfd97cbe3f4af2671889c529e1c95b21b410be4a4eae839d29d820e174ab5`), and the hash of
-the default-limit file, `fullHash`
-(`0371d9f8819eb229dbda496faefd744a0cabc08d864637eb6a879295960cad7d`), is pinned too
-(catalog C16). The fixture and both hashes were produced independently of the Go
-code by a short Python stepper written from isa.md, match.md and this document, which
-covers only the opcodes the two bots use, and were compared with the Go writer's
-output before they were pinned. `pit run imp.s dwarf.s --seed 1 --cycle-limit 40
---replay FILE` writes the fixture again, byte for byte.
+(`24f20dbf52fa877d9c4c92cfcf109593a45540ebe2d4fcbc52389f06c4ecc26e`).
+
+At the default limit of 80000 the same match ends at cycle 5880 with a win for the
+dwarf, because the imp's process is bombed. Its replay is 782675 bytes, about 0.8 MB;
+the size is roughly 130 bytes per cycle for two bots (a `c` line, two `x` lines and
+the writes), so a match that runs to the default limit with two bots is about 10 MB.
+The hash of the default-limit replay is pinned as `fullHash`
+(`0c7024334a7c20fe7f74b39b97d0c9693980d41f0351f3422846c3e2caeac831`); it is the C16
+check, which `pit run bots/imp.s bots/dwarf.s --seed 1 --replay FILE` reproduces
+(twice, with identical files). `pit run bots/imp.s bots/dwarf.s --seed 1
+--cycle-limit 40 --replay FILE` writes the fixture again, byte for byte.
+
+How the pinned values were checked. A short Python stepper, written from isa.md,
+match.md and this document, implements placement and the few opcodes and modes the
+two bots use. It reads the assembled cells from the output of `pit asm`. It produced
+the fixture and both hashes, and they were compared with the Go writer's output before
+they were pinned. The stepper is not in the repository (it covers only these
+opcodes); the pinned bytes and hashes are the record of its output. The first cycles
+of the fixture were also checked by hand against isa.md: in cycle 1 the imp at 4519
+copies itself to 4520 and the dwarf at 2555 adds 4 to the B field of its pointer cell
+(2558), and in cycle 2 the dwarf copies its bomb cell (2559) to 2558 + 4 = 2562.
 
 ## 10. Decisions
 
@@ -210,11 +240,11 @@ with its reason:
 | Catalog | Decision | Section |
 | --- | --- | --- |
 | C83 | hand-written canonical lines; the reader accepts only the writer's bytes | 1, 8 |
-| C84 | line types, field names, cycles without events have no line | 2, 4 |
+| C84 | line types and field names, a `c` line for every cycle, an `x` line for every step | 2, 4 |
 | C85 | no snapshot lines in version 1 | 5 |
 | C86 | replay hash and bot hash encodings | 6 |
 | C87 | `internal/replay` API (`Record`, `Read`, `Bytes`, `Hash`, `BotHash`, `Player`) | - |
-| C88 | `arena.RunObserved`, the per-cycle hook the writer uses | - |
+| C88 | `arena.RunObserved`, the per-cycle hook with the steps (bot, executed address, events) the writer uses | - |
 | C89 | `pit run --replay FILE` and the printed hash | - |
 
 The owner's amendments of 2026-10-18 to C76 and C77 (seed as a decimal string,

@@ -5,6 +5,8 @@ package replay
 import (
 	"bytes"
 	"testing"
+
+	"github.com/squalor-xyz/pitfight/internal/arena"
 )
 
 // FuzzRead: arbitrary input never panics. It is either refused with an error and
@@ -14,6 +16,9 @@ func FuzzRead(f *testing.F) {
 	for _, name := range []string{"imp_dwarf_seed1.jsonl", "win_death.jsonl"} {
 		f.Add(fixture(f, name))
 	}
+	// A match with spawns, deaths, post-increments and wrapping, from the library.
+	cfg := arena.Config{CoreSize: 64, CycleLimit: 12, MaxProcesses: 3, MinSeparation: 0, Seed: 5}
+	f.Add(recordBytes(f, cfg, splitterSrc, predecSrc))
 	f.Add([]byte{})
 	f.Add([]byte("\n"))
 	f.Add([]byte(`{"t":"header","version":2}` + "\n"))

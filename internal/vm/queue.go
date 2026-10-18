@@ -42,6 +42,11 @@ func (q *Queue) Addresses() []int32 {
 	}
 	return out
 }
+
+// Front returns the address of the process that steps next. The queue must not be
+// dead.
+func (q *Queue) Front() int32 { return q.pcs[q.head] }
+
 func (q *Queue) pop() int32 {
 	pc := q.pcs[q.head]
 	q.head = (q.head + 1) % len(q.pcs)

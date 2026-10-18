@@ -40,8 +40,10 @@ type Result struct {
 // config always give the same result and events. It does not change bots.
 func Run(cfg Config, bots []Bot) (Result, []vm.Event, error) {
 	var events []vm.Event
-	res, err := RunObserved(cfg, bots, func(_ int, _ *vm.Core, cycle []vm.Event) {
-		events = append(events, cycle...)
+	res, err := RunObserved(cfg, bots, func(_ int, _ *vm.Core, steps []Step) {
+		for _, st := range steps {
+			events = append(events, st.Events...)
+		}
 	})
 	if err != nil {
 		return Result{}, nil, err
@@ -49,13 +51,23 @@ func Run(cfg Config, bots []Bot) (Result, []vm.Event, error) {
 	return res, events, nil
 }
 
-// RunObserved is Run for a caller that needs the cycle boundaries, as the replay
-// writer does. observe is called once with cycle 0 and no events, after the bots
-// are loaded, and then after each cycle c = 1, 2, ... with the VM events of that
-// cycle's steps in execution order. core is the live core; observe must not
-// modify it, and must not keep it or events past the call (events is reused).
-// observe may be nil. A refused match returns the error before observe is called.
-func RunObserved(cfg Config, bots []Bot, observe func(cycle int, core *vm.Core, events []vm.Event)) (Result, error) {
+// Step is one step of a cycle: bot Bot executed the instruction at PC, the front
+// process of its queue, and Events are the VM events of that step (none if it
+// changed nothing, as for a jump to itself).
+type Step struct {
+	Bot    uint32
+	PC     int32
+	Events []vm.Event
+}
+
+// RunObserved is Run for a caller that needs the cycle boundaries and the steps, as
+// the replay writer does. observe is called once with cycle 0 and no steps, after
+// the bots are loaded, and then after each cycle c = 1, 2, ... with that cycle's
+// steps in execution order (ascending bot id), silent steps included. core is the
+// live core; observe must not modify it, and must not keep it, the steps or their
+// events past the call (the buffers are reused). observe may be nil. A refused match
+// returns the error before observe is called.
+func RunObserved(cfg Config, bots []Bot, observe func(cycle int, core *vm.Core, steps []Step)) (Result, error) {
 	if err := Validate(cfg, bots); err != nil {
 		return Result{}, err
 	}
@@ -72,16 +84,18 @@ func RunObserved(cfg Config, bots []Bot, observe func(cycle int, core *vm.Core, 
 		return Result{}, err
 	}
 	if observe == nil {
-		observe = func(int, *vm.Core, []vm.Event) {}
+		observe = func(int, *vm.Core, []Step) {}
 	}
 	observe(0, core, nil)
 
 	var events []vm.Event
+	var steps []Step
+	var ends []int // ends[i] is len(events) after step i
 	var liveAtStart, live []uint32
 	cycle := 0
 	for {
 		cycle++
-		events = events[:0]
+		events, steps, ends = events[:0], steps[:0], ends[:0]
 		liveAtStart = liveAtStart[:0]
 		for i, q := range queues {
 			if !q.Dead() {
@@ -91,7 +105,16 @@ func RunObserved(cfg Config, bots []Bot, observe func(cycle int, core *vm.Core, 
 		// A step changes only the core and the stepping bot's own queue, so the
 		// bots live at the start of the cycle all step, in ascending id.
 		for _, id := range liveAtStart {
-			events = core.Step(queues[id-1], id, events)
+			q := queues[id-1]
+			steps = append(steps, Step{Bot: id, PC: q.Front()})
+			events = core.Step(q, id, events)
+			ends = append(ends, len(events))
+		}
+		// Slice the events only now: appending may have moved the buffer.
+		lo := 0
+		for i, hi := range ends {
+			steps[i].Events = events[lo:hi:hi]
+			lo = hi
 		}
 		live = live[:0]
 		for _, id := range liveAtStart {
@@ -99,7 +122,7 @@ func RunObserved(cfg Config, bots []Bot, observe func(cycle int, core *vm.Core, 
 				live = append(live, id)
 			}
 		}
-		observe(cycle, core, events)
+		observe(cycle, core, steps)
 		if len(live) <= 1 || cycle == cfg.CycleLimit {
 			break
 		}

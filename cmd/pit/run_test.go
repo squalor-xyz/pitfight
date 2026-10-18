@@ -275,6 +275,11 @@ func TestRunReplay(t *testing.T) {
 	if r.Config.Seed != 1 || r.Config.CycleLimit != 30 || len(r.Cycles) != 30 || r.Result.Cycles != 30 {
 		t.Errorf("config %+v, %d cycles with events, result %+v", r.Config, len(r.Cycles), r.Result)
 	}
+	for _, c := range r.Cycles {
+		if len(c.Steps) != 2 || c.Steps[0].Bot != 1 || c.Steps[1].Bot != 2 {
+			t.Fatalf("cycle %d steps %+v, want one step for each bot", c.N, c.Steps)
+		}
+	}
 	// The replay is the replay of the same bots through the library.
 	var bots []arena.Bot
 	for _, p := range paths {

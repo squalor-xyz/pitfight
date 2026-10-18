@@ -14,8 +14,9 @@ The same bots, seed and configuration always produce the same match.
 Early development. What exists today:
 
 - The instruction set spec, [docs/spec/isa.md](docs/spec/isa.md), the assembly
-  language spec, [docs/spec/asm.md](docs/spec/asm.md), and the match spec,
-  [docs/spec/match.md](docs/spec/match.md).
+  language spec, [docs/spec/asm.md](docs/spec/asm.md), the match spec,
+  [docs/spec/match.md](docs/spec/match.md), and the replay file spec,
+  [docs/spec/replay.md](docs/spec/replay.md).
 - `internal/isa`: instruction types.
 - `internal/asm`: the assembler, with labels, expressions and errors that carry a line
   and column, and the disassembler (`pit asm` prints its output).
@@ -24,8 +25,8 @@ Early development. What exists today:
 - `internal/arena`: seeded placement, round-robin scheduling, the cycle limit and the
   result and tie rule of a match.
 - `internal/replay`: the replay file (`docs/spec/replay.md`): versioned JSON lines with
-  a stable SHA-256 hash, a strict reader, and a player that rebuilds the core from the
-  events.
+  a stable SHA-256 hash, a strict reader, and a player that rebuilds the core and the
+  executed addresses from the file without running the match.
 - `pit`: the CLI. Today it prints usage and has `pit asm bot.s`, which assembles a bot
   and prints the cells, and `pit run a.s b.s --seed 1`, which runs a match and prints
   the result (`--json` for one line of JSON; `--replay FILE` also writes the replay
@@ -60,9 +61,9 @@ locally, run `scripts/build-release.sh v0.1.0 dist`.
 ## Layout
 
 - `cmd/pit/`: the `pit` command.
-- `internal/`: the packages (`isa`, `asm`, `vm` and `arena` so far).
+- `internal/`: the packages (`isa`, `asm`, `vm`, `arena` and `replay` so far).
 - `bots/`: the starter bots.
-- `docs/spec/`: the ISA, assembly and match specs.
+- `docs/spec/`: the ISA, assembly, match and replay specs.
 - `scripts/env.sh`: Go cache and temp setup. `scripts/build-release.sh`: release
   archives.
 - `.github/workflows/`: CI and tagged releases.

@@ -5,6 +5,7 @@ package replay
 import (
 	"fmt"
 
+	"github.com/squalor-xyz/pitfight/internal/arena"
 	"github.com/squalor-xyz/pitfight/internal/vm"
 )
 
@@ -37,6 +38,16 @@ func NewPlayer(r *Replay) (*Player, error) {
 // Core returns the player's core. The caller must not write to it.
 func (p *Player) Core() *vm.Core { return p.core }
 
+// Steps returns the steps of the cycle the player is at, in execution order: for
+// each, the bot, the address it executed and the events (none for a silent step).
+// It is nil at cycle 0. The caller must not modify it.
+func (p *Player) Steps() []arena.Step {
+	if p.next > 0 {
+		return p.r.Cycles[p.next-1].Steps
+	}
+	return nil
+}
+
 // Cycle returns the cycle the core is at.
 func (p *Player) Cycle() int { return p.cycle }
 
@@ -48,8 +59,10 @@ func (p *Player) AdvanceTo(cycle int) error {
 		return fmt.Errorf("replay: cannot go back from cycle %d to cycle %d", p.cycle, cycle)
 	}
 	for ; p.next < len(p.r.Cycles) && p.r.Cycles[p.next].N <= cycle; p.next++ {
-		for _, ev := range p.r.Cycles[p.next].Events {
-			p.apply(ev)
+		for _, st := range p.r.Cycles[p.next].Steps {
+			for _, ev := range st.Events {
+				p.apply(ev)
+			}
 		}
 	}
 	p.cycle = cycle

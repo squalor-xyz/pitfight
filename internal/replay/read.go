@@ -66,12 +66,16 @@ type cycleLine struct {
 	N int64  `json:"n"`
 }
 
+type stepLine struct {
+	T  string `json:"t"`
+	B  int64  `json:"b"`
+	PC int64  `json:"pc"`
+}
+
 type eventLine struct {
-	T  string    `json:"t"`
-	B  int64     `json:"b"`
-	PC int64     `json:"pc"`
-	A  int64     `json:"a"`
-	C  *[6]int64 `json:"c"`
+	T string    `json:"t"`
+	A int64     `json:"a"`
+	C *[6]int64 `json:"c"`
 }
 
 type endLine struct {
@@ -127,6 +131,10 @@ type parser struct {
 	loaded  int   // bots whose load line was read
 	open    bool  // the last cycle line is open: r.Cycles[len-1]
 	lastN   int   // n of the last cycle line, 0 before the first
+	lastBot int64 // bot of the last step of the open cycle, 0 before the first
+	inStep  bool  // the open cycle has a step
+	ended   bool  // the last step had its spawn or death
+	live    []int // live processes per bot, from the header and the s and d lines
 }
 
 func (p *parser) line(n int, line []byte) error {
@@ -163,6 +171,8 @@ func (p *parser) line(n int, line []byte) error {
 	switch probe.T {
 	case "c":
 		return p.cycle(n, line)
+	case "x":
+		return p.execute(n, line)
 	case "w", "s", "d":
 		return p.event(n, line)
 	case "end":
@@ -256,6 +266,10 @@ func (p *parser) header(n int, line []byte) error {
 	}
 	p.r.Config, p.r.Bots = cfg, bots
 	p.r.Result.Placement.Starts = starts
+	p.live = make([]int, len(bots))
+	for i := range p.live {
+		p.live[i] = 1
+	}
 	p.stage = stageLoad
 	return nil
 }
@@ -318,12 +332,10 @@ func (p *parser) load(n int, line []byte) error {
 	return nil
 }
 
-// closeCycle checks that the open cycle, if any, has events.
+// closeCycle checks that the open cycle, if any, has steps.
 func (p *parser) closeCycle(n int) error {
-	if p.open {
-		if c := p.r.Cycles[len(p.r.Cycles)-1]; len(c.Events) == 0 {
-			return fmt.Errorf("replay: line %d: cycle %d has no events", n, c.N)
-		}
+	if p.open && len(p.r.Cycles[len(p.r.Cycles)-1].Steps) == 0 {
+		return fmt.Errorf("replay: line %d: cycle %d has no steps", n, p.lastN)
 	}
 	return nil
 }
@@ -336,15 +348,47 @@ func (p *parser) cycle(n int, line []byte) error {
 	if err := p.closeCycle(n); err != nil {
 		return err
 	}
-	if l.N <= int64(p.lastN) || l.N > int64(p.r.Config.CycleLimit) {
-		return fmt.Errorf("replay: line %d: cycle %d is not in %d..%d", n, l.N, p.lastN+1, p.r.Config.CycleLimit)
+	if l.N != int64(p.lastN)+1 {
+		return fmt.Errorf("replay: line %d: cycle %d, want %d", n, l.N, p.lastN+1)
+	}
+	if l.N > int64(p.r.Config.CycleLimit) {
+		return fmt.Errorf("replay: line %d: cycle %d is past cycle_limit %d", n, l.N, p.r.Config.CycleLimit)
 	}
 	if err := canonical(n, line, appendCycle(nil, int(l.N))); err != nil {
 		return err
 	}
 	p.lastN = int(l.N)
 	p.r.Cycles = append(p.r.Cycles, Cycle{N: p.lastN})
-	p.open = true
+	p.open, p.lastBot, p.inStep = true, 0, false
+	return nil
+}
+
+// execute reads an x line: a step of the open cycle.
+func (p *parser) execute(n int, line []byte) error {
+	var l stepLine
+	if err := decode(line, &l); err != nil {
+		return fmt.Errorf("replay: line %d: %v", n, err)
+	}
+	if !p.open {
+		return fmt.Errorf("replay: line %d: step before the first cycle line", n)
+	}
+	size := int64(p.r.Config.CoreSize)
+	switch {
+	case l.B < 1 || l.B > int64(len(p.r.Bots)):
+		return rangeErr(n, "bot", l.B, 1, int64(len(p.r.Bots)))
+	case l.PC < 0 || l.PC >= size:
+		return rangeErr(n, "pc", l.PC, 0, size-1)
+	case l.B <= p.lastBot:
+		return fmt.Errorf("replay: line %d: bot %d steps after bot %d in cycle %d", n, l.B, p.lastBot, p.lastN)
+	case p.live[l.B-1] <= 0:
+		return fmt.Errorf("replay: line %d: bot %d steps with no live process", n, l.B)
+	}
+	if err := canonical(n, line, appendStep(nil, uint32(l.B), int32(l.PC))); err != nil {
+		return err
+	}
+	cur := &p.r.Cycles[len(p.r.Cycles)-1]
+	cur.Steps = append(cur.Steps, arena.Step{Bot: uint32(l.B), PC: int32(l.PC)})
+	p.inStep, p.lastBot, p.ended = true, l.B, false
 	return nil
 }
 
@@ -353,19 +397,22 @@ func (p *parser) event(n int, line []byte) error {
 	if err := decode(line, &l); err != nil {
 		return fmt.Errorf("replay: line %d: %v", n, err)
 	}
-	if !p.open {
-		return fmt.Errorf("replay: line %d: event before the first cycle line", n)
+	if !p.inStep {
+		return fmt.Errorf("replay: line %d: event before a step", n)
+	}
+	if p.ended {
+		return fmt.Errorf("replay: line %d: event after the spawn or death of its step", n)
 	}
 	size := int64(p.r.Config.CoreSize)
-	switch {
-	case l.B < 1 || l.B > int64(len(p.r.Bots)):
-		return rangeErr(n, "bot", l.B, 1, int64(len(p.r.Bots)))
-	case l.PC < 0 || l.PC >= size:
-		return rangeErr(n, "pc", l.PC, 0, size-1)
-	case l.A < 0 || l.A >= size:
-		return rangeErr(n, "address", l.A, 0, size-1)
+	last := &p.r.Cycles[len(p.r.Cycles)-1].Steps[len(p.r.Cycles[len(p.r.Cycles)-1].Steps)-1]
+	ev := vm.Event{Bot: last.Bot, PC: last.PC}
+	switch l.T {
+	case "w", "s":
+		if l.A < 0 || l.A >= size {
+			return rangeErr(n, "address", l.A, 0, size-1)
+		}
+		ev.Address = int32(l.A)
 	}
-	ev := vm.Event{Bot: uint32(l.B), PC: int32(l.PC), Address: int32(l.A)}
 	switch l.T {
 	case "w":
 		ev.Kind = vm.CellWrite
@@ -381,15 +428,20 @@ func (p *parser) event(n int, line []byte) error {
 		ev.Kind = vm.ProcessSpawn
 	default:
 		ev.Kind = vm.ProcessDeath
-		if l.A != l.PC {
-			return fmt.Errorf("replay: line %d: death address %d is not pc %d", n, l.A, l.PC)
-		}
+		ev.Address = ev.PC
 	}
 	if err := canonical(n, line, appendEvent(nil, ev)); err != nil {
 		return err
 	}
-	cur := &p.r.Cycles[len(p.r.Cycles)-1]
-	cur.Events = append(cur.Events, ev)
+	last.Events = append(last.Events, ev)
+	switch ev.Kind {
+	case vm.ProcessSpawn:
+		p.live[ev.Bot-1]++
+		p.ended = true
+	case vm.ProcessDeath:
+		p.live[ev.Bot-1]--
+		p.ended = true
+	}
 	return nil
 }
 
@@ -416,8 +468,11 @@ func (p *parser) end(n int, line []byte) error {
 		return err
 	}
 	limit := int64(p.r.Config.CycleLimit)
-	if l.Cycles < max(1, int64(p.lastN)) || l.Cycles > limit {
-		return rangeErr(n, "cycles", l.Cycles, max(1, int64(p.lastN)), limit)
+	if l.Cycles < 1 || l.Cycles > limit {
+		return rangeErr(n, "cycles", l.Cycles, 1, limit)
+	}
+	if l.Cycles != int64(p.lastN) {
+		return fmt.Errorf("replay: line %d: cycles %d, but the last cycle is %d", n, l.Cycles, p.lastN)
 	}
 	survivors, err := p.ids(n, "survivors", l.Survivors)
 	if err != nil {
@@ -441,6 +496,15 @@ func (p *parser) end(n int, line []byte) error {
 		}
 	default:
 		return fmt.Errorf("replay: line %d: outcome %q is not win or tie", n, l.Outcome)
+	}
+	var alive []uint32
+	for i, c := range p.live {
+		if c > 0 {
+			alive = append(alive, uint32(i+1))
+		}
+	}
+	if !slices.Equal(alive, survivors) {
+		return fmt.Errorf("replay: line %d: survivors %v do not match the live processes %v", n, survivors, alive)
 	}
 	if err := canonical(n, line, appendEnd(nil, res)); err != nil {
 		return err

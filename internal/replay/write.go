@@ -4,7 +4,6 @@ package replay
 
 import (
 	"io"
-	"slices"
 	"strconv"
 
 	"github.com/squalor-xyz/pitfight/internal/arena"
@@ -20,8 +19,9 @@ type Replay struct {
 	Config arena.Config
 	Bots   []Bot // bot i+1 is Bots[i]
 	Cycles []Cycle
-	// Result is the match result. Only Placement.Starts is set when the replay
-	// was read from a file.
+	// Result is the match result. When the replay was read from a file, Cycles,
+	// Survivors, Outcome, Winner and Tied are as in the end line, and of Placement
+	// only Starts is set, from the header; Order, Rotation and Gaps are not in the file.
 	Result arena.Result
 }
 
@@ -33,21 +33,36 @@ type Bot struct {
 	Cells        []isa.Cell // normalized, written to Start, Start+1, ... with the bot's id as writer
 }
 
-// Cycle holds the events of one cycle that had at least one. Events are in
-// execution order; for a CellWrite, Cell.Writer equals Bot.
+// Cycle holds the steps of one cycle, in execution order (ascending bot id). Every
+// cycle of the match has one, and at least one step. In an event of a step, Bot and
+// PC are those of the step, Address of a ProcessDeath is PC, and for a CellWrite
+// Cell.Writer equals Bot.
 type Cycle struct {
-	N      int
-	Events []vm.Event
+	N     int
+	Steps []arena.Step
 }
 
 // Record runs the match and returns its replay. It returns the error of
 // arena.Run unchanged when the match is refused.
 func Record(cfg arena.Config, bots []arena.Bot) (*Replay, error) {
 	var cycles []Cycle
-	res, err := arena.RunObserved(cfg, bots, func(cycle int, _ *vm.Core, events []vm.Event) {
-		if len(events) > 0 {
-			cycles = append(cycles, Cycle{N: cycle, Events: slices.Clone(events)})
+	res, err := arena.RunObserved(cfg, bots, func(cycle int, _ *vm.Core, steps []arena.Step) {
+		if cycle == 0 {
+			return
 		}
+		// Copy the steps and their events: arena reuses its buffers.
+		n := 0
+		for _, st := range steps {
+			n += len(st.Events)
+		}
+		events := make([]vm.Event, 0, n) // never grows, so the subslices stay valid
+		kept := make([]arena.Step, len(steps))
+		for i, st := range steps {
+			lo := len(events)
+			events = append(events, st.Events...)
+			kept[i] = arena.Step{Bot: st.Bot, PC: st.PC, Events: events[lo:len(events):len(events)]}
+		}
+		cycles = append(cycles, Cycle{N: cycle, Steps: kept})
 	})
 	if err != nil {
 		return nil, err
@@ -90,8 +105,11 @@ func (r *Replay) Bytes() []byte {
 	}
 	for _, c := range r.Cycles {
 		b = appendCycle(b, c.N)
-		for _, ev := range c.Events {
-			b = appendEvent(b, ev)
+		for _, st := range c.Steps {
+			b = appendStep(b, st.Bot, st.PC)
+			for _, ev := range st.Events {
+				b = appendEvent(b, ev)
+			}
 		}
 	}
 	return appendEnd(b, r.Result)
@@ -190,24 +208,28 @@ func appendCycle(b []byte, n int) []byte {
 	return append(b, "}\n"...)
 }
 
+func appendStep(b []byte, bot uint32, pc int32) []byte {
+	b = append(b, `{"t":"x","b":`...)
+	b = appendInt(b, int64(bot))
+	b = append(b, `,"pc":`...)
+	b = appendInt(b, int64(pc))
+	return append(b, "}\n"...)
+}
+
+// appendEvent writes an event of a step. The step's line has the bot and pc, so a
+// write has an address and a cell, a spawn an address and a death nothing.
 func appendEvent(b []byte, ev vm.Event) []byte {
 	switch ev.Kind {
 	case vm.CellWrite:
-		b = append(b, `{"t":"w"`...)
-	case vm.ProcessSpawn:
-		b = append(b, `{"t":"s"`...)
-	default:
-		b = append(b, `{"t":"d"`...)
-	}
-	b = append(b, `,"b":`...)
-	b = appendInt(b, int64(ev.Bot))
-	b = append(b, `,"pc":`...)
-	b = appendInt(b, int64(ev.PC))
-	b = append(b, `,"a":`...)
-	b = appendInt(b, int64(ev.Address))
-	if ev.Kind == vm.CellWrite {
+		b = append(b, `{"t":"w","a":`...)
+		b = appendInt(b, int64(ev.Address))
 		b = append(b, `,"c":`...)
 		b = appendCell(b, ev.Cell)
+	case vm.ProcessSpawn:
+		b = append(b, `{"t":"s","a":`...)
+		b = appendInt(b, int64(ev.Address))
+	default:
+		b = append(b, `{"t":"d"`...)
 	}
 	return append(b, "}\n"...)
 }

@@ -1,6 +1,11 @@
 {"t":"header","version":1,"config":{"core_size":16,"cycle_limit":5,"max_processes":8,"min_separation":0,"seed":"1"},"bots":[{"id":1,"hash":"2915d3c360b2ce34c9adb3b60eccfd1b946d4055327776eeda1d20410d70ff2b","length":1,"start":7,"entry_address":7},{"id":2,"hash":"6d041bfdf23dcb3e5fba5f19c68e568540bba8c456489cf25a60cae545ac88a7","length":2,"start":0,"entry_address":0}]}
 {"t":"load","bot":1,"cells":[[6,1,1,0,1,0]]}
 {"t":"load","bot":2,"cells":[[14,4,1,0,1,0],[0,4,1,0,1,0]]}
+{"t":"c","n":1}
+{"t":"x","b":1,"pc":7}
+{"t":"x","b":2,"pc":0}
 {"t":"c","n":2}
-{"t":"d","b":2,"pc":1,"a":1}
+{"t":"x","b":1,"pc":7}
+{"t":"x","b":2,"pc":1}
+{"t":"d"}
 {"t":"end","cycles":2,"survivors":[1],"outcome":"win","winner":1,"tied":[]}
