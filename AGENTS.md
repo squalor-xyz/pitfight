@@ -34,7 +34,7 @@ a shared circular memory arena. Go, standard library only.
   replay file: writer, strict reader, hashes and the player that rebuilds the core)
   exist so far.
 - `web/`: the web viewer. `docs/spec/`: the ISA, assembly and format specs
-  (`isa.md`, `asm.md`, `match.md`, `replay.md`). `bots/`: the starter bots. `web/` and `bots/` do not exist yet.
+  (`isa.md`, `asm.md`, `match.md`, `replay.md`). `bots/`: the starter bots (`imp.s`, `dwarf.s`, `replicator.s`, `scanner.s`). `web/` does not exist yet.
 - `scripts/env.sh`: Go cache and temp setup (see below).
   `scripts/build-release.sh`: release archives. `.github/workflows/`: CI and
   release.
