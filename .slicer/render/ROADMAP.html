@@ -265,6 +265,18 @@
 <div class="prose"><p>S26 (C35). Without --seed the seed is a uint64 read from crypto/rand (CLI source; C12 and C36 bind only the VM and arena core) and printed as &#x27;pit play: seed N (repeat this match with --seed N)&#x27; before the server starts. With --terminal it is printed after the viewer ends (q or end of input), because the first drawing clears the screen; a Ctrl-C stop prints no seed, so pass --seed N to keep a match you may stop that way (documented in the usage). Reason: a match you liked can be repeated with pit play --seed N or pit run --seed N.</p></div>
 <h3>C122 S26 (C35): pit play serves the replay from memory at /replays/match.jsonl; viewer address is /?replay=/replays/match.jsonl&amp;autoplay=1</h3>
 <div class="prose"><p>S26 (C35). newPlayHandler wraps the pit serve handler (no directories, localOnly Host check, GET and HEAD only) and adds the in-memory replay at the /replays/ place that pit serve uses, so the viewer&#x27;s existing ?replay= loading works unchanged; web/js/main.js gains one query parameter, autoplay=1, so the page plays at once like a match from the start page (?replay= alone stays paused). The replay is written to disk only by --replay. Listens on 127.0.0.1 only; the printed address is the one handed to the opener. The opener is open on macOS and xdg-open on Linux/BSD via os/exec, injected in tests; on failure or on other systems the address stays printed and serving continues (stderr says why).</p></div>
+<h3>C123 install.sh resolves latest from the releases/latest/download/SHA256SUMS redirect</h3>
+<div class="prose"><p>Archive names carry the version, so the script fetches SHA256SUMS through GitHub&#x27;s latest/download redirect and reads the version from the pit_VERSION_OS_ARCH.tar.gz entry; this needs no API call, no header parsing and works with curl and wget, and the archive is then fetched by tag.</p></div>
+<h3>C124 install.sh env vars: PREFIX, PITFIGHT_VERSION, PITFIGHT_BASE_URL</h3>
+<div class="prose"><p>PREFIX (default $HOME/.local, absolute) follows common installer practice; PITFIGHT_VERSION pins a release (v0.1.1 form, validated); PITFIGHT_BASE_URL (default the https GitHub releases URL) lets tests use a local server and is the only place a non-https URL is allowed.</p></div>
+<h3>C125 install.sh has no way to skip checksum verification and fails closed</h3>
+<div class="prose"><p>The archive must match exactly one SHA256SUMS line for its exact name, using sha256sum or shasum -a 256; a missing hash tool, SHA256SUMS download failure, missing or duplicate entry, or mismatch aborts before unpacking, and no env var disables this.</p></div>
+<h3>C126 install.sh is attached to releases by build-release.sh and is not in SHA256SUMS</h3>
+<div class="prose"><p>build-release.sh copies scripts/install.sh into OUTDIR so release.yml&#x27;s dist/* upload attaches it with no workflow change; SHA256SUMS lists the archives only because the script is fetched over TLS as the trust root and the installer reads SHA256SUMS by archive name.</p></div>
+<h3>C127 install.sh stages in PREFIX, renames into place and never deletes user bots</h3>
+<div class="prose"><p>pit and the bots are copied to dot-named staging paths next to their destinations (same file system) and moved over with mv -f after the archive layout is validated; the shipped bot files are overwritten but other files in share/pitfight/bots stay.</p></div>
+<h3>C128 install.sh accepts only an archive with one top directory and regular files</h3>
+<div class="prose"><p>The tar listing must hold only pit_VERSION_OS_ARCH paths without .. components, and the unpacked tree must hold only directories and regular files (no links), pit, and a bots directory of files; anything else aborts before install.</p></div>
 <h3>C33 CI deferred</h3>
 <div class="prose"><p>Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run locally (see the in-repo Go cache and checks constraint).</p></div>
 <p><em>Retired: Owner lifted the CI deferral 2026-10-17; GitHub Actions chosen. Successor: C63.</em></p>
@@ -292,7 +304,7 @@
 <div class="prose"><p>PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first (needed for debugging), web viewer second. PROJECT.md names no alternative; both viewers are v1. (PROJECT.md Open decisions 6)</p></div>
 <p><em>Retired: Settled by owner decision C31 (2026-10-15)..</em></p>
 </section>
-<p class="summary">26 items · — 3 · done 19 · later 4</p>
+<p class="summary">26 items · — 2 · done 20 · later 4</p>
 <table><thead><tr><th>#</th><th>ID</th><th>Title</th><th>Size</th><th>Effort</th><th>Trees</th><th>Findings</th><th>Status</th></tr></thead><tbody>
 <tr class="open"><td>1</td><td>S14</td><td>Optional Go WASM build for live matches</td><td>S</td><td>1</td><td>vm, web</td><td>PROJECT.md Milestone 7, Stack recommendation</td><td class="status">—</td></tr>
 <tr class="open"><td>2</td><td>S16</td><td>Check licensing of Redcode standards and warriors</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Dependency / licensing notes</td><td class="status">—</td></tr>
@@ -301,32 +313,31 @@
 <tr class="other"><td>4</td><td>S19</td><td>Persistent hill of ranked bots</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
 <tr class="other"><td>5</td><td>S20</td><td>Host the web visualizer on squalor.xyz</td><td>S</td><td>2</td><td>web</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
 <tr class="other"><td>6</td><td>S21</td><td>ISA variants and new game modes</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Feature tiers: Later</td><td class="status">later</td></tr>
-<tr class="group"><td></td><td colspan="7"><strong>v0.1.1</strong></td></tr>
-<tr class="open"><td>7</td><td>S24</td><td>Install script</td><td>M</td><td>2</td><td>repo</td><td></td><td class="status">—</td></tr>
 </tbody></table>
 <table><thead><tr><th>#</th><th>ID</th><th>Title</th><th>Size</th><th>Effort</th><th>Trees</th><th>Findings</th><th>Status</th></tr></thead><tbody>
 <tr class="group"><td></td><td colspan="7"><strong>Decisions</strong></td></tr>
-<tr class="done"><td>8</td><td>S01</td><td>Confirm open decisions</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Open decisions · retired decision C33</td><td class="status">done</td></tr>
+<tr class="done"><td>7</td><td>S01</td><td>Confirm open decisions</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Open decisions · retired decision C33</td><td class="status">done</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v1 foundation</strong></td></tr>
-<tr class="done"><td>9</td><td>S02</td><td>Set up project scaffolding</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md Stack recommendation, Risks · retired decision C33</td><td class="status">done</td></tr>
-<tr class="done"><td>10</td><td>S03</td><td>Write the ISA spec</td><td>M</td><td>2</td><td>docs</td><td>PROJECT.md Milestone 1, Goals 1</td><td class="status">done</td></tr>
-<tr class="done"><td>11</td><td>S04</td><td>Specify match rules and verify default parameters</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Goals 3-4, Open decisions 5</td><td class="status">done</td></tr>
+<tr class="done"><td>8</td><td>S02</td><td>Set up project scaffolding</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md Stack recommendation, Risks · retired decision C33</td><td class="status">done</td></tr>
+<tr class="done"><td>9</td><td>S03</td><td>Write the ISA spec</td><td>M</td><td>2</td><td>docs</td><td>PROJECT.md Milestone 1, Goals 1</td><td class="status">done</td></tr>
+<tr class="done"><td>10</td><td>S04</td><td>Specify match rules and verify default parameters</td><td>S</td><td>1</td><td>docs</td><td>PROJECT.md Goals 3-4, Open decisions 5</td><td class="status">done</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v1 core</strong></td></tr>
-<tr class="done"><td>12</td><td>S05</td><td>Build VM core memory and addressing modes</td><td>M</td><td>2</td><td>vm</td><td>PROJECT.md Milestone 2</td><td class="status">done</td></tr>
-<tr class="done"><td>13</td><td>S06</td><td>Execute opcodes and process queues in the VM</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Milestone 2, Core concepts</td><td class="status">done</td></tr>
+<tr class="done"><td>11</td><td>S05</td><td>Build VM core memory and addressing modes</td><td>M</td><td>2</td><td>vm</td><td>PROJECT.md Milestone 2</td><td class="status">done</td></tr>
+<tr class="done"><td>12</td><td>S06</td><td>Execute opcodes and process queues in the VM</td><td>L</td><td>3</td><td>vm</td><td>PROJECT.md Milestone 2, Core concepts</td><td class="status">done</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v0.1.0</strong></td></tr>
-<tr class="done"><td>14</td><td>S07</td><td>Build the assembler</td><td>M</td><td>2</td><td>asm</td><td>PROJECT.md Milestone 3, Goals 2</td><td class="status">done</td></tr>
-<tr class="done"><td>15</td><td>S08</td><td>Add the disassembler and round-trip tests</td><td>S</td><td>1</td><td>asm</td><td>PROJECT.md Milestone 3</td><td class="status">done</td></tr>
-<tr class="done"><td>16</td><td>S09</td><td>Run matches in the arena</td><td>M</td><td>2</td><td>arena</td><td>PROJECT.md Milestone 4, Goals 3-4</td><td class="status">done</td></tr>
-<tr class="done"><td>17</td><td>S10</td><td>Write the starter bots and golden-result tests</td><td>M</td><td>2</td><td>bots</td><td>PROJECT.md v1 features, Risks</td><td class="status">done</td></tr>
-<tr class="done"><td>18</td><td>S11</td><td>Define and write the replay format</td><td>M</td><td>2</td><td>replay</td><td>PROJECT.md Milestone 5, Goals 7, Risks</td><td class="status">done</td></tr>
-<tr class="done"><td>19</td><td>S12</td><td>Build the terminal viewer</td><td>M</td><td>2</td><td>tui</td><td>PROJECT.md Milestone 5, Goals 6</td><td class="status">done</td></tr>
-<tr class="done"><td>20</td><td>S13</td><td>Run tournaments with a scoreboard</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Milestone 6, Goals 5</td><td class="status">done</td></tr>
-<tr class="done"><td>21</td><td>S15</td><td>Build the web viewer</td><td>L</td><td>3</td><td>web</td><td>PROJECT.md Milestone 7, Goals 6</td><td class="status">done</td></tr>
-<tr class="done"><td>22</td><td>S17</td><td>Verify v1 acceptance criteria</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md v1 acceptance criteria · retired decision C33</td><td class="status">done</td></tr>
+<tr class="done"><td>13</td><td>S07</td><td>Build the assembler</td><td>M</td><td>2</td><td>asm</td><td>PROJECT.md Milestone 3, Goals 2</td><td class="status">done</td></tr>
+<tr class="done"><td>14</td><td>S08</td><td>Add the disassembler and round-trip tests</td><td>S</td><td>1</td><td>asm</td><td>PROJECT.md Milestone 3</td><td class="status">done</td></tr>
+<tr class="done"><td>15</td><td>S09</td><td>Run matches in the arena</td><td>M</td><td>2</td><td>arena</td><td>PROJECT.md Milestone 4, Goals 3-4</td><td class="status">done</td></tr>
+<tr class="done"><td>16</td><td>S10</td><td>Write the starter bots and golden-result tests</td><td>M</td><td>2</td><td>bots</td><td>PROJECT.md v1 features, Risks</td><td class="status">done</td></tr>
+<tr class="done"><td>17</td><td>S11</td><td>Define and write the replay format</td><td>M</td><td>2</td><td>replay</td><td>PROJECT.md Milestone 5, Goals 7, Risks</td><td class="status">done</td></tr>
+<tr class="done"><td>18</td><td>S12</td><td>Build the terminal viewer</td><td>M</td><td>2</td><td>tui</td><td>PROJECT.md Milestone 5, Goals 6</td><td class="status">done</td></tr>
+<tr class="done"><td>19</td><td>S13</td><td>Run tournaments with a scoreboard</td><td>M</td><td>2</td><td>tourney</td><td>PROJECT.md Milestone 6, Goals 5</td><td class="status">done</td></tr>
+<tr class="done"><td>20</td><td>S15</td><td>Build the web viewer</td><td>L</td><td>3</td><td>web</td><td>PROJECT.md Milestone 7, Goals 6</td><td class="status">done</td></tr>
+<tr class="done"><td>21</td><td>S17</td><td>Verify v1 acceptance criteria</td><td>S</td><td>1</td><td>repo</td><td>PROJECT.md v1 acceptance criteria · retired decision C33</td><td class="status">done</td></tr>
 <tr class="group"><td></td><td colspan="7"><strong>v0.1.1</strong></td></tr>
-<tr class="done"><td>23</td><td>S22</td><td>v0.1.0 code cleanups</td><td>M</td><td>2</td><td>repo</td><td>S17 later notes (from the S09, S11, S12, S13 and S15 relays) · discovered from S17</td><td class="status">done</td></tr>
-<tr class="done"><td>24</td><td>S23</td><td>v0.1.0 doc cleanups</td><td>S</td><td>1</td><td>docs</td><td>S17 later notes (from the S08, S12, S15 and S17 relays) · discovered from S17</td><td class="status">done</td></tr>
+<tr class="done"><td>22</td><td>S22</td><td>v0.1.0 code cleanups</td><td>M</td><td>2</td><td>repo</td><td>S17 later notes (from the S09, S11, S12, S13 and S15 relays) · discovered from S17</td><td class="status">done</td></tr>
+<tr class="done"><td>23</td><td>S23</td><td>v0.1.0 doc cleanups</td><td>S</td><td>1</td><td>docs</td><td>S17 later notes (from the S08, S12, S15 and S17 relays) · discovered from S17</td><td class="status">done</td></tr>
+<tr class="done"><td>24</td><td>S24</td><td>Install script</td><td>M</td><td>2</td><td>repo</td><td></td><td class="status">done</td></tr>
 <tr class="done"><td>25</td><td>S25</td><td>Serve start page</td><td>M</td><td>2</td><td>web, cmd</td><td></td><td class="status">done</td></tr>
 <tr class="done"><td>26</td><td>S26</td><td>pit play</td><td>M</td><td>2</td><td>cmd</td><td></td><td class="status">done</td></tr>
 </tbody></table>

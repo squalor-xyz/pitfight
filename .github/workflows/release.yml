@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
 # Pushing a tag v* runs the checks, builds pit for each release platform with
-# scripts/build-release.sh and publishes a GitHub Release with the archives.
+# scripts/build-release.sh and publishes a GitHub Release with the archives, SHA256SUMS
+# and install.sh (everything build-release.sh writes into dist/).
 name: release
 
 on:
