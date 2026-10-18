@@ -414,6 +414,17 @@
           "verified_by": "",
           "verified_at": "",
           "stale_after": ""
+        },
+        {
+          "id": "ced8f21f-7fd8-4ad0-bf3e-76ecd1772148",
+          "kind": "",
+          "text": "**2026-10-18** — Owner 2026-10-18: accept C72. S08 moves the cmd/pit/asm.go listing formatter into internal/asm as Disassemble and pit asm calls it; no second formatter.",
+          "created_at": "2026-10-18T14:17:15Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
         }
       ],
       "claim": null,
@@ -471,6 +482,17 @@
           "kind": "",
           "text": "**2026-10-18** — From S07: asm.Program cells carry raw signed operand values (C69); the loader must Norm every AValue/BValue before placement (match.md section 5) and test a bot with a negative operand.",
           "created_at": "2026-10-18T04:02:20Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        },
+        {
+          "id": "5cb2ea7d-94d9-4333-b567-b9ce005a94ff",
+          "kind": "",
+          "text": "**2026-10-18** — Owner 2026-10-18: keep C69 (assembler emits raw signed operand values). In S09, amend the isa.Cell comment (internal/isa/isa.go:101-102) to say the [0, CORESIZE) range holds for cells in a core; the loader normalizes on placement.",
+          "created_at": "2026-10-18T14:17:15Z",
           "attempt": 0,
           "by": "Jon R",
           "verified_by": "",
