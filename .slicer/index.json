@@ -608,7 +608,7 @@
       "id": "S11",
       "title": "Define and write the replay format",
       "short_title": "Define and write the replay format",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [
         "S09",
@@ -632,6 +632,28 @@
           "text": "**2026-10-18** — Owner 2026-10-18 (amends C76/C77): in pit run JSON and the replay format, emit seed as a decimal string (JS precision above 2^53), and rename the output field entry to entry_address (it is the absolute address Norm(start+e), not match.md's offset e) in text and JSON output. S11 makes both changes, updates tests, docs and the catalog records.",
           "created_at": "2026-10-18T14:43:22Z",
           "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        },
+        {
+          "id": "f7e0b1a0-43ff-45be-867a-fe34df5217f9",
+          "kind": "",
+          "text": "**2026-10-18** — Review (round 1) stopped, not PASS: (1) main moved (S10 merged, ddd19b4); fullHash and docs/spec/replay.md section 9 pin the isa.md 4-cell dwarf, not bots/dwarf.s, so the C16/Check hash for bots/imp.s vs bots/dwarf.s --seed 1 needs main merged and a repin (real hash bee2a802...1be2 at default limit); AGENTS.md/README.md will conflict on 'bots/ do not exist yet'. (2) Owner decision: replay v1 records no process pcs for silent steps, so execution pointers (S12/S15, C07) cannot be shown without re-simulating; options: add per-step execute record (reviewer recommends) or narrow viewers to executed cells. Minor: untested reader range checks read.go:242,246; stale README.md:16-18,60-61; comment write.go:23-24.",
+          "created_at": "2026-10-18T15:07:43Z",
+          "attempt": 1,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        },
+        {
+          "id": "2bcc0647-1efd-4620-a99f-c9ab69449614",
+          "kind": "",
+          "text": "**2026-10-18** — Owner 2026-10-18: replay format adds a per-step execute record, e.g. {\"t\":\"x\",\"b\":N,\"pc\":N}, for every step (including silent JMP/NOP/test steps) so viewers (S12, S15) can show execution pointers without re-simulating (C07). Update C84, docs/spec/replay.md, reader/writer/apply, fuzz seeds and golden fixtures.",
+          "created_at": "2026-10-18T15:08:52Z",
+          "attempt": 1,
           "by": "Jon R",
           "verified_by": "",
           "verified_at": "",
@@ -666,7 +688,7 @@
         "importance": 3,
         "urgency": 2,
         "effort": 2,
-        "attempts": 0
+        "attempts": 1
       }
     },
     {
@@ -679,7 +701,19 @@
         "S11",
         "S01"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "56a515a2-14af-4656-928c-2c7852d67e4f",
+          "kind": "",
+          "text": "**2026-10-18** — From S11: an x record names only the process that stepped, so a viewer cannot place a multi-process bot's other queued processes; draw executed addresses per cycle. The replay reader does not validate header placement consistency (overlap, total length vs core, entry outside the bot) and accepts some files the writer never produces (a live bot with no x step in a cycle, cycles after one bot is left, spawns beyond max_processes), so viewers must not assume those invariants.",
+          "created_at": "2026-10-18T15:27:57Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "M",
@@ -870,6 +904,17 @@
           "verified_by": "",
           "verified_at": "",
           "stale_after": ""
+        },
+        {
+          "id": "4f70c3d1-caca-4617-b71d-cce0f7a8fa6a",
+          "kind": "",
+          "text": "**2026-10-18** — From S11: an x record names only the process that stepped, so a viewer cannot place a multi-process bot's other queued processes; draw executed addresses per cycle. The replay reader does not validate header placement consistency (overlap, total length vs core, entry outside the bot) and accepts some files the writer never produces (a live bot with no x step in a cycle, cycles after one bot is left, spawns beyond max_processes), so viewers must not assume those invariants.",
+          "created_at": "2026-10-18T15:27:58Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
         }
       ],
       "claim": null,
@@ -977,6 +1022,17 @@
           "kind": "",
           "text": "**2026-10-18** — From S13 (later): no test proves tourney parallelism (jobs=1 mutant survives); cmd/pit tourney.go:76 and run.go:65 treat a flag value of -- as terminator; arena.Run collects all events per tourney match (~143 MB peak), consider an events-off option; fold the duplicated flag-interleave loop of tourney.go and run.go into one helper after S11 lands.",
           "created_at": "2026-10-18T15:19:51Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        },
+        {
+          "id": "d06a3cd2-c6a9-429b-9321-0590045da276",
+          "kind": "",
+          "text": "**2026-10-18** — From S11 (later): replay read.go:20-25 duplicates arena's private limits (arena/config.go:13-18); os.WriteFile in cmd/pit/run.go may leave a partial replay file on a write error; the golden fixture hand-check used a Python stepper that is not in the repo (replay.md section 9 says so).",
+          "created_at": "2026-10-18T15:27:58Z",
           "attempt": 0,
           "by": "Jon R",
           "verified_by": "",
@@ -1834,7 +1890,7 @@
         "id": "C76",
         "kind": "decision",
         "title": "pit run text output: config line, one line per bot, cycles, survivors, result (S09)",
-        "body": "Plain line-oriented text with the fields of match.md section 8 plus each bot's file, length, start and entry address, so a human and grep can read it; byte-identical for the same input (C16).",
+        "body": "Plain line-oriented text with the fields of match.md section 8 plus each bot's file, length, start and entry_address (the absolute address Norm(start + entry offset) of its first process, not the offset e of match.md section 5), so a human and grep can read it; byte-identical for the same input (C16). Owner amendment 2026-10-18: the field was called 'entry'; it is entry_address (done in S11). With --replay S11 adds a last line 'replay: <hash>' (see the S11 record).",
         "status": "active",
         "reason": "",
         "successor": ""
@@ -1843,7 +1899,7 @@
         "id": "C77",
         "kind": "decision",
         "title": "pit run --json: one JSON line with config, bots, cycles, survivors, outcome, winner, tied (S09)",
-        "body": "A single line of fixed-order snake_case JSON with lists never null is the simplest machine-readable form for the later agent harness (C09); seed is a JSON number.",
+        "body": "A single line of fixed-order snake_case JSON with lists never null is the simplest machine-readable form for the later agent harness (C09). Owner amendment 2026-10-18 (done in S11): seed is a decimal string, not a JSON number, because JavaScript loses precision above 2^53; the bot field 'entry' is renamed entry_address (the absolute address, not the offset). With --replay a last field replay_hash is added.",
         "status": "active",
         "reason": "",
         "successor": ""
@@ -1880,6 +1936,69 @@
         "kind": "decision",
         "title": "isa.md section 8 listings are asm blocks without the N: prefix",
         "body": "The three starter-bot listings in docs/spec/isa.md are tagged asm and the N: prefix moved into the trailing comment (; N: text), so TestRoundTripSpecExamples can extract and assemble them; the cells are unchanged.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C83",
+        "kind": "decision",
+        "title": "Replay file: hand-written canonical JSON lines; the reader accepts only the writer's bytes (S11)",
+        "body": "S11 implementer decision under C35 (docs/spec/replay.md sections 1, 4, 8). The writer appends integers with strconv and fixed words by hand, so no map, no encoding/json and no string escaping touch the bytes (C36); the only strings are fixed words, the decimal seed and lowercase-hex hashes. The reader decodes each line with encoding/json for validation, then requires the line to equal what the writer would write for the parsed values, so Read then Write returns the same bytes and the file hash identifies the match. Line order: header, one load line per bot, cycle groups, end. Reason: byte stability across Go versions and one accepted spelling per replay; the cost is that hand-edited replays with other spacing are refused.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C84",
+        "kind": "decision",
+        "title": "Replay v1 vocabulary: header, load, c/x/w/s/d body lines, end; a c line for every cycle and an x line for every step (S11)",
+        "body": "S11 implementer decision under C35 (replay.md section 4), amended by the owner's 2026-10-18 per-step execute record. Header: version, config (snake_case, seed a decimal string per the owner's C77 amendment), bots with id, hash, length, start, entry_address. load: the bot's Norm'd cells, so the file holds the initial core (C79 left the initial state to the replay). Body: c {n} for EVERY cycle 1..cycles (a cycle always has a step, since the match runs only while two bots are live); inside it one x {b,pc} line for EVERY step, silent ones (JMP, NOP, skipping tests) included, in ascending bot id; the step's events follow its x line and carry no bot or pc: w {a,c:[six ints]}, s {a}, d (no fields; its address is the step's pc), with at most one s or d and it last. A cell is [opcode,modifier,a_mode,a_value,b_mode,b_value] as isa codes, the writer being the step's bot. end: cycles (equal to the last c), survivors, outcome, winner, tied. All numbers stay below 2^31. The reader also checks that a bot steps only while its process count (1 + s - d) is above 0 and that survivors are the bots with a count above 0. Reason: compact (C07) and JS-safe (C19); a viewer rebuilds the core and shows the execution pointers of every cycle (S12, S15) without re-simulating; dropping b and pc from events removes redundancy. Size: the default-limit imp-vs-dwarf replay (5880 cycles) is 782675 bytes, about 133 bytes per cycle for two bots.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C85",
+        "kind": "decision",
+        "title": "Replay v1 has no snapshot lines; seeking is the viewer's job (S11)",
+        "body": "S11 implementer decision under C35 (replay.md section 5). A viewer that wants to jump to a cycle keeps its own checkpoints while reading the file; a snapshot every K cycles would add up to CORESIZE cells per snapshot and would be a format change. Adding snapshot lines later is a new version number (replay.md section 7), with no optional fields in v1. Reason: smallest format that satisfies the slice; a later version can add them if a viewer needs it.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C86",
+        "kind": "decision",
+        "title": "Replay hashes: SHA-256 hex of the file bytes; bot hash over entry offset plus raw assembled cells (S11)",
+        "body": "S11 implementer decision under C35 (replay.md section 6). Replay hash: SHA-256 of the whole file including the final line feed, lowercase hex. Bot hash: SHA-256 of the entry offset (4 bytes big endian) then 12 bytes per assembled cell (opcode, modifier, a_mode, a_value int32, b_mode, b_value int32, big endian; writer excluded), using the raw signed values of C69 so the hash does not depend on CORESIZE or placement. Readers treat the bot hash as opaque because the load lines are normalized. Reason: the slice asked for a stated encoding over the assembled cells; raw values keep a bot's identity independent of the match configuration.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C87",
+        "kind": "decision",
+        "title": "Replay API: replay.Record, Read, Bytes, Hash, BotHash and Player (S11)",
+        "body": "S11 implementer decision under C35. Record(cfg, bots) runs the match and returns a Replay holding the config, bots as loaded, cycles (each with its []arena.Step) and the result; Bytes/Write give the file, Hash(data) and BotHash the hashes; Read(r) validates the whole file and returns a nil replay on any error, with *VersionError for an unknown version (message names the version); Player (NewPlayer, AdvanceTo, Core, Cycle, Steps, Live) rebuilds the core, the live process counts and the executed addresses of the current cycle by applying the file forward, which is what TestReplayEquivalence checks against the live core and live steps. Reason: one in-memory form shared by the pit run writer and later viewers, with no re-simulation.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C88",
+        "kind": "decision",
+        "title": "arena.RunObserved: per-cycle hook with the live core; Run is built on it (S11)",
+        "body": "S11 implementer decision under C35, following the S09 note on C79 and amended for the per-step execute record. RunObserved(cfg, bots, observe) calls observe(0, core, nil) after loading and observe(c, core, steps) after each cycle with that cycle's []arena.Step in ascending bot id: Step{Bot, PC, Events}, PC being the address the step executed (the front of the bot's queue before it) and Events the step's VM events, empty for a silent step. The buffers are reused; observe must not modify the core or keep anything past the call. Run is RunObserved collecting the events, so its results and events are unchanged. To read the pc of a step the VM gets Queue.Front() (non-test vm source, one line). Reason: a flat event list cannot give cycle boundaries or the pc of steps that emit no event, and the equivalence test needs the live core and live steps at every cycle.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C89",
+        "kind": "decision",
+        "title": "pit run --replay FILE writes the replay and prints its hash: 'replay: <hash>' or JSON replay_hash (S11)",
+        "body": "S11 implementer decision under C35. The flag name --replay FILE follows the kebab-case flags of C75. With it, pit run records the match, writes FILE (a refused match writes nothing; a write error exits 1 with empty stdout) and adds the replay hash: a last text line 'replay: <64 hex>' and, with --json, a last field replay_hash; without the flag both are absent. Reason: C16 asks for the same result and replay hash on every run; printing the hash lets a script compare runs without shasum.",
         "status": "active",
         "reason": "",
         "successor": ""

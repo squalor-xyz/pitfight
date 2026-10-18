@@ -14,6 +14,7 @@ import (
 
 	"github.com/squalor-xyz/pitfight/internal/arena"
 	"github.com/squalor-xyz/pitfight/internal/asm"
+	"github.com/squalor-xyz/pitfight/internal/replay"
 )
 
 const runUsage = `usage: pit run [flags] [--] <bot.s> <bot.s> [<bot.s> ...]
@@ -29,6 +30,7 @@ Flags:
   --max-processes N   live processes allowed per bot, 1 to 1048576 (default 8000)
   --min-separation N  empty cells between neighbouring bots, 0 to 1048576 (default 100)
   --json              print the result as one line of JSON instead of text
+  --replay FILE       also write the replay (docs/spec/replay.md) to FILE and print its hash
 
 Exit codes: 0 the match ran; 1 an error in a bot file or the configuration; 2 a usage error.
 `
@@ -38,6 +40,7 @@ Exit codes: 0 the match ran; 1 an error in a bot file or the configuration; 2 a 
 func runRun(args []string, stdout, stderr io.Writer) int {
 	cfg := arena.DefaultConfig()
 	var asJSON bool
+	var replayPath string
 	fs := flag.NewFlagSet("pit run", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 	fs.Uint64Var(&cfg.Seed, "seed", cfg.Seed, "")
@@ -46,6 +49,7 @@ func runRun(args []string, stdout, stderr io.Writer) int {
 	fs.IntVar(&cfg.MaxProcesses, "max-processes", cfg.MaxProcesses, "")
 	fs.IntVar(&cfg.MinSeparation, "min-separation", cfg.MinSeparation, "")
 	fs.BoolVar(&asJSON, "json", false, "")
+	fs.StringVar(&replayPath, "replay", "", "")
 
 	// The flag package stops at the first file name; parse again after each one so
 	// that "pit run a.s b.s --seed 1" works.
@@ -91,16 +95,31 @@ func runRun(args []string, stdout, stderr io.Writer) int {
 		}
 		bots[i] = arena.Bot{Cells: prog.Cells, Entry: prog.Entry}
 	}
-	res, _, err := arena.Run(cfg, bots)
+	var (
+		res        arena.Result
+		replayHash string
+		err        error
+	)
+	if replayPath == "" {
+		res, _, err = arena.Run(cfg, bots)
+	} else {
+		var rec *replay.Replay
+		if rec, err = replay.Record(cfg, bots); err == nil {
+			res = rec.Result
+			data := rec.Bytes()
+			replayHash = replay.Hash(data)
+			err = os.WriteFile(replayPath, data, 0o644)
+		}
+	}
 	if err != nil {
 		fmt.Fprintf(stderr, "pit run: %v\n", err)
 		return 1
 	}
 	var out []byte
 	if asJSON {
-		out, err = runJSON(cfg, files, bots, res)
+		out, err = runJSON(cfg, files, bots, res, replayHash)
 	} else {
-		out = runText(cfg, files, bots, res)
+		out = runText(cfg, files, bots, res, replayHash)
 	}
 	if err == nil {
 		_, err = stdout.Write(out)
@@ -118,14 +137,14 @@ func entryAddress(cfg arena.Config, start, entry int) int {
 }
 
 // runText formats the result as text: a configuration line, one line per bot, then
-// cycles, survivors and the result.
-func runText(cfg arena.Config, files []string, bots []arena.Bot, res arena.Result) []byte {
+// cycles, survivors and the result, and the replay hash if a replay was written.
+func runText(cfg arena.Config, files []string, bots []arena.Bot, res arena.Result, replayHash string) []byte {
 	var b bytes.Buffer
 	fmt.Fprintf(&b, "match: %d bots, seed %d, core size %d, cycle limit %d, max processes %d, min separation %d\n",
 		len(bots), cfg.Seed, cfg.CoreSize, cfg.CycleLimit, cfg.MaxProcesses, cfg.MinSeparation)
 	for i, bot := range bots {
 		start := res.Placement.Starts[i]
-		fmt.Fprintf(&b, "bot %d: %s (length %d, start %d, entry %d)\n",
+		fmt.Fprintf(&b, "bot %d: %s (length %d, start %d, entry_address %d)\n",
 			i+1, files[i], len(bot.Cells), start, entryAddress(cfg, start, bot.Entry))
 	}
 	fmt.Fprintf(&b, "cycles: %d\n", res.Cycles)
@@ -149,6 +168,9 @@ func runText(cfg arena.Config, files []string, bots []arena.Bot, res arena.Resul
 		}
 		b.WriteString("\n")
 	}
+	if replayHash != "" {
+		fmt.Fprintf(&b, "replay: %s\n", replayHash)
+	}
 	return b.Bytes()
 }
 
@@ -159,15 +181,15 @@ type jsonConfig struct {
 	CycleLimit    int    `json:"cycle_limit"`
 	MaxProcesses  int    `json:"max_processes"`
 	MinSeparation int    `json:"min_separation"`
-	Seed          uint64 `json:"seed"`
+	Seed          string `json:"seed"` // a decimal string: JavaScript numbers lose precision above 2^53
 }
 
 type jsonBot struct {
-	ID     int    `json:"id"`
-	File   string `json:"file"`
-	Length int    `json:"length"`
-	Start  int    `json:"start"`
-	Entry  int    `json:"entry"`
+	ID           int    `json:"id"`
+	File         string `json:"file"`
+	Length       int    `json:"length"`
+	Start        int    `json:"start"`
+	EntryAddress int    `json:"entry_address"`
 }
 
 type jsonResult struct {
@@ -178,18 +200,21 @@ type jsonResult struct {
 	Outcome   string     `json:"outcome"`
 	Winner    uint32     `json:"winner"`
 	Tied      []uint32   `json:"tied"`
+	// ReplayHash is present only when --replay was given.
+	ReplayHash string `json:"replay_hash,omitempty"`
 }
 
-func runJSON(cfg arena.Config, files []string, bots []arena.Bot, res arena.Result) ([]byte, error) {
+func runJSON(cfg arena.Config, files []string, bots []arena.Bot, res arena.Result, replayHash string) ([]byte, error) {
 	out := jsonResult{
-		Config: jsonConfig{cfg.CoreSize, cfg.CycleLimit, cfg.MaxProcesses, cfg.MinSeparation, cfg.Seed},
+		Config: jsonConfig{cfg.CoreSize, cfg.CycleLimit, cfg.MaxProcesses, cfg.MinSeparation, strconv.FormatUint(cfg.Seed, 10)},
 		Bots:   make([]jsonBot, len(bots)),
 		Cycles: res.Cycles,
 		// Empty lists, not null.
-		Survivors: append([]uint32{}, res.Survivors...),
-		Outcome:   res.Outcome.String(),
-		Winner:    res.Winner,
-		Tied:      append([]uint32{}, res.Tied...),
+		Survivors:  append([]uint32{}, res.Survivors...),
+		Outcome:    res.Outcome.String(),
+		Winner:     res.Winner,
+		Tied:       append([]uint32{}, res.Tied...),
+		ReplayHash: replayHash,
 	}
 	for i, bot := range bots {
 		start := res.Placement.Starts[i]

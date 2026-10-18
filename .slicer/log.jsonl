@@ -326,6 +326,18 @@
 {"when": "2026-10-18T14:26:37Z", "item": "S08", "action": "status", "from": "started", "to": "done", "note": "Added asm.Disassemble (moved from cmd/pit); pit asm prints it; round-trip tests (cells, spec examples, FuzzRoundTrip 60s) pass; C73, C74 recorded", "by": "Jon R"}
 {"when": "2026-10-18T14:28:35Z", "item": "S17", "action": "note", "from": "", "to": "", "note": "From S08 (low): asm.md bomber listing is tagged text and cov", "by": "Jon R"}
 {"when": "2026-10-18T14:43:22Z", "item": "S11", "action": "note", "from": "", "to": "", "note": "Owner 2026-10-18 (amends C76/C77): in pit run JSON and the r", "by": "Jon R"}
+{"when": "2026-10-18T14:44:20Z", "item": "S11", "action": "status", "from": "open", "to": "started", "note": "", "by": "Jon R"}
+{"when": "2026-10-18T14:59:57Z", "item": "C83", "action": "catalog", "from": "", "to": "Replay file: hand-written canonical JSON lines; the reader accepts only the writer's bytes (S11)", "note": "add"}
+{"when": "2026-10-18T14:59:57Z", "item": "C84", "action": "catalog", "from": "", "to": "Replay v1 vocabulary: header, load, c/w/s/d body lines, end; cycles without events have no line (S11)", "note": "add"}
+{"when": "2026-10-18T14:59:57Z", "item": "C85", "action": "catalog", "from": "", "to": "Replay v1 has no snapshot lines; seeking is the viewer's job (S11)", "note": "add"}
+{"when": "2026-10-18T14:59:57Z", "item": "C86", "action": "catalog", "from": "", "to": "Replay hashes: SHA-256 hex of the file bytes; bot hash over entry offset plus raw assembled cells (S11)", "note": "add"}
+{"when": "2026-10-18T14:59:58Z", "item": "C87", "action": "catalog", "from": "", "to": "Replay API: replay.Record, Read, Bytes, Hash, BotHash and Player (S11)", "note": "add"}
+{"when": "2026-10-18T14:59:58Z", "item": "C88", "action": "catalog", "from": "", "to": "arena.RunObserved: per-cycle hook with the live core; Run is built on it (S11)", "note": "add"}
+{"when": "2026-10-18T14:59:58Z", "item": "C89", "action": "catalog", "from": "", "to": "pit run --replay FILE writes the replay and prints its hash: 'replay: <hash>' or JSON replay_hash (S11)", "note": "add"}
+{"when": "2026-10-18T14:59:58Z", "item": "C76", "action": "catalog", "from": "", "to": "body", "note": "edit"}
+{"when": "2026-10-18T14:59:58Z", "item": "C77", "action": "catalog", "from": "", "to": "body", "note": "edit"}
+{"when": "2026-10-18T15:07:43Z", "item": "S11", "action": "note", "from": "", "to": "", "note": "Review (round 1) stopped, not PASS: (1) main moved (S10 merg", "by": "Jon R"}
+{"when": "2026-10-18T15:08:52Z", "item": "S11", "action": "note", "from": "", "to": "", "note": "Owner 2026-10-18: replay format adds a per-step execute reco", "by": "Jon R"}
 {"when": "2026-10-18T14:44:14Z", "item": "S10", "action": "status", "from": "open", "to": "started", "note": "", "by": "Jon R"}
 {"when": "2026-10-18T14:55:06Z", "item": "C80", "action": "catalog", "from": "", "to": "Starter golden table shape (S10)", "note": "add"}
 {"when": "2026-10-18T14:55:06Z", "item": "C81", "action": "catalog", "from": "", "to": "Starter bot designs and parameters (S10)", "note": "add"}
@@ -334,6 +346,13 @@
 {"when": "2026-10-18T15:02:42Z", "item": "S10", "action": "note", "from": "", "to": "", "note": "S10 closing note. Four original starter bots (bots/imp.s, dw", "by": "Jon R"}
 {"when": "2026-10-18T15:02:42Z", "item": "S10", "action": "status", "from": "started", "to": "done", "note": "S10 done: four original starter bots, bots_test.go and golden_test.go (18 hand-reviewed rows, independent simulator cross-check); decisions C80-C82, C90; reasoning in the item note", "by": "Jon R"}
 {"when": "2026-10-18T15:03:14Z", "item": "S13", "action": "note", "from": "", "to": "", "note": "From S10: starter bot balance caveats for tournament scoring", "by": "Jon R"}
+{"when": "2026-10-18T15:15:34Z", "item": "C84", "action": "catalog", "from": "", "to": "title,body", "note": "edit"}
+{"when": "2026-10-18T15:15:34Z", "item": "C88", "action": "catalog", "from": "", "to": "body", "note": "edit"}
+{"when": "2026-10-18T15:15:34Z", "item": "C87", "action": "catalog", "from": "", "to": "body", "note": "edit"}
+{"when": "2026-10-18T15:27:26Z", "item": "S11", "action": "status", "from": "started", "to": "done", "note": "Replay v1 done: versioned JSON lines (docs/spec/replay.md) with header, load, a c line per cycle, an x line per step (silent steps included) and w/s/d events, end line; hand-written canonical writer and strict reader (Read then Bytes is byte-identical), Player rebuilds core, live counts and executed addresses; hashes SHA-256 hex. Pinned to the real starter bots: golden fixture bots/imp.s vs bots/dwarf.s --seed 1 --cycle-limit 40 hash 24f20dbf52fa877d9c4c92cfcf109593a45540ebe2d4fcbc52389f06c4ecc26e; default-limit hash (cycle 5880, 782675 bytes) 0c7024334a7c20fe7f74b39b97d0c9693980d41f0351f3422846c3e2caeac831, reproduced by pit run twice with cmp identical and shasum; small fixture win_death.jsonl a873bbed14b1dfa66343725f004024b0ff4ced141de5e931e54c8d02ecd1f4f3. Tests: golden, full hash, equivalence at every cycle (core and live steps), read-error table, unknown version, deterministic file, FuzzRead (30s clean); 103 mutations killed. pit run --replay FILE, seed as decimal string and entry_address amendments to C76/C77 done. Decisions C83-C89 (C84, C87, C88 amended). Checks: go test ./..., go vet, gofmt -l cmd internal, go build, slicer check all pass.", "by": "Jon R"}
+{"when": "2026-10-18T15:27:57Z", "item": "S12", "action": "note", "from": "", "to": "", "note": "From S11: an x record names only the process that stepped, s", "by": "Jon R"}
+{"when": "2026-10-18T15:27:58Z", "item": "S15", "action": "note", "from": "", "to": "", "note": "From S11: an x record names only the process that stepped, s", "by": "Jon R"}
+{"when": "2026-10-18T15:27:58Z", "item": "S17", "action": "note", "from": "", "to": "", "note": "From S11 (later): replay read.go:20-25 duplicates arena's pr", "by": "Jon R"}
 {"when": "2026-10-18T15:04:45Z", "item": "S13", "action": "status", "from": "open", "to": "started", "note": "", "by": "Jon R"}
 {"when": "2026-10-18T15:12:42Z", "item": "C91", "action": "catalog", "from": "", "to": "Tournament scoring: win 3, tie 1 each, loss 0; rank by points, wins, name (S13)", "note": "add"}
 {"when": "2026-10-18T15:12:42Z", "item": "C92", "action": "catalog", "from": "", "to": "Tournament pairings: every pair in both orders each round, one seed per round (S13)", "note": "add"}

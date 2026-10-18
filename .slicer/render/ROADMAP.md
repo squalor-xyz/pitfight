@@ -280,11 +280,11 @@ Kebab-case flag per match.md config field, defaults from the spec; flags and bot
 
 ### C76 pit run text output: config line, one line per bot, cycles, survivors, result (S09)
 
-Plain line-oriented text with the fields of match.md section 8 plus each bot's file, length, start and entry address, so a human and grep can read it; byte-identical for the same input (C16).
+Plain line-oriented text with the fields of match.md section 8 plus each bot's file, length, start and entry_address (the absolute address Norm(start + entry offset) of its first process, not the offset e of match.md section 5), so a human and grep can read it; byte-identical for the same input (C16). Owner amendment 2026-10-18: the field was called 'entry'; it is entry_address (done in S11). With --replay S11 adds a last line 'replay: <hash>' (see the S11 record).
 
 ### C77 pit run --json: one JSON line with config, bots, cycles, survivors, outcome, winner, tied (S09)
 
-A single line of fixed-order snake_case JSON with lists never null is the simplest machine-readable form for the later agent harness (C09); seed is a JSON number.
+A single line of fixed-order snake_case JSON with lists never null is the simplest machine-readable form for the later agent harness (C09). Owner amendment 2026-10-18 (done in S11): seed is a decimal string, not a JSON number, because JavaScript loses precision above 2^53; the bot field 'entry' is renamed entry_address (the absolute address, not the offset). With --replay a last field replay_hash is added.
 
 ### C78 pit run exit codes and error output (S09)
 
@@ -301,6 +301,34 @@ Disassemble takes the Program (cells and entry) so the ORG line survives the rou
 ### C74 isa.md section 8 listings are asm blocks without the N: prefix
 
 The three starter-bot listings in docs/spec/isa.md are tagged asm and the N: prefix moved into the trailing comment (; N: text), so TestRoundTripSpecExamples can extract and assemble them; the cells are unchanged.
+
+### C83 Replay file: hand-written canonical JSON lines; the reader accepts only the writer's bytes (S11)
+
+S11 implementer decision under C35 (docs/spec/replay.md sections 1, 4, 8). The writer appends integers with strconv and fixed words by hand, so no map, no encoding/json and no string escaping touch the bytes (C36); the only strings are fixed words, the decimal seed and lowercase-hex hashes. The reader decodes each line with encoding/json for validation, then requires the line to equal what the writer would write for the parsed values, so Read then Write returns the same bytes and the file hash identifies the match. Line order: header, one load line per bot, cycle groups, end. Reason: byte stability across Go versions and one accepted spelling per replay; the cost is that hand-edited replays with other spacing are refused.
+
+### C84 Replay v1 vocabulary: header, load, c/x/w/s/d body lines, end; a c line for every cycle and an x line for every step (S11)
+
+S11 implementer decision under C35 (replay.md section 4), amended by the owner's 2026-10-18 per-step execute record. Header: version, config (snake_case, seed a decimal string per the owner's C77 amendment), bots with id, hash, length, start, entry_address. load: the bot's Norm'd cells, so the file holds the initial core (C79 left the initial state to the replay). Body: c {n} for EVERY cycle 1..cycles (a cycle always has a step, since the match runs only while two bots are live); inside it one x {b,pc} line for EVERY step, silent ones (JMP, NOP, skipping tests) included, in ascending bot id; the step's events follow its x line and carry no bot or pc: w {a,c:[six ints]}, s {a}, d (no fields; its address is the step's pc), with at most one s or d and it last. A cell is [opcode,modifier,a_mode,a_value,b_mode,b_value] as isa codes, the writer being the step's bot. end: cycles (equal to the last c), survivors, outcome, winner, tied. All numbers stay below 2^31. The reader also checks that a bot steps only while its process count (1 + s - d) is above 0 and that survivors are the bots with a count above 0. Reason: compact (C07) and JS-safe (C19); a viewer rebuilds the core and shows the execution pointers of every cycle (S12, S15) without re-simulating; dropping b and pc from events removes redundancy. Size: the default-limit imp-vs-dwarf replay (5880 cycles) is 782675 bytes, about 133 bytes per cycle for two bots.
+
+### C85 Replay v1 has no snapshot lines; seeking is the viewer's job (S11)
+
+S11 implementer decision under C35 (replay.md section 5). A viewer that wants to jump to a cycle keeps its own checkpoints while reading the file; a snapshot every K cycles would add up to CORESIZE cells per snapshot and would be a format change. Adding snapshot lines later is a new version number (replay.md section 7), with no optional fields in v1. Reason: smallest format that satisfies the slice; a later version can add them if a viewer needs it.
+
+### C86 Replay hashes: SHA-256 hex of the file bytes; bot hash over entry offset plus raw assembled cells (S11)
+
+S11 implementer decision under C35 (replay.md section 6). Replay hash: SHA-256 of the whole file including the final line feed, lowercase hex. Bot hash: SHA-256 of the entry offset (4 bytes big endian) then 12 bytes per assembled cell (opcode, modifier, a_mode, a_value int32, b_mode, b_value int32, big endian; writer excluded), using the raw signed values of C69 so the hash does not depend on CORESIZE or placement. Readers treat the bot hash as opaque because the load lines are normalized. Reason: the slice asked for a stated encoding over the assembled cells; raw values keep a bot's identity independent of the match configuration.
+
+### C87 Replay API: replay.Record, Read, Bytes, Hash, BotHash and Player (S11)
+
+S11 implementer decision under C35. Record(cfg, bots) runs the match and returns a Replay holding the config, bots as loaded, cycles (each with its []arena.Step) and the result; Bytes/Write give the file, Hash(data) and BotHash the hashes; Read(r) validates the whole file and returns a nil replay on any error, with *VersionError for an unknown version (message names the version); Player (NewPlayer, AdvanceTo, Core, Cycle, Steps, Live) rebuilds the core, the live process counts and the executed addresses of the current cycle by applying the file forward, which is what TestReplayEquivalence checks against the live core and live steps. Reason: one in-memory form shared by the pit run writer and later viewers, with no re-simulation.
+
+### C88 arena.RunObserved: per-cycle hook with the live core; Run is built on it (S11)
+
+S11 implementer decision under C35, following the S09 note on C79 and amended for the per-step execute record. RunObserved(cfg, bots, observe) calls observe(0, core, nil) after loading and observe(c, core, steps) after each cycle with that cycle's []arena.Step in ascending bot id: Step{Bot, PC, Events}, PC being the address the step executed (the front of the bot's queue before it) and Events the step's VM events, empty for a silent step. The buffers are reused; observe must not modify the core or keep anything past the call. Run is RunObserved collecting the events, so its results and events are unchanged. To read the pc of a step the VM gets Queue.Front() (non-test vm source, one line). Reason: a flat event list cannot give cycle boundaries or the pc of steps that emit no event, and the equivalence test needs the live core and live steps at every cycle.
+
+### C89 pit run --replay FILE writes the replay and prints its hash: 'replay: <hash>' or JSON replay_hash (S11)
+
+S11 implementer decision under C35. The flag name --replay FILE follows the kebab-case flags of C75. With it, pit run records the match, writes FILE (a refused match writes nothing; a write error exits 1 with empty stdout) and adds the replay hash: a last text line 'replay: <64 hex>' and, with --json, a last field replay_hash; without the flag both are absent. Reason: C16 asks for the same result and replay hash on every run; printing the hash lets a script compare runs without shasum.
 
 ### C80 Starter golden table shape (S10)
 
@@ -392,39 +420,39 @@ PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first 
 
 *Retired: Settled by owner decision C31 (2026-10-15)..*
 
-21 items · — 6 · done 11 · later 4
+21 items · — 5 · done 12 · later 4
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
 | v0.1.0 | | | | | | | |
-| 1 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | — |
-| 2 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | — |
-| 3 | [S14](slices/S14.md) | Optional Go WASM build for live matches | S | 1 | vm, web | PROJECT.md Milestone 7, Stack recommendation | — |
-| 4 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | — |
-| 5 | [S16](slices/S16.md) | Check licensing of Redcode standards and warriors | S | 1 | docs | PROJECT.md Dependency / licensing notes | — |
-| 6 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria · retired decision C33 | — |
+| 1 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | — |
+| 2 | [S14](slices/S14.md) | Optional Go WASM build for live matches | S | 1 | vm, web | PROJECT.md Milestone 7, Stack recommendation | — |
+| 3 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | — |
+| 4 | [S16](slices/S16.md) | Check licensing of Redcode standards and warriors | S | 1 | docs | PROJECT.md Dependency / licensing notes | — |
+| 5 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria · retired decision C33 | — |
 | Later tier | | | | | | | |
-| 7 | [S18](slices/S18.md) | LLM agent harness | L | 3 | harness | PROJECT.md Feature tiers: Later | later |
-| 8 | [S19](slices/S19.md) | Persistent hill of ranked bots | M | 2 | tourney | PROJECT.md Feature tiers: Later | later |
-| 9 | [S20](slices/S20.md) | Host the web visualizer on squalor.xyz | S | 2 | web | PROJECT.md Feature tiers: Later | later |
-| 10 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
+| 6 | [S18](slices/S18.md) | LLM agent harness | L | 3 | harness | PROJECT.md Feature tiers: Later | later |
+| 7 | [S19](slices/S19.md) | Persistent hill of ranked bots | M | 2 | tourney | PROJECT.md Feature tiers: Later | later |
+| 8 | [S20](slices/S20.md) | Host the web visualizer on squalor.xyz | S | 2 | web | PROJECT.md Feature tiers: Later | later |
+| 9 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
 
 ---
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
 | Decisions | | | | | | | |
-| 11 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions · retired decision C33 | done |
+| 10 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions · retired decision C33 | done |
 | v1 foundation | | | | | | | |
-| 12 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks · retired decision C33 | done |
-| 13 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |
-| 14 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | done |
+| 11 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks · retired decision C33 | done |
+| 12 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |
+| 13 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | done |
 | v1 core | | | | | | | |
-| 15 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | done |
-| 16 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | done |
+| 14 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | done |
+| 15 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | done |
 | v0.1.0 | | | | | | | |
-| 17 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | done |
-| 18 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | done |
-| 19 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | done |
-| 20 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | done |
+| 16 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | done |
+| 17 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | done |
+| 18 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | done |
+| 19 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | done |
+| 20 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | done |
 | 21 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | done |
