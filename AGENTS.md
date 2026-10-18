@@ -28,7 +28,7 @@ a shared circular memory arena. Go, standard library only.
   it handles usage, `pit asm` and `pit run`.
 - `internal/isa`, `asm`, `vm`, `arena`, `replay`, `tourney`, `tui`: the
   packages, one slice at a time. Only `internal/isa` (instruction types),
-  `internal/asm` (the assembler), `internal/vm` (core memory, operand
+  `internal/asm` (the assembler and disassembler), `internal/vm` (core memory, operand
   evaluation, opcode execution, process queues and events) and `internal/arena`
   (the seeded generator, placement and the match loop) exist so far.
 - `web/`: the web viewer. `docs/spec/`: the ISA, assembly and format specs
