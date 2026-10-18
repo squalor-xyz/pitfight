@@ -25,16 +25,16 @@ a shared circular memory arena. Go, standard library only.
 ## Layout
 
 - `cmd/pit/`: `main`. `run(args, stdout, stderr)` returns the exit code; today
-  it handles usage, `pit asm` and `pit run`.
+  it handles usage, `pit asm`, `pit run` and `pit tourney`.
 - `internal/isa`, `asm`, `vm`, `arena`, `replay`, `tourney`, `tui`: the
   packages, one slice at a time. Only `internal/isa` (instruction types),
   `internal/asm` (the assembler and disassembler), `internal/vm` (core memory, operand
   evaluation, opcode execution, process queues and events), `internal/arena`
-  (the seeded generator, placement and the match loop) and `internal/replay` (the
+  (the seeded generator, placement and the match loop), `internal/replay` (the
   replay file: writer, strict reader, hashes and the player that rebuilds the core)
-  exist so far.
+  and `internal/tourney` (round-robin tournaments and the scoreboard) exist so far.
 - `web/`: the web viewer. `docs/spec/`: the ISA, assembly and format specs
-  (`isa.md`, `asm.md`, `match.md`, `replay.md`). `bots/`: the starter bots (`imp.s`, `dwarf.s`, `replicator.s`, `scanner.s`). `web/` does not exist yet.
+  (`isa.md`, `asm.md`, `match.md`, `replay.md`, `tourney.md`). `bots/`: the starter bots (`imp.s`, `dwarf.s`, `replicator.s`, `scanner.s`). `web/` does not exist yet.
 - `scripts/env.sh`: Go cache and temp setup (see below).
   `scripts/build-release.sh`: release archives. `.github/workflows/`: CI and
   release.

@@ -34,9 +34,11 @@ Early development. What exists today:
 - `bots/`: four original starter bots (`imp.s`, `dwarf.s`, `replicator.s`,
   `scanner.s`); golden tests in `internal/arena` pin their match results. Try
   `pit run bots/imp.s bots/dwarf.s --seed 1`.
+- `internal/tourney`: round-robin tournaments over many seeds on parallel workers, with
+  a reproducible scoreboard ([docs/spec/tourney.md](docs/spec/tourney.md)). Try
+  `pit tourney bots/ --rounds 100`.
 
-Planned: round-robin tournaments
-(`pit tourney`), and terminal and web replay viewers (`pit view`).
+Planned: terminal and web replay viewers (`pit view`).
 
 ## Build and test
 
@@ -61,9 +63,9 @@ locally, run `scripts/build-release.sh v0.1.0 dist`.
 ## Layout
 
 - `cmd/pit/`: the `pit` command.
-- `internal/`: the packages (`isa`, `asm`, `vm`, `arena` and `replay` so far).
+- `internal/`: the packages (`isa`, `asm`, `vm`, `arena`, `replay` and `tourney` so far).
 - `bots/`: the starter bots.
-- `docs/spec/`: the ISA, assembly, match and replay specs.
+- `docs/spec/`: the ISA, assembly, match, replay and tournament specs.
 - `scripts/env.sh`: Go cache and temp setup. `scripts/build-release.sh`: release
   archives.
 - `.github/workflows/`: CI and tagged releases.
