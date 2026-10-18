@@ -326,3 +326,11 @@
 {"when": "2026-10-18T14:26:37Z", "item": "S08", "action": "status", "from": "started", "to": "done", "note": "Added asm.Disassemble (moved from cmd/pit); pit asm prints it; round-trip tests (cells, spec examples, FuzzRoundTrip 60s) pass; C73, C74 recorded", "by": "Jon R"}
 {"when": "2026-10-18T14:28:35Z", "item": "S17", "action": "note", "from": "", "to": "", "note": "From S08 (low): asm.md bomber listing is tagged text and cov", "by": "Jon R"}
 {"when": "2026-10-18T14:43:22Z", "item": "S11", "action": "note", "from": "", "to": "", "note": "Owner 2026-10-18 (amends C76/C77): in pit run JSON and the r", "by": "Jon R"}
+{"when": "2026-10-18T14:44:14Z", "item": "S10", "action": "status", "from": "open", "to": "started", "note": "", "by": "Jon R"}
+{"when": "2026-10-18T14:55:06Z", "item": "C80", "action": "catalog", "from": "", "to": "Starter golden table shape (S10)", "note": "add"}
+{"when": "2026-10-18T14:55:06Z", "item": "C81", "action": "catalog", "from": "", "to": "Starter bot designs and parameters (S10)", "note": "add"}
+{"when": "2026-10-18T14:55:06Z", "item": "C82", "action": "catalog", "from": "", "to": "Ship bots/ in release archives (S10)", "note": "add"}
+{"when": "2026-10-18T15:00:34Z", "item": "C90", "action": "catalog", "from": "", "to": "Starter scanner lap blind spot (S10)", "note": "add"}
+{"when": "2026-10-18T15:02:42Z", "item": "S10", "action": "note", "from": "", "to": "", "note": "S10 closing note. Four original starter bots (bots/imp.s, dw", "by": "Jon R"}
+{"when": "2026-10-18T15:02:42Z", "item": "S10", "action": "status", "from": "started", "to": "done", "note": "S10 done: four original starter bots, bots_test.go and golden_test.go (18 hand-reviewed rows, independent simulator cross-check); decisions C80-C82, C90; reasoning in the item note", "by": "Jon R"}
+{"when": "2026-10-18T15:03:14Z", "item": "S13", "action": "note", "from": "", "to": "", "note": "From S10: starter bot balance caveats for tournament scoring", "by": "Jon R"}

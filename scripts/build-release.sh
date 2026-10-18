@@ -5,7 +5,8 @@
 # platform plus SHA256SUMS into OUTDIR. Run from anywhere, by path:
 #   scripts/build-release.sh VERSION OUTDIR
 # VERSION (for example v0.1.0) only names the archives. Each archive holds the
-# pit binary, LICENSE, NOTICE and README.md. Used by .github/workflows/release.yml.
+# pit binary, LICENSE, NOTICE, README.md and the starter bots in bots/. Used by
+# .github/workflows/release.yml.
 
 set -euo pipefail
 
@@ -36,6 +37,7 @@ for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 wi
 	(cd "$root" && CGO_ENABLED=0 GOOS=$goos GOARCH=$goarch \
 		go build -trimpath -ldflags='-s -w' -o "$stage/$name/$bin" ./cmd/pit)
 	cp "$root/LICENSE" "$root/NOTICE" "$root/README.md" "$stage/$name/"
+	cp -R "$root/bots" "$stage/$name/bots"
 	if [ "$goos" = windows ]; then
 		(cd "$stage" && zip -qr "$outdir/$name.zip" "$name")
 	else
