@@ -100,8 +100,10 @@ func (m Mode) String() string {
 }
 
 // Cell is one core cell (docs/spec/isa.md section 2). AValue and BValue are
-// stored values in [0, CORESIZE). Writer is the id of the last bot that wrote the
-// cell, 0 if none; it is metadata and not part of the instruction.
+// stored values in [0, CORESIZE) for a cell in a core; the assembler emits raw
+// signed values (C69) and the arena's loader reduces them with Norm when it places
+// a bot. Writer is the id of the last bot that wrote the cell, 0 if none; it is
+// metadata and not part of the instruction.
 type Cell struct {
 	Opcode   Opcode
 	Modifier Modifier

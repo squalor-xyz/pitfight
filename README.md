@@ -21,10 +21,13 @@ Early development. What exists today:
   and column.
 - `internal/vm`: core memory, operand evaluation, opcode execution, process queues
   and events.
+- `internal/arena`: seeded placement, round-robin scheduling, the cycle limit and the
+  result and tie rule of a match.
 - `pit`: the CLI. Today it prints usage and has `pit asm bot.s`, which assembles a bot
-  and prints the cells.
+  and prints the cells, and `pit run a.s b.s --seed 1`, which runs a match and prints
+  the result (`--json` for one line of JSON; `pit run` with no files lists the flags).
 
-Planned: matches (`pit run`), round-robin tournaments
+Planned: round-robin tournaments
 (`pit tourney`), a replay format, and terminal and web replay viewers (`pit view`).
 
 ## Build and test
@@ -50,7 +53,7 @@ file. To build the same archives locally, run
 ## Layout
 
 - `cmd/pit/`: the `pit` command.
-- `internal/`: the packages (`isa`, `asm` and `vm` so far).
+- `internal/`: the packages (`isa`, `asm`, `vm` and `arena` so far).
 - `docs/spec/`: the ISA, assembly and match specs.
 - `scripts/env.sh`: Go cache and temp setup. `scripts/build-release.sh`: release
   archives.
