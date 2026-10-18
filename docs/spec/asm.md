@@ -200,6 +200,13 @@ func Assemble(name string, src []byte) (Program, error)
 `Col`, `Msg`; `Error()` is the `file:line:col: message` text) and its `Line` and `Col`
 are at least 1. On error the `Program` is the zero value.
 
+```text
+func Disassemble(p Program) []byte
+```
+
+`Disassemble` formats a program as source: the listing of section 9. `Cells` must be
+valid and `Entry` within them. See *Disassembly* in section 9.
+
 ## 9. `pit asm`
 
 ```text
@@ -239,6 +246,23 @@ output, the message is written to standard error, and the exit code is 1. An
 assembly error is printed as `file:line:col: message`. A wrong argument count or an
 argument starting with `-` is a usage error: exit code 2 and
 `usage: pit asm <file>` on standard error.
+
+### Disassembly
+
+The listing is the disassembly: `asm.Disassemble(p)` returns exactly the bytes
+`pit asm` prints for `p`, and there is no other formatter. It is the debugging view
+of a program, with every default made explicit and every label replaced by its
+relative offset. It is not a pretty printer: it keeps no labels, comments or layout
+beyond the format above.
+
+Disassembly and assembly round-trip. For a valid program `p`, `Assemble` of
+`Disassemble(p)` gives the same `Cells` and the same `Entry`, with one exception: the
+last-writer id (`Cell.Writer`) is not part of the source, so `Disassemble` ignores it
+and the assembled cells always have `Writer` 0. Cell values are printed as they are,
+over the whole `int32` range, never reduced modulo `CORESIZE`. The disassembly of a
+reassembled listing is the same text. There is no separate `pit` subcommand and no
+binary cell format: `pit asm` is the command-line entry point, and the Go function
+is the entry point for Go code that holds cells.
 
 ## 10. More examples
 

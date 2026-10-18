@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/squalor-xyz/pitfight/internal/asm"
-	"github.com/squalor-xyz/pitfight/internal/isa"
 )
 
 // bomberSrc and bomberListing are the example of docs/spec/asm.md section 9.
@@ -147,35 +146,45 @@ func TestAsmCommandTestdata(t *testing.T) {
 	}
 }
 
-// TestListingReassembles: the listing of any cell sequence assembles back to the
-// same cells and entry offset (docs/spec/asm.md section 9).
-func TestListingReassembles(t *testing.T) {
-	var p asm.Program
-	i := int32(0)
-	for _, op := range isa.Opcodes {
-		for _, mod := range isa.Modifiers {
-			for _, am := range isa.Modes {
-				for _, bm := range isa.Modes {
-					p.Cells = append(p.Cells, isa.Cell{Opcode: op, Modifier: mod,
-						AMode: am, AValue: i*7 - 20000, BMode: bm, BValue: -i})
-					i++
-				}
-			}
-		}
+// TestAsmCommandRoundTrip: pit asm is the disassembly entry point
+// (docs/spec/asm.md section 9). Its output on a file is exactly asm.Disassemble of
+// the assembled program, and assembles back to the same cells and entry offset.
+func TestAsmCommandRoundTrip(t *testing.T) {
+	srcs := map[string]string{
+		"bomber": bomberSrc,
+		"entry and every mode": `
+        ORG b
+        NOP
+b:      MOV.X  #-1, {2
+        SPL.BA <3, >-4
+        DJN.I  @1, *2
+        SEQ.A  }5, $0
+        DAT    #-2147483648, #2147483647
+`,
 	}
-	p.Cells = append(p.Cells, isa.Cell{Opcode: isa.OpDAT, Modifier: isa.ModF, AValue: -2147483648, BValue: 2147483647})
-	p.Entry = len(p.Cells) - 1
-	back, err := asm.Assemble("listing", listing(p))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if back.Entry != p.Entry || !slices.Equal(back.Cells, p.Cells) {
-		for j := range p.Cells {
-			if j >= len(back.Cells) || back.Cells[j] != p.Cells[j] {
-				t.Fatalf("cell %d: got %+v, want %+v (entry %d, want %d)", j, back.Cells[j], p.Cells[j], back.Entry, p.Entry)
+	for name, src := range srcs {
+		t.Run(name, func(t *testing.T) {
+			path := writeSrc(t, "bot.s", src)
+			prog, err := asm.Assemble(path, []byte(src))
+			if err != nil {
+				t.Fatal(err)
 			}
-		}
-		t.Fatalf("entry %d, want %d", back.Entry, p.Entry)
+			var stdout, stderr bytes.Buffer
+			if code := run([]string{"asm", path}, &stdout, &stderr); code != 0 {
+				t.Fatalf("exit code = %d, stderr %q", code, stderr.String())
+			}
+			if want := asm.Disassemble(prog); !bytes.Equal(stdout.Bytes(), want) {
+				t.Errorf("stdout = %q, want asm.Disassemble output %q", stdout.String(), want)
+			}
+			// The printed source, written to a file, reassembles to the same program.
+			back, err := asm.Assemble("listing", stdout.Bytes())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if back.Entry != prog.Entry || !slices.Equal(back.Cells, prog.Cells) {
+				t.Errorf("reassembled %+v entry %d, want %+v entry %d", back.Cells, back.Entry, prog.Cells, prog.Entry)
+			}
+		})
 	}
 }
 

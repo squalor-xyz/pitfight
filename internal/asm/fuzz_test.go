@@ -78,3 +78,62 @@ func FuzzAssemble(f *testing.F) {
 		}
 	})
 }
+
+// cellBytes is the size of one cell in the byte encoding that decodeCells reads.
+const cellBytes = 13
+
+// decodeCells turns arbitrary bytes into valid cells: opcode, modifier and the two
+// modes reduced into range, two little-endian int32 operand values and a last-writer
+// id. Trailing bytes short of a whole cell are ignored.
+func decodeCells(data []byte) []isa.Cell {
+	var cells []isa.Cell
+	for ; len(data) >= cellBytes; data = data[cellBytes:] {
+		le := func(b []byte) int32 {
+			return int32(uint32(b[0]) | uint32(b[1])<<8 | uint32(b[2])<<16 | uint32(b[3])<<24)
+		}
+		cells = append(cells, isa.Cell{
+			Opcode:   isa.Opcodes[int(data[0])%len(isa.Opcodes)],
+			Modifier: isa.Modifiers[int(data[1])%len(isa.Modifiers)],
+			AMode:    isa.Modes[int(data[2])%len(isa.Modes)],
+			BMode:    isa.Modes[int(data[3])%len(isa.Modes)],
+			AValue:   le(data[4:8]),
+			BValue:   le(data[8:12]),
+			Writer:   uint32(data[12]),
+		})
+	}
+	return cells
+}
+
+// FuzzRoundTrip: arbitrary bytes decoded into valid cells and an entry offset
+// disassemble to source that assembles back to the same cells (except the
+// last-writer id) and entry, and disassembling again gives the same text.
+func FuzzRoundTrip(f *testing.F) {
+	f.Add([]byte{}, uint32(0))
+	f.Add([]byte{1, 6, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0}, uint32(0))                // imp
+	f.Add([]byte{0, 4, 0, 7, 0xff, 0xff, 0xff, 0x7f, 0, 0, 0, 0x80, 9}, uint32(0)) // int32 extremes
+	f.Add([]byte{14, 2, 3, 4, 1, 0, 0, 0, 2, 0, 0, 0, 1, 10, 3, 5, 6, 3, 0, 0, 0, 0xfc, 255, 255, 255, 0}, uint32(1))
+	f.Fuzz(func(t *testing.T, data []byte, entry uint32) {
+		cells := decodeCells(data)
+		if len(cells) == 0 {
+			return
+		}
+		p := Program{Cells: cells, Entry: int(entry % uint32(len(cells)))}
+		src := Disassemble(p)
+		back, err := Assemble("fuzz.s", src)
+		if err != nil {
+			t.Fatalf("reassembly failed: %v\n%s", err, src)
+		}
+		if back.Entry != p.Entry || len(back.Cells) != len(cells) {
+			t.Fatalf("entry %d with %d cells, want %d with %d\n%s", back.Entry, len(back.Cells), p.Entry, len(cells), src)
+		}
+		for i, want := range cells {
+			want.Writer = 0
+			if back.Cells[i] != want {
+				t.Fatalf("cell %d = %+v, want %+v\n%s", i, back.Cells[i], want, src)
+			}
+		}
+		if again := Disassemble(back); string(again) != string(src) {
+			t.Fatalf("second disassembly differs:\n%s\nthen\n%s", src, again)
+		}
+	})
+}

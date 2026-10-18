@@ -18,7 +18,7 @@ Early development. What exists today:
   [docs/spec/match.md](docs/spec/match.md).
 - `internal/isa`: instruction types.
 - `internal/asm`: the assembler, with labels, expressions and errors that carry a line
-  and column.
+  and column, and the disassembler (`pit asm` prints its output).
 - `internal/vm`: core memory, operand evaluation, opcode execution, process queues
   and events.
 - `internal/arena`: seeded placement, round-robin scheduling, the cycle limit and the
