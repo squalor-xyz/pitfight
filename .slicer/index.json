@@ -1294,7 +1294,19 @@
       "status": "done",
       "has_slice": true,
       "depends_on": [],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "39ae77a9-c827-4040-a45b-e4aa37b590a3",
+          "kind": "",
+          "text": "**2026-10-18** — Owner 2026-10-18: accepted C111 (nil observer to arena.RunObserved as events-off, no new option) and C110 (atomic replay write; symlink/special targets written in place; existing mode kept; read-only target replaced).",
+          "created_at": "2026-10-18T19:33:48Z",
+          "attempt": 1,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "M",
