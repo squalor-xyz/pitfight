@@ -325,3 +325,4 @@
 {"when": "2026-10-18T14:20:48Z", "item": "C74", "action": "catalog", "from": "", "to": "isa.md section 8 listings are asm blocks without the N: prefix", "note": "add"}
 {"when": "2026-10-18T14:26:37Z", "item": "S08", "action": "status", "from": "started", "to": "done", "note": "Added asm.Disassemble (moved from cmd/pit); pit asm prints it; round-trip tests (cells, spec examples, FuzzRoundTrip 60s) pass; C73, C74 recorded", "by": "Jon R"}
 {"when": "2026-10-18T14:28:35Z", "item": "S17", "action": "note", "from": "", "to": "", "note": "From S08 (low): asm.md bomber listing is tagged text and cov", "by": "Jon R"}
+{"when": "2026-10-18T14:43:22Z", "item": "S11", "action": "note", "from": "", "to": "", "note": "Owner 2026-10-18 (amends C76/C77): in pit run JSON and the r", "by": "Jon R"}
