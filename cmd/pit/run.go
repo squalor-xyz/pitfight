@@ -69,19 +69,9 @@ func runRun(args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 
-	bots := make([]arena.Bot, len(files))
-	for i, path := range files {
-		src, err := os.ReadFile(path)
-		if err != nil {
-			fmt.Fprintf(stderr, "pit run: %v\n", err)
-			return 1
-		}
-		prog, err := asm.Assemble(path, src)
-		if err != nil {
-			fmt.Fprintln(stderr, err)
-			return 1
-		}
-		bots[i] = arena.Bot{Cells: prog.Cells, Entry: prog.Entry}
+	bots, ok := assembleFiles("pit run", files, stderr)
+	if !ok {
+		return 1
 	}
 	var (
 		res        arena.Result
@@ -116,6 +106,27 @@ func runRun(args []string, stdout, stderr io.Writer) int {
 		return 1
 	}
 	return 0
+}
+
+// assembleFiles reads and assembles the bot files, in order. On an error it writes the
+// message to stderr (an assembler error as the assembler words it, with file, line and
+// column; any other error prefixed with the command name) and reports false.
+func assembleFiles(command string, files []string, stderr io.Writer) ([]arena.Bot, bool) {
+	bots := make([]arena.Bot, len(files))
+	for i, path := range files {
+		src, err := os.ReadFile(path)
+		if err != nil {
+			fmt.Fprintf(stderr, "%s: %v\n", command, err)
+			return nil, false
+		}
+		prog, err := asm.Assemble(path, src)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return nil, false
+		}
+		bots[i] = arena.Bot{Cells: prog.Cells, Entry: prog.Entry}
+	}
+	return bots, true
 }
 
 // entryAddress is the address of a bot's first process.

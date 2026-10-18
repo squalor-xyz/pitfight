@@ -1468,7 +1468,7 @@
       "id": "S26",
       "title": "Add pit play to run a match and watch it in one command",
       "short_title": "pit play",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [
         "S25"
@@ -1505,7 +1505,7 @@
         "importance": 3,
         "urgency": 2,
         "effort": 2,
-        "attempts": 0
+        "attempts": 1
       }
     }
   ],
@@ -1513,7 +1513,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 120,
+    "next_id": 123,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -2584,6 +2584,33 @@
         "kind": "decision",
         "title": "S25 (C35): pit serve --bots DIR (default bots if present); start page behaviour",
         "body": "S25 (C35). pit serve gains --bots DIR, opened as an os.Root like --replays; without the flag it is bots under the working directory if that is a directory, else none (the page then shows only the replays and the file picker); an explicit missing directory is exit 1. Start page (web/js/home.js, wired in main.js): imp and dwarf preselected if listed; the seed field starts random and shown, a seed the page chose is replaced by a new random one at each Fight (so Fight twice gives two matches), a seed the user typed is kept; Fight and a click on a listed replay start playing at once, ?replay=URL still loads paused. Reason: the owner wants to run and watch a match in one step; a stale seed would repeat the same match.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C120",
+        "kind": "decision",
+        "title": "S26 (C35): pit play CLI: pit play A B [more] with --seed, --cycle-limit, --port, --no-open, --terminal, --replay",
+        "body": "S26 (C35). At least two bot files (as many as pit run takes); flags --seed N (default random), --cycle-limit N (default 80000), --port N (default 0, a free port), --no-open, --terminal (no server; --port and --no-open ignored), --replay FILE (written through writeFileAtomic; hash printed). Match flags other than seed and cycle limit are left to pit run. Exit codes as pit run: 1 for bot file, assembler (file:line:col as in pit run) or match configuration errors and server start errors, 2 for usage errors. Reason: the smallest surface that covers 'run, watch, repeat, keep'; a short --cycle-limit also keeps tests fast.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C121",
+        "kind": "decision",
+        "title": "S26 (C35): pit play default seed is random from crypto/rand and always printed",
+        "body": "S26 (C35). Without --seed the seed is a uint64 read from crypto/rand (CLI source; C12 and C36 bind only the VM and arena core) and printed as 'pit play: seed N (repeat this match with --seed N)' before the server starts. With --terminal it is printed after the viewer ends (q or end of input), because the first drawing clears the screen; a Ctrl-C stop prints no seed, so pass --seed N to keep a match you may stop that way (documented in the usage). Reason: a match you liked can be repeated with pit play --seed N or pit run --seed N.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C122",
+        "kind": "decision",
+        "title": "S26 (C35): pit play serves the replay from memory at /replays/match.jsonl; viewer address is /?replay=/replays/match.jsonl&autoplay=1",
+        "body": "S26 (C35). newPlayHandler wraps the pit serve handler (no directories, localOnly Host check, GET and HEAD only) and adds the in-memory replay at the /replays/ place that pit serve uses, so the viewer's existing ?replay= loading works unchanged; web/js/main.js gains one query parameter, autoplay=1, so the page plays at once like a match from the start page (?replay= alone stays paused). The replay is written to disk only by --replay. Listens on 127.0.0.1 only; the printed address is the one handed to the opener. The opener is open on macOS and xdg-open on Linux/BSD via os/exec, injected in tests; on failure or on other systems the address stays printed and serving continues (stderr says why).",
         "status": "active",
         "reason": "",
         "successor": ""

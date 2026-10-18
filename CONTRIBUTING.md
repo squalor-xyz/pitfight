@@ -15,6 +15,8 @@ This page summarizes them.
   older versions are not). `pit serve` serves it on 127.0.0.1; its start page lists
   the bots of `--bots DIR` (default `bots`) and the replays of `--replays DIR`, and a
   Fight button runs a match of two bots on the server (`cmd/pit/serveapi.go`).
+  `pit play a.s b.s` runs a match and opens the viewer on it in one command
+  (`cmd/pit/play.go`; tests inject the browser opener and never start a browser).
 - Do not run `go env -w`, and do not add a Makefile.
 
 ## Checks

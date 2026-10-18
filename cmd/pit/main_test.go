@@ -11,7 +11,7 @@ import (
 // usageLines are the usage text's command entries. Matching "\n  name " rather
 // than the bare name keeps prose such as "runs matches", or another entry's
 // description, from satisfying a test.
-var usageLines = []string{"\n  asm ", "\n  run ", "\n  tourney ", "\n  view ", "\n  serve ", "\n  help "}
+var usageLines = []string{"\n  asm ", "\n  run ", "\n  tourney ", "\n  view ", "\n  serve ", "\n  play ", "\n  help "}
 
 func TestRun(t *testing.T) {
 	tests := []struct {
