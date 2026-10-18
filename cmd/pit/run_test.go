@@ -10,7 +10,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/squalor-xyz/pitfight/internal/arena"
 	"github.com/squalor-xyz/pitfight/internal/asm"
+	"github.com/squalor-xyz/pitfight/internal/replay"
 )
 
 const (
@@ -51,8 +53,8 @@ func TestRunCommand(t *testing.T) {
 		t.Fatalf("exit code %d, stderr %q; want 0 and empty", code, errOut)
 	}
 	want := "match: 2 bots, seed 1, core size 8000, cycle limit 80000, max processes 8000, min separation 100\n" +
-		"bot 1: " + paths[0] + " (length 1, start 4519, entry 4519)\n" +
-		"bot 2: " + paths[1] + " (length 1, start 7975, entry 7975)\n" +
+		"bot 1: " + paths[0] + " (length 1, start 4519, entry_address 4519)\n" +
+		"bot 2: " + paths[1] + " (length 1, start 7975, entry_address 7975)\n" +
 		"cycles: 1\n" +
 		"survivors: 1\n" +
 		"result: win bot 1\n"
@@ -93,9 +95,9 @@ func TestRunJSON(t *testing.T) {
 	if code != 0 || errOut != "" {
 		t.Fatalf("exit code %d, stderr %q", code, errOut)
 	}
-	want := `{"config":{"core_size":8000,"cycle_limit":80000,"max_processes":8000,"min_separation":100,"seed":1},` +
-		`"bots":[{"id":1,"file":` + jsonString(paths[0]) + `,"length":1,"start":4519,"entry":4519},` +
-		`{"id":2,"file":` + jsonString(paths[1]) + `,"length":1,"start":7975,"entry":7975}],` +
+	want := `{"config":{"core_size":8000,"cycle_limit":80000,"max_processes":8000,"min_separation":100,"seed":"1"},` +
+		`"bots":[{"id":1,"file":` + jsonString(paths[0]) + `,"length":1,"start":4519,"entry_address":4519},` +
+		`{"id":2,"file":` + jsonString(paths[1]) + `,"length":1,"start":7975,"entry_address":7975}],` +
 		`"cycles":1,"survivors":[1],"outcome":"win","winner":1,"tied":[]}` + "\n"
 	if out != want {
 		t.Errorf("stdout:\n%s\nwant:\n%s", out, want)
@@ -194,7 +196,7 @@ func TestRunErrors(t *testing.T) {
 	}
 }
 
-// TestRunEntry checks the printed entry address: start plus the ORG offset, wrapped
+// TestRunEntry checks the printed entry_address: start plus the ORG offset, wrapped
 // around the core. Seed 1 in a core of 20 cells with no separation puts the
 // three-cell bot at 19..1 (computed outside the Go code from match.md section 6).
 func TestRunEntry(t *testing.T) {
@@ -206,7 +208,7 @@ func TestRunEntry(t *testing.T) {
 	if code != 0 || errOut != "" {
 		t.Fatalf("exit code %d, stderr %q", code, errOut)
 	}
-	for _, want := range []string{"(length 3, start 19, entry 1)\n", "(length 1, start 2, entry 2)\n", "cycles: 5\n", "survivors: 1 2\n"} {
+	for _, want := range []string{"(length 3, start 19, entry_address 1)\n", "(length 1, start 2, entry_address 2)\n", "cycles: 5\n", "survivors: 1 2\n"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("stdout lacks %q:\n%s", want, out)
 		}
@@ -243,5 +245,115 @@ func TestRunDoubleDash(t *testing.T) {
 
 	if !strings.Contains(runUsage, "[--]") {
 		t.Error("the usage text does not mention --")
+	}
+}
+
+// replayTestBots writes two bots that run for a while: an imp, which writes a cell
+// every cycle, and a sitter.
+func replayTestBots(t *testing.T) []string {
+	t.Helper()
+	return writeBots(t, map[string]string{"imp.s": "MOV.I $0, $1\n", "sitter.s": sitterSrc}, "imp.s", "sitter.s")
+}
+
+// TestRunReplay: --replay FILE writes the replay of the match, the output gives its
+// hash, and the file is the one internal/replay writes for the same match.
+func TestRunReplay(t *testing.T) {
+	paths := replayTestBots(t)
+	file := filepath.Join(t.TempDir(), "match.jsonl")
+	code, out, errOut := runPit("run", paths[0], paths[1], "--seed", "1", "--cycle-limit", "30", "--replay", file)
+	if code != 0 || errOut != "" {
+		t.Fatalf("exit code %d, stderr %q", code, errOut)
+	}
+	data, err := os.ReadFile(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r, err := replay.Read(bytes.NewReader(data))
+	if err != nil {
+		t.Fatalf("the replay file does not parse: %v", err)
+	}
+	if r.Config.Seed != 1 || r.Config.CycleLimit != 30 || len(r.Cycles) != 30 || r.Result.Cycles != 30 {
+		t.Errorf("config %+v, %d cycles with events, result %+v", r.Config, len(r.Cycles), r.Result)
+	}
+	// The replay is the replay of the same bots through the library.
+	var bots []arena.Bot
+	for _, p := range paths {
+		src, _ := os.ReadFile(p)
+		prog, err := asm.Assemble(p, src)
+		if err != nil {
+			t.Fatal(err)
+		}
+		bots = append(bots, arena.Bot{Cells: prog.Cells, Entry: prog.Entry})
+	}
+	want, err := replay.Record(r.Config, bots)
+	if err != nil || !bytes.Equal(want.Bytes(), data) {
+		t.Errorf("the file differs from replay.Record (err %v)", err)
+	}
+	hash := replay.Hash(data)
+	if !strings.HasSuffix(out, "replay: "+hash+"\n") {
+		t.Errorf("stdout does not end with the replay hash %s:\n%s", hash, out)
+	}
+
+	// The same command into a second file: identical bytes, identical output.
+	file2 := filepath.Join(t.TempDir(), "again.jsonl")
+	code, out2, _ := runPit("run", paths[0], paths[1], "--seed", "1", "--cycle-limit", "30", "--replay", file2)
+	data2, err := os.ReadFile(file2)
+	if err != nil || code != 0 || !bytes.Equal(data, data2) || out != out2 {
+		t.Errorf("second run: code %d, err %v, files equal %v, outputs equal %v", code, err, bytes.Equal(data, data2), out == out2)
+	}
+
+	// Without the flag nothing is printed about a replay.
+	_, plain, _ := runPit("run", paths[0], paths[1], "--seed", "1", "--cycle-limit", "30")
+	if strings.Contains(plain, "replay") || !strings.HasPrefix(out, plain) {
+		t.Errorf("output without --replay:\n%s\nwith it:\n%s", plain, out)
+	}
+}
+
+// TestRunReplayJSON: with --json the hash is the last field, replay_hash.
+func TestRunReplayJSON(t *testing.T) {
+	paths := replayTestBots(t)
+	file := filepath.Join(t.TempDir(), "match.jsonl")
+	code, out, errOut := runPit("run", "--json", "--replay", file, "--seed", "18446744073709551615", "--cycle-limit", "10", paths[0], paths[1])
+	if code != 0 || errOut != "" {
+		t.Fatalf("exit code %d, stderr %q", code, errOut)
+	}
+	data, err := os.ReadFile(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out, `"seed":"18446744073709551615"`) || !bytes.Contains(data, []byte(`"seed":"18446744073709551615"`)) {
+		t.Errorf("seed is not a string:\n%s\n%s", out, data[:200])
+	}
+	if want := `,"tied":[1,2],"replay_hash":"` + replay.Hash(data) + `"}` + "\n"; !strings.HasSuffix(out, want) {
+		t.Errorf("stdout does not end with %s:\n%s", want, out)
+	}
+	// Without the flag the field is absent.
+	_, plain, _ := runPit("run", "--json", "--cycle-limit", "10", paths[0], paths[1])
+	if strings.Contains(plain, "replay") {
+		t.Errorf("replay_hash without --replay: %s", plain)
+	}
+}
+
+func TestRunReplayErrors(t *testing.T) {
+	paths := replayTestBots(t)
+	// A directory that does not exist: the match ran, but the replay cannot be written.
+	bad := filepath.Join(t.TempDir(), "missing", "match.jsonl")
+	code, out, errOut := runPit("run", "--replay", bad, paths[0], paths[1])
+	if code != 1 || out != "" || !strings.Contains(errOut, "pit run:") || !strings.Contains(errOut, "missing") {
+		t.Errorf("exit code %d, stdout %q, stderr %q", code, out, errOut)
+	}
+	// The flag needs a value.
+	code, out, errOut = runPit("run", paths[0], paths[1], "--replay")
+	if code != 2 || out != "" || !strings.Contains(errOut, "usage: pit run") {
+		t.Errorf("exit code %d, stdout %q, stderr %q", code, out, errOut)
+	}
+	// A refused match writes no file.
+	file := filepath.Join(t.TempDir(), "match.jsonl")
+	code, _, _ = runPit("run", "--core-size", "0", "--replay", file, paths[0], paths[1])
+	if _, err := os.Stat(file); code != 1 || err == nil {
+		t.Errorf("exit code %d, stat error %v; want 1 and no file", code, err)
+	}
+	if !strings.Contains(runUsage, "--replay FILE") {
+		t.Error("the usage text does not list --replay")
 	}
 }

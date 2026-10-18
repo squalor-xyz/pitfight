@@ -23,12 +23,16 @@ Early development. What exists today:
   and events.
 - `internal/arena`: seeded placement, round-robin scheduling, the cycle limit and the
   result and tie rule of a match.
+- `internal/replay`: the replay file (`docs/spec/replay.md`): versioned JSON lines with
+  a stable SHA-256 hash, a strict reader, and a player that rebuilds the core from the
+  events.
 - `pit`: the CLI. Today it prints usage and has `pit asm bot.s`, which assembles a bot
   and prints the cells, and `pit run a.s b.s --seed 1`, which runs a match and prints
-  the result (`--json` for one line of JSON; `pit run` with no files lists the flags).
+  the result (`--json` for one line of JSON; `--replay FILE` also writes the replay
+  and prints its hash; `pit run` with no files lists the flags).
 
 Planned: round-robin tournaments
-(`pit tourney`), a replay format, and terminal and web replay viewers (`pit view`).
+(`pit tourney`), and terminal and web replay viewers (`pit view`).
 
 ## Build and test
 

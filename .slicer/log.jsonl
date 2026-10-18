@@ -326,3 +326,15 @@
 {"when": "2026-10-18T14:26:37Z", "item": "S08", "action": "status", "from": "started", "to": "done", "note": "Added asm.Disassemble (moved from cmd/pit); pit asm prints it; round-trip tests (cells, spec examples, FuzzRoundTrip 60s) pass; C73, C74 recorded", "by": "Jon R"}
 {"when": "2026-10-18T14:28:35Z", "item": "S17", "action": "note", "from": "", "to": "", "note": "From S08 (low): asm.md bomber listing is tagged text and cov", "by": "Jon R"}
 {"when": "2026-10-18T14:43:22Z", "item": "S11", "action": "note", "from": "", "to": "", "note": "Owner 2026-10-18 (amends C76/C77): in pit run JSON and the r", "by": "Jon R"}
+{"when": "2026-10-18T14:44:20Z", "item": "S11", "action": "status", "from": "open", "to": "started", "note": "", "by": "Jon R"}
+{"when": "2026-10-18T14:59:57Z", "item": "C83", "action": "catalog", "from": "", "to": "Replay file: hand-written canonical JSON lines; the reader accepts only the writer's bytes (S11)", "note": "add"}
+{"when": "2026-10-18T14:59:57Z", "item": "C84", "action": "catalog", "from": "", "to": "Replay v1 vocabulary: header, load, c/w/s/d body lines, end; cycles without events have no line (S11)", "note": "add"}
+{"when": "2026-10-18T14:59:57Z", "item": "C85", "action": "catalog", "from": "", "to": "Replay v1 has no snapshot lines; seeking is the viewer's job (S11)", "note": "add"}
+{"when": "2026-10-18T14:59:57Z", "item": "C86", "action": "catalog", "from": "", "to": "Replay hashes: SHA-256 hex of the file bytes; bot hash over entry offset plus raw assembled cells (S11)", "note": "add"}
+{"when": "2026-10-18T14:59:58Z", "item": "C87", "action": "catalog", "from": "", "to": "Replay API: replay.Record, Read, Bytes, Hash, BotHash and Player (S11)", "note": "add"}
+{"when": "2026-10-18T14:59:58Z", "item": "C88", "action": "catalog", "from": "", "to": "arena.RunObserved: per-cycle hook with the live core; Run is built on it (S11)", "note": "add"}
+{"when": "2026-10-18T14:59:58Z", "item": "C89", "action": "catalog", "from": "", "to": "pit run --replay FILE writes the replay and prints its hash: 'replay: <hash>' or JSON replay_hash (S11)", "note": "add"}
+{"when": "2026-10-18T14:59:58Z", "item": "C76", "action": "catalog", "from": "", "to": "body", "note": "edit"}
+{"when": "2026-10-18T14:59:58Z", "item": "C77", "action": "catalog", "from": "", "to": "body", "note": "edit"}
+{"when": "2026-10-18T15:07:43Z", "item": "S11", "action": "note", "from": "", "to": "", "note": "Review (round 1) stopped, not PASS: (1) main moved (S10 merg", "by": "Jon R"}
+{"when": "2026-10-18T15:08:52Z", "item": "S11", "action": "note", "from": "", "to": "", "note": "Owner 2026-10-18: replay format adds a per-step execute reco", "by": "Jon R"}

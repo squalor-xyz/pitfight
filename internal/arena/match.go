@@ -39,8 +39,25 @@ type Result struct {
 // loading of the bots. Run has no I/O, no clock and no map; the same bots and
 // config always give the same result and events. It does not change bots.
 func Run(cfg Config, bots []Bot) (Result, []vm.Event, error) {
-	if err := Validate(cfg, bots); err != nil {
+	var events []vm.Event
+	res, err := RunObserved(cfg, bots, func(_ int, _ *vm.Core, cycle []vm.Event) {
+		events = append(events, cycle...)
+	})
+	if err != nil {
 		return Result{}, nil, err
+	}
+	return res, events, nil
+}
+
+// RunObserved is Run for a caller that needs the cycle boundaries, as the replay
+// writer does. observe is called once with cycle 0 and no events, after the bots
+// are loaded, and then after each cycle c = 1, 2, ... with the VM events of that
+// cycle's steps in execution order. core is the live core; observe must not
+// modify it, and must not keep it or events past the call (events is reused).
+// observe may be nil. A refused match returns the error before observe is called.
+func RunObserved(cfg Config, bots []Bot, observe func(cycle int, core *vm.Core, events []vm.Event)) (Result, error) {
+	if err := Validate(cfg, bots); err != nil {
+		return Result{}, err
 	}
 	lengths := make([]int, len(bots))
 	for i, b := range bots {
@@ -48,18 +65,23 @@ func Run(cfg Config, bots []Bot) (Result, []vm.Event, error) {
 	}
 	placement, err := Place(cfg, lengths)
 	if err != nil {
-		return Result{}, nil, err
+		return Result{}, err
 	}
 	core, queues, err := load(cfg, bots, placement)
 	if err != nil {
-		return Result{}, nil, err
+		return Result{}, err
 	}
+	if observe == nil {
+		observe = func(int, *vm.Core, []vm.Event) {}
+	}
+	observe(0, core, nil)
 
 	var events []vm.Event
 	var liveAtStart, live []uint32
 	cycle := 0
 	for {
 		cycle++
+		events = events[:0]
 		liveAtStart = liveAtStart[:0]
 		for i, q := range queues {
 			if !q.Dead() {
@@ -77,6 +99,7 @@ func Run(cfg Config, bots []Bot) (Result, []vm.Event, error) {
 				live = append(live, id)
 			}
 		}
+		observe(cycle, core, events)
 		if len(live) <= 1 || cycle == cfg.CycleLimit {
 			break
 		}
@@ -91,7 +114,7 @@ func Run(cfg Config, bots []Bot) (Result, []vm.Event, error) {
 	default:
 		res.Outcome, res.Tied = Tie, slicesClone(liveAtStart)
 	}
-	return res, events, nil
+	return res, nil
 }
 
 // slicesClone copies s; an empty s gives nil.

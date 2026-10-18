@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+// Package replay writes, reads and applies the pitfight replay file, version 1
+// (docs/spec/replay.md): versioned JSON lines holding the match configuration, the
+// loaded bots, the cell writes and process events of every cycle, and the result.
+// The bytes depend only on the match, not on the Go version (C36).
+package replay
