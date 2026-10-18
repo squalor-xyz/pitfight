@@ -1324,7 +1324,19 @@
       "status": "open",
       "has_slice": true,
       "depends_on": [],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "57eeaf32-cd49-4974-a04e-69426f885a14",
+          "kind": "",
+          "text": "**2026-10-18** — From S22 (later): C111 text cites 0.46 MB for two imp matches while TestRunKeepsNoEvents now measures about 1.38 MB for 6 matches; replay/read.go:215 still reads vm.MaxCoreSize and MinCoreSize (same value, cosmetic). Not code-wording blockers: tourney --matches output is not written atomically (slice named only replays); TestRunKeepsNoEvents allocation bound (1/4 of event bytes) is a heuristic; TestRunConcurrent uses a 2 s barrier timeout.",
+          "created_at": "2026-10-18T19:32:08Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "S",
