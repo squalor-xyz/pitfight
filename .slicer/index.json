@@ -458,7 +458,7 @@
       "id": "S09",
       "title": "Run matches in the arena",
       "short_title": "Run matches in the arena",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [
         "S06",
@@ -498,6 +498,17 @@
           "verified_by": "",
           "verified_at": "",
           "stale_after": ""
+        },
+        {
+          "id": "a09bd0ad-3820-44ef-b9d1-1f8e2a19d567",
+          "kind": "",
+          "text": "**2026-10-18** — Review FAIL (gate 1): README.md:56 still says packages are isa, asm and vm; arena missing. Code and tests otherwise pass.",
+          "created_at": "2026-10-18T14:38:25Z",
+          "attempt": 1,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
         }
       ],
       "claim": null,
@@ -528,7 +539,7 @@
         "importance": 3,
         "urgency": 2,
         "effort": 2,
-        "attempts": 0
+        "attempts": 1
       }
     },
     {
@@ -592,7 +603,19 @@
         "S09",
         "S01"
       ],
-      "note_records": [],
+      "note_records": [
+        {
+          "id": "77d5f830-988a-499c-b64f-33380a332a59",
+          "kind": "",
+          "text": "**2026-10-18** — From S09: arena.Run returns a flat []vm.Event with no cycle boundaries and no initial-load events (C79). Replay needs cycle markers or a per-cycle hook; initial state = bot cells Norm'd at Result.Placement.Starts with writer = bot id; JMP-to-self steps emit no event.",
+          "created_at": "2026-10-18T14:39:37Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        }
+      ],
       "claim": null,
       "fields": {
         "size": "M",
@@ -692,6 +715,17 @@
           "kind": "",
           "text": "**2026-10-16** — From S04 review: match.md section 7 gives the lower bot id the first move in every cycle (ids are not rotated). TestPairings should play each pair in both orders, or state another neutraliser, and record it per C35.",
           "created_at": "2026-10-16T03:18:59Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
+        },
+        {
+          "id": "cdc3bc0e-5f96-40ef-8899-26260377cadd",
+          "kind": "",
+          "text": "**2026-10-18** — From S09: arena.Run keeps all events in memory; consider a way to skip event collection for scoring-only tournament runs. Place panics on empty lengths (documented; Run validates K>=2).",
+          "created_at": "2026-10-18T14:39:37Z",
           "attempt": 0,
           "by": "Jon R",
           "verified_by": "",
@@ -1091,7 +1125,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 75,
+    "next_id": 80,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -1739,6 +1773,51 @@
         "kind": "decision",
         "title": "pit asm <file>: prints a re-assemblable listing (ORG line, one canonical instruction per line); exit 1 on error, 2 on usage",
         "body": "Implementer decision under C35 (S07, asm.md section 9). On success stdout gets 'ORG e' then 'OPCODE.MODIFIER <mode><value>, <mode><value>' per cell with signed decimal values and explicit modifiers, nothing else; an assembly error or unreadable file prints file:line:col: message (or 'pit asm: <os error>') on stderr and exits 1 with empty stdout; a wrong argument count or an argument starting with '-' prints 'usage: pit asm <file>' and exits 2. The file name is printed exactly as given. The usage text now lists asm as implemented, marks the other commands 'not implemented yet' and adds exit code 1. Reason: a listing is both human-readable and valid source, which the S08 round trip needs; the exit codes extend C40.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C75",
+        "kind": "decision",
+        "title": "pit run flags: --seed, --core-size, --cycle-limit, --max-processes, --min-separation, --json (S09)",
+        "body": "Kebab-case flag per match.md config field, defaults from the spec; flags and bot files may be interleaved (pit run a.s b.s --seed 1) because that is the form the slice and the harness use.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C76",
+        "kind": "decision",
+        "title": "pit run text output: config line, one line per bot, cycles, survivors, result (S09)",
+        "body": "Plain line-oriented text with the fields of match.md section 8 plus each bot's file, length, start and entry address, so a human and grep can read it; byte-identical for the same input (C16).",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C77",
+        "kind": "decision",
+        "title": "pit run --json: one JSON line with config, bots, cycles, survivors, outcome, winner, tied (S09)",
+        "body": "A single line of fixed-order snake_case JSON with lists never null is the simplest machine-readable form for the later agent harness (C09); seed is a JSON number.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C78",
+        "kind": "decision",
+        "title": "pit run exit codes and error output (S09)",
+        "body": "0 the match ran (win or tie); 1 a bot file, assembler, config or placement error, printed as 'pit run: <spec message>' on stderr with assembler errors bare as file:line:col like pit asm; 2 a usage error, so scripts can tell a bad invocation from a bad bot.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C79",
+        "kind": "decision",
+        "title": "arena API: arena.Run(cfg, bots) returns Result, []vm.Event, error (S09)",
+        "body": "Bot is cells plus entry offset so arena does not import the assembler; Result adds the Placement used; events cover steps only, not loading, leaving the replay slice free to choose its initial-state record; errors are *arena.Error with the three kinds of match.md section 1.",
         "status": "active",
         "reason": "",
         "successor": ""

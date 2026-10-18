@@ -310,6 +310,16 @@
 {"when": "2026-10-18T04:02:20Z", "item": "S08", "action": "note", "from": "", "to": "", "note": "From S07: pit asm already has a listing formatter (cmd/pit/a", "by": "Jon R"}
 {"when": "2026-10-18T14:17:15Z", "item": "S09", "action": "note", "from": "", "to": "", "note": "Owner 2026-10-18: keep C69 (assembler emits raw signed opera", "by": "Jon R"}
 {"when": "2026-10-18T14:17:15Z", "item": "S08", "action": "note", "from": "", "to": "", "note": "Owner 2026-10-18: accept C72. S08 moves the cmd/pit/asm.go l", "by": "Jon R"}
+{"when": "2026-10-18T14:18:12Z", "item": "S09", "action": "status", "from": "open", "to": "started", "note": "", "by": "Jon R"}
+{"when": "2026-10-18T14:23:22Z", "item": "C75", "action": "catalog", "from": "", "to": "pit run flags: --seed, --core-size, --cycle-limit, --max-processes, --min-separation, --json (S09)", "note": "add"}
+{"when": "2026-10-18T14:23:22Z", "item": "C76", "action": "catalog", "from": "", "to": "pit run text output: config line, one line per bot, cycles, survivors, result (S09)", "note": "add"}
+{"when": "2026-10-18T14:23:22Z", "item": "C77", "action": "catalog", "from": "", "to": "pit run --json: one JSON line with config, bots, cycles, survivors, outcome, winner, tied (S09)", "note": "add"}
+{"when": "2026-10-18T14:23:22Z", "item": "C78", "action": "catalog", "from": "", "to": "pit run exit codes and error output (S09)", "note": "add"}
+{"when": "2026-10-18T14:23:22Z", "item": "C79", "action": "catalog", "from": "", "to": "arena API: arena.Run(cfg, bots) returns Result, []vm.Event, error (S09)", "note": "add"}
+{"when": "2026-10-18T14:38:25Z", "item": "S09", "action": "note", "from": "", "to": "", "note": "Review FAIL (gate 1): README.md:56 still says packages are i", "by": "Jon R"}
+{"when": "2026-10-18T14:39:13Z", "item": "S09", "action": "status", "from": "started", "to": "done", "note": "Verified: arena SplitMix64 PRNG, seeded placement and match loop; pit run with --seed/--core-size/--cycle-limit/--max-processes/--min-separation/--json and --; spec vectors (Next/Draw, P1-P6, X1-X5, M1-M6) tested; Norm on load with negative-operand test; isa.Cell comment amended; go test, vet, gofmt, build green; decisions C75-C79.", "by": "Jon R"}
+{"when": "2026-10-18T14:39:37Z", "item": "S11", "action": "note", "from": "", "to": "", "note": "From S09: arena.Run returns a flat []vm.Event with no cycle ", "by": "Jon R"}
+{"when": "2026-10-18T14:39:37Z", "item": "S13", "action": "note", "from": "", "to": "", "note": "From S09: arena.Run keeps all events in memory; consider a w", "by": "Jon R"}
 {"when": "2026-10-18T14:18:09Z", "item": "S08", "action": "status", "from": "open", "to": "started", "note": "", "by": "Jon R"}
 {"when": "2026-10-18T14:20:48Z", "item": "C73", "action": "catalog", "from": "", "to": "Disassembly is asm.Disassemble(Program) []byte; pit asm is its CLI entry point", "note": "add"}
 {"when": "2026-10-18T14:20:48Z", "item": "C74", "action": "catalog", "from": "", "to": "isa.md section 8 listings are asm blocks without the N: prefix", "note": "add"}

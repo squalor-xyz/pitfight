@@ -226,7 +226,7 @@ func TestUsageListsAsm(t *testing.T) {
 	}
 	for _, want := range []string{
 		"\n  asm      assemble a bot source file\n",
-		"\n  run      run a match between bots (not implemented yet)\n",
+		"\n  run      run a match between bots\n",
 		"1 an error in a command",
 	} {
 		if !strings.Contains(stdout.String(), want) {
