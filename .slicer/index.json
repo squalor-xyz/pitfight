@@ -971,6 +971,17 @@
           "verified_by": "",
           "verified_at": "",
           "stale_after": ""
+        },
+        {
+          "id": "16e77230-42d5-4205-80e1-4f06afde71c4",
+          "kind": "",
+          "text": "**2026-10-18** — From S13 (later): no test proves tourney parallelism (jobs=1 mutant survives); cmd/pit tourney.go:76 and run.go:65 treat a flag value of -- as terminator; arena.Run collects all events per tourney match (~143 MB peak), consider an events-off option; fold the duplicated flag-interleave loop of tourney.go and run.go into one helper after S11 lands.",
+          "created_at": "2026-10-18T15:19:51Z",
+          "attempt": 0,
+          "by": "Jon R",
+          "verified_by": "",
+          "verified_at": "",
+          "stale_after": ""
         }
       ],
       "claim": null,
