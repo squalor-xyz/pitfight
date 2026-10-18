@@ -450,6 +450,18 @@ S23 (C35). internal/acceptance/doc.go is deleted and its package comment now hea
 
 S23 (C35). The listing printed by pit asm for the bomber in docs/spec/asm.md section 9 is tagged asm, not text, because a listing is itself valid source (asm.md section 9). TestRoundTripSpecExamples now round-trips it and counts 5 asm blocks in asm.md; TestSpecListing checks that the asm block after the bomber equals the output of pit asm. Reason: one place checks every runnable listing in the specs; the text tag left it covered by a string comparison only.
 
+### C117 S25 (C35): amends C103: pit serve takes POST /api/match; files stay GET and HEAD
+
+S25 (C35). C103 allowed GET and HEAD only. Now POST is accepted at /api/match alone (the match endpoint); the viewer, /replays/ and /api/list stay GET and HEAD (405 with Allow otherwise). POST, not GET with a query, because a match is work that changes nothing but costs CPU, and a GET can be fired by any page through an image or link; POST needs the Content-Type application/json (so a form on another site cannot send it and a fetch from another site needs a preflight, which the server never answers), an Origin equal to the request Host over http if the header is sent, and Sec-Fetch-Site same-origin or none if sent. The 127.0.0.1 bind and the Host guard (403, empty body) are unchanged. Reason: the page must ask the server to run a match, and these checks keep another site from using the loopback server for that.
+
+### C118 S25 (C35): pit serve API: GET /api/list and POST /api/match, JSON shapes and limits
+
+S25 (C35). cmd/pit/serveapi.go, built for reuse by pit play (newAPI(bots, replays fs.FS, apiLimits), mount(mux), match(first, second, seed) returning the replay bytes or an *apiError). GET /api/list -> {"bots":[names ending .s],"replays":[names ending .jsonl],"truncated":true only if cut}: regular files only, base names, sorted, a symlink listed only if os.Root can open it, never a path; names with control characters or invalid UTF-8 skipped. POST /api/match {"bots":[A,B],"seed":"N"} (exactly two names from the listing, matched against the listing and never joined into a path; seed a decimal string 0..2^64-1, absent = 0 like pit run) -> 200 application/x-ndjson, the bytes pit run --replay writes with the default configuration; errors are JSON {error, and for a source error bot, line, col, message}: 400 bad request, 403 foreign Origin, 404 name not listed, 413 body over 4096 bytes, 415 not application/json, 422 assembler error (message names the listed file, no directory) or a match the arena refuses or a bot file over 64 KiB, 503 with Retry-After while another match runs. Limits: one match at a time, cycle limit 80000 (the pit run default; no request field changes the configuration), at most 1000 names per list. Reason: smallest shape the start page needs; seed as a string because JavaScript numbers lose precision above 2^53; limits keep one request from costing more than a default pit run.
+
+### C119 S25 (C35): pit serve --bots DIR (default bots if present); start page behaviour
+
+S25 (C35). pit serve gains --bots DIR, opened as an os.Root like --replays; without the flag it is bots under the working directory if that is a directory, else none (the page then shows only the replays and the file picker); an explicit missing directory is exit 1. Start page (web/js/home.js, wired in main.js): imp and dwarf preselected if listed; the seed field starts random and shown, a seed the page chose is replaced by a new random one at each Fight (so Fight twice gives two matches), a seed the user typed is kept; Fight and a click on a listed replay start playing at once, ?replay=URL still loads paused. Reason: the owner wants to run and watch a match in one step; a stale seed would repeat the same match.
+
 ### C33 CI deferred
 
 Owner decision 2026-10-15. CI is deferred; no CI host is chosen. Checks run locally (see the in-repo Go cache and checks constraint).
@@ -500,7 +512,7 @@ PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first 
 
 *Retired: Settled by owner decision C31 (2026-10-15)..*
 
-26 items · — 5 · done 17 · later 4
+26 items · — 4 · done 18 · later 4
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
@@ -513,32 +525,32 @@ PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first 
 | 6 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
 | v0.1.1 | | | | | | | |
 | 7 | [S24](slices/S24.md) | Install script | M | 2 | repo |  | — |
-| 8 | [S25](slices/S25.md) | Serve start page | M | 2 | web, cmd |  | — |
-| 9 | [S26](slices/S26.md) | pit play | M | 2 | cmd |  | — |
+| 8 | [S26](slices/S26.md) | pit play | M | 2 | cmd |  | — |
 
 ---
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
 | Decisions | | | | | | | |
-| 10 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions · retired decision C33 | done |
+| 9 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions · retired decision C33 | done |
 | v1 foundation | | | | | | | |
-| 11 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks · retired decision C33 | done |
-| 12 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |
-| 13 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | done |
+| 10 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks · retired decision C33 | done |
+| 11 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |
+| 12 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | done |
 | v1 core | | | | | | | |
-| 14 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | done |
-| 15 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | done |
+| 13 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | done |
+| 14 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | done |
 | v0.1.0 | | | | | | | |
-| 16 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | done |
-| 17 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | done |
-| 18 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | done |
-| 19 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | done |
-| 20 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | done |
-| 21 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | done |
-| 22 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | done |
-| 23 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | done |
-| 24 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria · retired decision C33 | done |
+| 15 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | done |
+| 16 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | done |
+| 17 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | done |
+| 18 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | done |
+| 19 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | done |
+| 20 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | done |
+| 21 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | done |
+| 22 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | done |
+| 23 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria · retired decision C33 | done |
 | v0.1.1 | | | | | | | |
-| 25 | [S22](slices/S22.md) | v0.1.0 code cleanups | M | 2 | repo | S17 later notes (from the S09, S11, S12, S13 and S15 relays) · discovered from S17 | done |
-| 26 | [S23](slices/S23.md) | v0.1.0 doc cleanups | S | 1 | docs | S17 later notes (from the S08, S12, S15 and S17 relays) · discovered from S17 | done |
+| 24 | [S22](slices/S22.md) | v0.1.0 code cleanups | M | 2 | repo | S17 later notes (from the S09, S11, S12, S13 and S15 relays) · discovered from S17 | done |
+| 25 | [S23](slices/S23.md) | v0.1.0 doc cleanups | S | 1 | docs | S17 later notes (from the S08, S12, S15 and S17 relays) · discovered from S17 | done |
+| 26 | [S25](slices/S25.md) | Serve start page | M | 2 | web, cmd |  | done |

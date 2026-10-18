@@ -1419,7 +1419,7 @@
       "id": "S25",
       "title": "Show bots and replays on the pit serve start page",
       "short_title": "Serve start page",
-      "status": "open",
+      "status": "done",
       "has_slice": true,
       "depends_on": [
         "S23"
@@ -1437,7 +1437,11 @@
         "findings": "",
         "discovered_from": "",
         "parent": "",
-        "cites": [],
+        "cites": [
+          "C117",
+          "C118",
+          "C119"
+        ],
         "key": "serve-start-page",
         "pass": "",
         "group": "v0.1.1",
@@ -1445,7 +1449,7 @@
         "importance": 3,
         "urgency": 2,
         "effort": 2,
-        "attempts": 0
+        "attempts": 1
       }
     },
     {
@@ -1485,7 +1489,7 @@
   "goals": "Goal records C01-C07 come from PROJECT.md Goals. The open decisions, first filed as assumptions C20-C25, were settled by the owner on 2026-10-15 in S01 as decisions C26-C33 (name, ISA, core language, replay format, default match parameters, visualizer priority, license, CI deferred), with constraints C34-C37 (in-repo Go caches and local checks, implementer-recorded interface details, determinism rules, Go fuzzing).",
   "non_goals": "Non-goal records C08-C11 come from PROJECT.md Non-goals (v1). The later tier (S18-S21) is filed with status later.",
   "catalog": {
-    "next_id": 117,
+    "next_id": 120,
     "id_prefix": "C",
     "id_width": 2,
     "records": [
@@ -2529,6 +2533,33 @@
         "kind": "decision",
         "title": "asm.md bomber listing is an asm block under TestRoundTripSpecExamples",
         "body": "S23 (C35). The listing printed by pit asm for the bomber in docs/spec/asm.md section 9 is tagged asm, not text, because a listing is itself valid source (asm.md section 9). TestRoundTripSpecExamples now round-trips it and counts 5 asm blocks in asm.md; TestSpecListing checks that the asm block after the bomber equals the output of pit asm. Reason: one place checks every runnable listing in the specs; the text tag left it covered by a string comparison only.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C117",
+        "kind": "decision",
+        "title": "S25 (C35): amends C103: pit serve takes POST /api/match; files stay GET and HEAD",
+        "body": "S25 (C35). C103 allowed GET and HEAD only. Now POST is accepted at /api/match alone (the match endpoint); the viewer, /replays/ and /api/list stay GET and HEAD (405 with Allow otherwise). POST, not GET with a query, because a match is work that changes nothing but costs CPU, and a GET can be fired by any page through an image or link; POST needs the Content-Type application/json (so a form on another site cannot send it and a fetch from another site needs a preflight, which the server never answers), an Origin equal to the request Host over http if the header is sent, and Sec-Fetch-Site same-origin or none if sent. The 127.0.0.1 bind and the Host guard (403, empty body) are unchanged. Reason: the page must ask the server to run a match, and these checks keep another site from using the loopback server for that.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C118",
+        "kind": "decision",
+        "title": "S25 (C35): pit serve API: GET /api/list and POST /api/match, JSON shapes and limits",
+        "body": "S25 (C35). cmd/pit/serveapi.go, built for reuse by pit play (newAPI(bots, replays fs.FS, apiLimits), mount(mux), match(first, second, seed) returning the replay bytes or an *apiError). GET /api/list -> {\"bots\":[names ending .s],\"replays\":[names ending .jsonl],\"truncated\":true only if cut}: regular files only, base names, sorted, a symlink listed only if os.Root can open it, never a path; names with control characters or invalid UTF-8 skipped. POST /api/match {\"bots\":[A,B],\"seed\":\"N\"} (exactly two names from the listing, matched against the listing and never joined into a path; seed a decimal string 0..2^64-1, absent = 0 like pit run) -> 200 application/x-ndjson, the bytes pit run --replay writes with the default configuration; errors are JSON {error, and for a source error bot, line, col, message}: 400 bad request, 403 foreign Origin, 404 name not listed, 413 body over 4096 bytes, 415 not application/json, 422 assembler error (message names the listed file, no directory) or a match the arena refuses or a bot file over 64 KiB, 503 with Retry-After while another match runs. Limits: one match at a time, cycle limit 80000 (the pit run default; no request field changes the configuration), at most 1000 names per list. Reason: smallest shape the start page needs; seed as a string because JavaScript numbers lose precision above 2^53; limits keep one request from costing more than a default pit run.",
+        "status": "active",
+        "reason": "",
+        "successor": ""
+      },
+      {
+        "id": "C119",
+        "kind": "decision",
+        "title": "S25 (C35): pit serve --bots DIR (default bots if present); start page behaviour",
+        "body": "S25 (C35). pit serve gains --bots DIR, opened as an os.Root like --replays; without the flag it is bots under the working directory if that is a directory, else none (the page then shows only the replays and the file picker); an explicit missing directory is exit 1. Start page (web/js/home.js, wired in main.js): imp and dwarf preselected if listed; the seed field starts random and shown, a seed the page chose is replaced by a new random one at each Fight (so Fight twice gives two matches), a seed the user typed is kept; Fight and a click on a listed replay start playing at once, ?replay=URL still loads paused. Reason: the owner wants to run and watch a match in one step; a stale seed would repeat the same match.",
         "status": "active",
         "reason": "",
         "successor": ""
