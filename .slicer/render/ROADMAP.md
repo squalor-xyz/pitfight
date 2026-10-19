@@ -548,7 +548,7 @@ PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first 
 
 *Retired: Settled by owner decision C31 (2026-10-15)..*
 
-26 items · — 2 · done 20 · later 4
+27 items · — 3 · done 20 · later 4
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
@@ -559,33 +559,35 @@ PENDING OWNER CONFIRMATION - not decided. Recommendation: terminal viewer first 
 | 4 | [S19](slices/S19.md) | Persistent hill of ranked bots | M | 2 | tourney | PROJECT.md Feature tiers: Later | later |
 | 5 | [S20](slices/S20.md) | Host the web visualizer on squalor.xyz | S | 2 | web | PROJECT.md Feature tiers: Later | later |
 | 6 | [S21](slices/S21.md) | ISA variants and new game modes | L | 3 | vm | PROJECT.md Feature tiers: Later | later |
+| v0.1.2 | | | | | | | |
+| 7 | [S27](slices/S27.md) | v0.1.1 cleanups | M | 2 | repo | S23, S25 and S26 later notes (S23 carries the open S22 notes) · discovered from S26 | — |
 
 ---
 
 | # | Slice | Title | Size | Effort | Trees | Findings | Status |
 |---|---|---|---|---|---|---|---|
 | Decisions | | | | | | | |
-| 7 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions · retired decision C33 | done |
+| 8 | [S01](slices/S01.md) | Confirm open decisions | S | 1 | docs | PROJECT.md Open decisions · retired decision C33 | done |
 | v1 foundation | | | | | | | |
-| 8 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks · retired decision C33 | done |
-| 9 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |
-| 10 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | done |
+| 9 | [S02](slices/S02.md) | Set up project scaffolding | S | 1 | repo | PROJECT.md Stack recommendation, Risks · retired decision C33 | done |
+| 10 | [S03](slices/S03.md) | Write the ISA spec | M | 2 | docs | PROJECT.md Milestone 1, Goals 1 | done |
+| 11 | [S04](slices/S04.md) | Specify match rules and verify default parameters | S | 1 | docs | PROJECT.md Goals 3-4, Open decisions 5 | done |
 | v1 core | | | | | | | |
-| 11 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | done |
-| 12 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | done |
+| 12 | [S05](slices/S05.md) | Build VM core memory and addressing modes | M | 2 | vm | PROJECT.md Milestone 2 | done |
+| 13 | [S06](slices/S06.md) | Execute opcodes and process queues in the VM | L | 3 | vm | PROJECT.md Milestone 2, Core concepts | done |
 | v0.1.0 | | | | | | | |
-| 13 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | done |
-| 14 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | done |
-| 15 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | done |
-| 16 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | done |
-| 17 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | done |
-| 18 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | done |
-| 19 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | done |
-| 20 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | done |
-| 21 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria · retired decision C33 | done |
+| 14 | [S07](slices/S07.md) | Build the assembler | M | 2 | asm | PROJECT.md Milestone 3, Goals 2 | done |
+| 15 | [S08](slices/S08.md) | Add the disassembler and round-trip tests | S | 1 | asm | PROJECT.md Milestone 3 | done |
+| 16 | [S09](slices/S09.md) | Run matches in the arena | M | 2 | arena | PROJECT.md Milestone 4, Goals 3-4 | done |
+| 17 | [S10](slices/S10.md) | Write the starter bots and golden-result tests | M | 2 | bots | PROJECT.md v1 features, Risks | done |
+| 18 | [S11](slices/S11.md) | Define and write the replay format | M | 2 | replay | PROJECT.md Milestone 5, Goals 7, Risks | done |
+| 19 | [S12](slices/S12.md) | Build the terminal viewer | M | 2 | tui | PROJECT.md Milestone 5, Goals 6 | done |
+| 20 | [S13](slices/S13.md) | Run tournaments with a scoreboard | M | 2 | tourney | PROJECT.md Milestone 6, Goals 5 | done |
+| 21 | [S15](slices/S15.md) | Build the web viewer | L | 3 | web | PROJECT.md Milestone 7, Goals 6 | done |
+| 22 | [S17](slices/S17.md) | Verify v1 acceptance criteria | S | 1 | repo | PROJECT.md v1 acceptance criteria · retired decision C33 | done |
 | v0.1.1 | | | | | | | |
-| 22 | [S22](slices/S22.md) | v0.1.0 code cleanups | M | 2 | repo | S17 later notes (from the S09, S11, S12, S13 and S15 relays) · discovered from S17 | done |
-| 23 | [S23](slices/S23.md) | v0.1.0 doc cleanups | S | 1 | docs | S17 later notes (from the S08, S12, S15 and S17 relays) · discovered from S17 | done |
-| 24 | [S24](slices/S24.md) | Install script | M | 2 | repo |  | done |
-| 25 | [S25](slices/S25.md) | Serve start page | M | 2 | web, cmd |  | done |
-| 26 | [S26](slices/S26.md) | pit play | M | 2 | cmd |  | done |
+| 23 | [S22](slices/S22.md) | v0.1.0 code cleanups | M | 2 | repo | S17 later notes (from the S09, S11, S12, S13 and S15 relays) · discovered from S17 | done |
+| 24 | [S23](slices/S23.md) | v0.1.0 doc cleanups | S | 1 | docs | S17 later notes (from the S08, S12, S15 and S17 relays) · discovered from S17 | done |
+| 25 | [S24](slices/S24.md) | Install script | M | 2 | repo |  | done |
+| 26 | [S25](slices/S25.md) | Serve start page | M | 2 | web, cmd |  | done |
+| 27 | [S26](slices/S26.md) | pit play | M | 2 | cmd |  | done |

@@ -1,0 +1,41 @@
+{
+  "id": "S27",
+  "title": "Fix rough edges found in the v0.1.1 relays",
+  "lead": [
+    "Small correctness, robustness and test-strength issues that the v0.1.1 relay reviewers recorded as later notes. None breaks a v1 acceptance criterion. Line numbers are as of tag v0.1.1; re-check them with `slicer refs`."
+  ],
+  "depends_note": null,
+  "findings_note": "S23, S25 and S26 later notes (S23 carries the open S22 notes)",
+  "size": "M",
+  "flags": [],
+  "trees_note": "repo",
+  "trees_plural": false,
+  "boundary": "**Not in this slice:** owner decisions still open (whether to amend or retire C103 now that C117 amends it; whether `pit play` keeps accepting more than two bots, C120; busybox `wget` support in `scripts/install.sh`, from the S24 notes); automated tests for the DOM wiring in `web/js/main.js` and `web/index.html`; testing against the real GitHub `releases/latest` redirect; new features; changes to the replay format or the ISA.",
+  "sections": [
+    {
+      "heading": "Why",
+      "body": "Reviewers of S22, S23, S25 and S26 found these during review. They were left out of scope so the slices could land, and are tracked here so they are not lost on done items."
+    },
+    {
+      "heading": "Files",
+      "body": "- `cmd/pit/play.go`, `cmd/pit/play_test.go`: SIGINT handling in `--terminal`, and a test of the web branch's stop path.\n- `cmd/pit/serveapi.go`, `cmd/pit/serve.go` and tests: the match response, the work slot, `rootFS.Open` (`serve.go:257`), `defaultBotsDir` (`serveapi.go:386`).\n- `cmd/pit/tourney.go`: `--matches` output writing (reuse `cmd/pit/atomic.go`).\n- `cmd/pit/serve_test.go`: `TestServeSymlinks` (line 106). `cmd/pit/serveapi_test.go`: `TestAPIFifo` (line 720).\n- `internal/tourney/tourney_test.go`: `TestRunKeepsNoEvents` (line 428) and `TestRunConcurrent` (line 478).\n- `README.md`, `AGENTS.md`, `CONTRIBUTING.md`, and catalog C121: update wherever they describe the seed being lost on Ctrl-C."
+    },
+    {
+      "heading": "Failing tests",
+      "body": "- `pit play --terminal` interrupted by SIGINT (an injected signal or context, not a real signal to the test process) ends the viewer and still prints the seed, and the `--replay` hash when `--replay` is set.\n- The `pit play` web branch stops cleanly and returns its exit code when its stop context is cancelled.\n- `pit tourney --matches FILE` that fails partway leaves no partial file at the target path, as `pit run --replay` does since S22.\n- A `POST /api/match` holds its work slot until the response is fully written: a second match is refused (or waits, per the existing rule) while the first response is still being written.\n- `rootFS.Open` cannot be tricked into opening a special file swapped in between a stat and an open: it opens first and checks the opened file.\n- `defaultBotsDir` picks `bots` when that directory exists under the given root and nothing otherwise, tested without `os.Chdir`.\n- `TestServeSymlinks` has a positive case: a relative symlink that stays inside the served directory is served.\n- `TestAPIFifo` makes its FIFO without running an external `mkfifo` (for example `syscall.Mkfifo`), so it no longer skips where the command is missing; it may still skip on platforms without FIFOs.\n- `TestRunKeepsNoEvents` checks events off directly (for example that the observer is never called and no event slice is kept) instead of a heuristic allocation bound.\n- `TestRunConcurrent` no longer depends on a 2 s barrier timeout: use the test deadline or a much longer bound, so a slow CI runner does not flake it."
+    },
+    {
+      "heading": "Implement",
+      "body": "- Catch SIGINT in `pit play --terminal` with `signal.NotifyContext` (or the context the web branch already uses), passed in so tests inject it.\n- Make the stop context of the web branch injectable if it is not already, and test the cancel path.\n- Write `--matches` through the atomic write helper from `cmd/pit/atomic.go`.\n- Release the match work slot only after the response is written.\n- Measure the response for an 80000-cycle tie of the starter bots (S25 measured about 11.6 MB). Decide whether to gzip it with `compress/gzip` when the request sends `Accept-Encoding: gzip`, or to leave it and document the size. Record the choice per C35. The replay bytes and hashes must not change.\n- Change `rootFS.Open` to open, then `Stat` the opened file.\n- Fix the test weaknesses listed above."
+    },
+    {
+      "heading": "Check",
+      "body": "- `. scripts/env.sh && go test ./... && go vet ./... && test -z \"$(gofmt -l cmd internal web)\" && go build -o .cache/bin/pit ./cmd/pit`\n- `node --test web/test/*.test.js`\n- `slicer check`\n- Golden results, replay hashes and acceptance tests (C15-C19) are unchanged.\n- Manual (owner): run `.cache/bin/pit play --terminal bots/imp.s bots/dwarf.s`, press Ctrl-C, and check that the seed is printed."
+    },
+    {
+      "heading": "Git",
+      "body": "Branch `slice/<id>-v011-cleanups` in `.worktrees/<id>`. One commit when the owner asks."
+    }
+  ],
+  "notes": []
+}
